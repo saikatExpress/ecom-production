@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import GuestRoute from "./GuestRoute";
 import ProtectedRoute from "./ProtectedRoute";
 
+import AdminLayout from "../layouts/AdminLayout";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
@@ -18,7 +19,16 @@ export default function AppRoutes() {
                 </Route>
 
                 <Route element={<ProtectedRoute />}>
-                    <Route path="/dashboard" element={<Dashboard />}/>
+
+                    <Route element={<AdminLayout />}>
+
+                        <Route 
+                            path="/dashboard" 
+                            element={<Dashboard />} 
+                        />
+
+                    </Route>
+
                 </Route>
 
             </Routes>
