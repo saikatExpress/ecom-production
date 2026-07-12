@@ -245,10 +245,7 @@ const authSlice = createSlice({
         .addCase(getMe.fulfilled,(state, action)=>{
 
 
-            saveAuth(
-                state,
-                action.payload.data
-            );
+            saveAuth(state,action.payload.data);
 
 
             state.authChecked = true;
