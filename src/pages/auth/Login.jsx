@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../features/auth/authThunk";
+import { verifyOtp } from "../../features/auth/verifyOtpThunk";
 import "./Login.css";
 
 const PHONE_REGEX = /^(\+?88)?01[3-9]\d{8}$/;
