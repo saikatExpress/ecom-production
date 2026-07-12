@@ -1,3 +1,6 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { postData } from "../../services/request";
+
 export const verifyOtp = createAsyncThunk(
     "auth/verifyOtp",
 

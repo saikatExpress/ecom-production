@@ -2,6 +2,7 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../features/auth/authThunk";
 import "./Login.css";
 
@@ -14,6 +15,7 @@ export default function Login() {
     const [showOtp, setShowOtp] = useState(false);
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const onFinish = async (values) => {
 
@@ -38,7 +40,6 @@ export default function Login() {
             return;
         }
 
-        // OTP লাগবে
         if (result.payload.data?.otp_required) {
 
             setShowOtp(true);
@@ -48,7 +49,8 @@ export default function Login() {
             return;
         }
 
-        // Normal Login
+        navigate("/dashboard", { replace: true });
+
         message.success("Login Successful");
     };
 
@@ -65,6 +67,8 @@ export default function Login() {
         if (!verifyOtp.fulfilled.match(result)) {
             return;
         }
+
+        navigate("/dashboard", { replace: true });
 
         message.success("Login Successful");
     };
