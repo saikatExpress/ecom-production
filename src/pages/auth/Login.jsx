@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../features/auth/authThunk";
+import { resendOtp } from "../../features/auth/resendOtpThunk";
 import { verifyOtp } from "../../features/auth/verifyOtpThunk";
 import "./Login.css";
 
@@ -14,18 +15,22 @@ export default function Login() {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [showOtp, setShowOtp] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const onFinish = async (values) => {
-
-        if (showOtp) {
-            return handleVerifyOtp(values);
+        setLoading(true);
+        try {
+            if (showOtp) {
+                await handleVerifyOtp(values);
+            } else {
+                await handleLogin(values);
+            }
+        } finally {
+            setLoading(false);
         }
-
-        return handleLogin(values);
-
     };
 
     const handleLogin = async (values) => {
@@ -36,6 +41,10 @@ export default function Login() {
         formData.append("password", values.password);
 
         const result = await dispatch(loginUser(formData));
+
+        if (result?.payload?.success === false) {
+            message.warning(result.payload.message);
+        }
 
         if (!loginUser.fulfilled.match(result)) {
             return;
@@ -61,21 +70,47 @@ export default function Login() {
 
         formData.append("phone_number", form.getFieldValue("phone"));
         formData.append("otp", values.otp);
-        formData.append('purpose', 'login');
+        formData.append("purpose", "login");
 
-        const result = await dispatch(verifyOtp(formData));
+        try {
+            await dispatch(verifyOtp(formData)).unwrap();
 
-        if (!verifyOtp.fulfilled.match(result)) {
-            return;
+            message.success("Login Successful");
+
+            navigate("/dashboard", { replace: true });
+
+        } catch (error) {
+            message.warning(error.message || "OTP verification failed.");
         }
 
-        navigate("/dashboard", { replace: true });
-
-        message.success("Login Successful");
     };
 
     const onFinishFailed = (errorInfo) => {
         console.log("Validation failed:", errorInfo);
+    };
+
+    const handleResendOtp = async () => {
+        setResendLoading(true);
+
+        try {
+
+            const formData = new FormData();
+
+            formData.append("phone_number", form.getFieldValue("phone"));
+            formData.append("purpose", "login");
+
+            const res = await dispatch(resendOtp(formData)).unwrap();
+
+            message.success(res.message);
+
+        } catch (error) {
+
+            message.error(error?.message || "Failed to resend OTP");
+
+        } finally {
+            setResendLoading(false);
+        }
+
     };
 
     if (showOtp) {
@@ -87,9 +122,7 @@ export default function Login() {
                             <h1>Verify OTP</h1>
                             <p>We've sent an OTP to <strong>{form.getFieldValue("phone")}</strong></p>
                         </div>
-                        <Form
-                            form={form}
-                            name="verify-otp"
+                        <Form form={form} name="verify-otp"
                             onFinish={onFinish}
                             layout="vertical"
                             size="large"
@@ -107,14 +140,26 @@ export default function Login() {
                                 />
                             </Form.Item>
                             <Form.Item>
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    block
-                                    loading={loading}
-                                >
-                                    {loading ? "Verifying..." : "Verify OTP"}
-                                </Button>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        block
+                                        loading={loading}
+                                        size="large"
+                                    >
+                                        {loading ? "Verifying..." : "Verify OTP"}
+                                    </Button>
+                                    <Button
+                                        type="default"
+                                        block
+                                        onClick={handleResendOtp}
+                                        loading={resendLoading}
+                                        size="large"
+                                    >
+                                        Resend OTP
+                                    </Button>
+                                </div>
                             </Form.Item>
                         </Form>
                     </div>
