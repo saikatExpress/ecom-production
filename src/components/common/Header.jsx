@@ -1,12 +1,28 @@
 import { BellOutlined, LogoutOutlined, MoonOutlined, ProfileOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Badge, Button, Dropdown, Input, List, Space, Typography } from "antd";
-import { useSelector } from "react-redux";
+import { Avatar, Badge, Button, Dropdown, Input, List, Space, Typography, message } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../features/auth/authSlice";
+import { postData } from "../../services/request";
 import "./Header.css";
 
 const { Text } = Typography;
 
 export default function Header({ isDarkMode, setIsDarkMode }) {
     const { user } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+
+    const handleMenuClick = async (e) => {
+        if (e.key === 'logout') {
+            try {
+                await postData('/auth/logout');
+            } catch (error) {
+                console.error("Logout failed:", error);
+            } finally {
+                dispatch(logout());
+                message.success('Logged out successfully');
+            }
+        }
+    };
 
     const toggleTheme = () => {
         setIsDarkMode(!isDarkMode);
@@ -79,24 +95,12 @@ export default function Header({ isDarkMode, setIsDarkMode }) {
     return (
         <header className="header-container">
             <div className="header-left">
-                <Input
-                    size="large"
-                    placeholder="Search here..."
-                    prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                    className="header-search"
-                    allowClear
-                    style={{ borderRadius: '20px' }}
-                />
+                <Input size="large" placeholder="Search here..." prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} className="header-search" allowClear style={{ borderRadius: '20px' }}/>
             </div>
 
             <div className="header-right">
                 <Space size="large" align="center">
-                    <Button
-                        type="text"
-                        shape="circle"
-                        icon={isDarkMode ? <SunOutlined style={{ fontSize: '18px' }} /> : <MoonOutlined style={{ fontSize: '18px' }} />}
-                        onClick={toggleTheme}
-                        className="header-icon-btn"
+                    <Button type="text" shape="circle" icon={isDarkMode ? <SunOutlined style={{ fontSize: '18px' }} /> : <MoonOutlined style={{ fontSize: '18px' }} />}onClick={toggleTheme} className="header-icon-btn"
                     />
 
                     <Dropdown
@@ -115,7 +119,7 @@ export default function Header({ isDarkMode, setIsDarkMode }) {
                     </Dropdown>
 
                     <Dropdown
-                        menu={{ items: profileItems }}
+                        menu={{ items: profileItems, onClick: handleMenuClick }}
                         trigger={['click']}
                         placement="bottomRight"
                     >
