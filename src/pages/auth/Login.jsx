@@ -2,7 +2,7 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../features/auth/authThunk";
 import { resendOtp } from "../../features/auth/resendOtpThunk";
 import { verifyOtp } from "../../features/auth/verifyOtpThunk";
@@ -237,7 +237,7 @@ export default function Login() {
                                             : Promise.reject("You must accept the Terms & Conditions")
                                 }
                             ]}
-                            initialValue={true} // Always checked by default
+                            initialValue={true}
                         >
                             <Checkbox>
                                 I agree to the{" "}
@@ -259,9 +259,9 @@ export default function Login() {
                         </Form.Item>
 
                         <div className="login-footer">
-                            <a href="/forgot-password" onClick={(e) => e.preventDefault()}>
+                            <Link to="/forgot-password">
                                 Forgot password?
-                            </a>
+                            </Link>
                         </div>
                     </Form>
                 </div>
