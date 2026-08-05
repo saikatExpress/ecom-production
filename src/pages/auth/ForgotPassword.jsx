@@ -27,7 +27,24 @@ export default function ForgotPassword() {
                 message.success(res.message);
             }
         } catch (error) {
-            message.error(error.response?.data?.message || "Something went wrong.");
+            if (error.response?.status === 422) {
+
+                const errors = error.response.data.errors;
+
+                form.setFields(
+                    Object.keys(errors).map((field) => ({
+                        name: field === "phone_number" ? "phone" : field,
+                        errors: errors[field],
+                    }))
+                );
+
+            } else {
+
+                message.error(
+                    error.response?.data?.message || "Something went wrong."
+                );
+
+            }
         } finally {
 
             setLoading(false);
