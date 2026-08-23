@@ -1,4 +1,4 @@
-import { AppstoreOutlined, BranchesOutlined, ControlOutlined, DashboardOutlined, ProductOutlined, ShoppingCartOutlined, SlidersOutlined, TagsOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 
 import { Menu } from "antd";
 import { useSelector } from "react-redux";
@@ -87,21 +87,45 @@ export default function Sidebar() {
             children : [
                 {
                     key: "orders/list",
-                    icon: <UnorderedListOutlined />,
+                    icon: <ProfileOutlined />,
                     label: "Order List",
                     permission: "order_read"
                 },
                 {
                     key: "add/orders",
-                    icon : <UnorderedListOutlined />,
+                    icon : <PlusCircleOutlined />,
                     label: "Add Order",
                     permission: "order_create"
                 },
                 {
                     key: "order/source",
-                    icon : <UnorderedListOutlined />,
+                    icon : <GlobalOutlined />,
                     label: "Order Source",
                     permission: "order_source_read"
+                },
+                {
+                    key: "orders/customer-type",
+                    icon: <TeamOutlined />,
+                    label: "Customer Type",
+                    permission: "customer_type_read"
+                },
+                {
+                    key: "orders/cancel-reason",
+                    icon: <StopOutlined />,
+                    label: "Cancel Reason",
+                    permission: "cancel_reason_read"
+                },
+                {
+                    key: "orders/delivery-gateway",
+                    icon: <TruckOutlined />,
+                    label: "Delivery Gateway",
+                    permission: "delivery_gateway_read"
+                },
+                {
+                    key: "orders/payment-gateway",
+                    icon: <CreditCardOutlined />,
+                    label: "Payment Gateway",
+                    permission: "payment_gateway_read"
                 }
             ]
         },
