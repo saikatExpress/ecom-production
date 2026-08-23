@@ -1,15 +1,4 @@
-import {
-    DashboardOutlined,
-    ProductOutlined,
-    ShoppingCartOutlined,
-    UserOutlined,
-    TagsOutlined,
-    AppstoreOutlined,
-    BranchesOutlined,
-    UnorderedListOutlined,
-    ControlOutlined,
-    SlidersOutlined
-} from "@ant-design/icons";
+import { AppstoreOutlined, BranchesOutlined, ControlOutlined, DashboardOutlined, ProductOutlined, ShoppingCartOutlined, SlidersOutlined, TagsOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 
 import { Menu } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -26,6 +15,23 @@ export default function Sidebar() {
             key: "dashboard",
             icon: <DashboardOutlined />,
             label: "Dashboard"
+        },
+        {
+            key: "users-menu",
+            icon: <UserOutlined />,
+            label: "Users",
+            children: [
+                {
+                    key: "users/list",
+                    icon: <UnorderedListOutlined />,
+                    label: "User List"
+                },
+                {
+                    key: "users/role-permission",
+                    icon: <ControlOutlined />,
+                    label: "Role Permission"
+                }
+            ]
         },
         {
             key: "product-menu",
@@ -86,13 +92,7 @@ export default function Sidebar() {
                 ECOM ADMIN
             </div>
 
-            <Menu
-                mode="inline"
-                selectedKeys={[currentKey]}
-                defaultOpenKeys={["product-menu"]}
-                items={items}
-                onClick={handleClick}
-            />
+            <Menu mode="inline" selectedKeys={[currentKey]} defaultOpenKeys={["users-menu"]} items={items} onClick={handleClick}/>
         </aside>
     );
-}
+}

@@ -9,6 +9,7 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
 import ProductList from "../pages/products/ProductList";
+import AddProduct from "../pages/products/AddProduct";
 import Brand from "../pages/products/Brand";
 import Category from "../pages/products/Category";
 import SubCategory from "../pages/products/SubCategory";
@@ -33,6 +34,7 @@ export default function AppRoutes() {
 
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/products" element={<ProductList />} />
+                        <Route path="/products/create" element={<AddProduct />} />
                         <Route path="/products/category" element={<Category />} />
                         <Route path="/products/sub-category" element={<SubCategory />} />
                         <Route path="/products/brand" element={<Brand />} />

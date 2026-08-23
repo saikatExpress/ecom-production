@@ -1,46 +1,23 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-    Card,
-    Typography,
-    Breadcrumb,
-    Table,
-    Tag,
-    Input,
-    Select,
-    Button,
-    Space,
-    Popconfirm,
-    message,
-    Flex,
-    Badge,
-    Tooltip
-} from "antd";
-import {
-    SearchOutlined,
-    ReloadOutlined,
-    PlusOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    FilterOutlined,
-    ClearOutlined,
-    EyeOutlined,
-    ShoppingOutlined
-} from "@ant-design/icons";
+import { ClearOutlined, DeleteOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { Badge, Breadcrumb, Button, Card, Flex, Input, Popconfirm, Select, Space, Table, Tag, Tooltip, Typography, message } from "antd";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getDatas } from "../../services/request";
 
 const { Title, Text } = Typography;
 
 export default function ProductList() {
-    const [products, setProducts] = useState([]);
+    const navigate                    = useNavigate();
+    const [products, setProducts]     = useState([]);
     const [categories, setCategories] = useState([]);
-    const [brands, setBrands] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [brands, setBrands]         = useState([]);
+    const [loading, setLoading]       = useState(false);
 
     // Filter states
-    const [search, setSearch] = useState("");
+    const [search, setSearch]         = useState("");
     const [categoryId, setCategoryId] = useState(undefined);
-    const [brandId, setBrandId] = useState(undefined);
-    const [status, setStatus] = useState(undefined);
+    const [brandId, setBrandId]       = useState(undefined);
+    const [status, setStatus]         = useState(undefined);
 
     const [pagination, setPagination] = useState({
         current: 1,
@@ -294,7 +271,7 @@ export default function ProductList() {
                             <Button danger icon={<DeleteOutlined />}>
                                 Trash
                             </Button>
-                            <Button type="primary" icon={<PlusOutlined />}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/products/create")}>
                                 Add Product
                             </Button>
                         </Space>
