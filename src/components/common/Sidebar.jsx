@@ -1,16 +1,24 @@
 import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 
-import { Menu } from "antd";
+import { Drawer, Menu } from "antd";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-export default function Sidebar() {
+export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     const navigate = useNavigate();
     const location = useLocation();
 
     const { permissions } = useSelector((state) => state.auth);
 
     const currentKey = location.pathname.replace(/^\//, "") || "dashboard";
+
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 992);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     const allItems = [
         {
@@ -84,7 +92,7 @@ export default function Sidebar() {
             key: "orders",
             icon: <ShoppingCartOutlined />,
             label: "Orders",
-            children : [
+            children: [
                 {
                     key: "orders/list",
                     icon: <ProfileOutlined />,
@@ -93,13 +101,13 @@ export default function Sidebar() {
                 },
                 {
                     key: "add/orders",
-                    icon : <PlusCircleOutlined />,
+                    icon: <PlusCircleOutlined />,
                     label: "Add Order",
                     permission: "order_create"
                 },
                 {
                     key: "order/source",
-                    icon : <GlobalOutlined />,
+                    icon: <GlobalOutlined />,
                     label: "Order Source",
                     permission: "order_source_read"
                 },
@@ -189,15 +197,46 @@ export default function Sidebar() {
 
     const handleClick = ({ key }) => {
         navigate(`/${key}`);
+        if (isMobile) setSidebarOpen(false);
     };
 
+    const menuContent = (
+        <>
+            <div className="sidebar-logo">ECOM ADMIN</div>
+            <Menu
+                mode="inline"
+                selectedKeys={[currentKey]}
+                defaultOpenKeys={["users-menu"]}
+                items={items}
+                onClick={handleClick}
+                style={{ border: 'none' }}
+            />
+        </>
+    );
+
+    // Mobile / Tablet — render inside a Drawer
+    if (isMobile) {
+        return (
+            <Drawer
+                placement="left"
+                open={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                width={260}
+                styles={{
+                    header: { display: 'none' },
+                    body: { padding: 0 },
+                }}
+            >
+                {menuContent}
+            </Drawer>
+        );
+    }
+
+    // Desktop — render as fixed aside
     return (
         <aside className="sidebar">
-            <div className="sidebar-logo">
-                ECOM ADMIN
-            </div>
-
-            <Menu mode="inline" selectedKeys={[currentKey]} defaultOpenKeys={["users-menu"]} items={items} onClick={handleClick}/>
+            {menuContent}
         </aside>
     );
 }
+

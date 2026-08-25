@@ -1,78 +1,94 @@
-.admin-layout{
-
-    display:flex;
-    min-height:100vh;
-    background:#f5f5f5;
-
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    background: #f5f5f5;
 }
 
+/* ── Sidebar ── */
+.sidebar {
+    width: 260px;
+    background: #fff;
+    border-right: 1px solid #eee;
+    flex-shrink: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar { display: none; }
 
-.sidebar{
-
-    width:260px;
-    background:#fff;
-    border-right:1px solid #eee;
-
+.sidebar-logo {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    letter-spacing: 1px;
 }
 
-
-.sidebar-logo{
-
-    height:64px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:20px;
-    font-weight:700;
-
+/* ── Main ── */
+.admin-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
 }
 
-
-.admin-main{
-
-    flex:1;
-    display:flex;
-    flex-direction:column;
-
+/* ── Header ── */
+.header {
+    height: 64px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    border-bottom: 1px solid #eee;
 }
 
-
-.header{
-
-    height:64px;
-    background:#fff;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:0 25px;
-
-    border-bottom:1px solid #eee;
-
+/* ── Content ── */
+.admin-content {
+    flex: 1;
+    padding: 24px;
+    overflow-x: hidden;
 }
 
-
-.admin-content{
-
-    flex:1;
-
-    padding:24px;
-
+/* ── Footer ── */
+.footer {
+    height: 50px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #eee;
 }
 
-
-.footer{
-
-    height:50px;
-
-    background:#fff;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-top:1px solid #eee;
-
+/* ── Dark mode ── */
+.dark-mode .sidebar {
+    background: #1f1f1f;
+    border-right-color: #303030;
 }
+.dark-mode .sidebar-logo {
+    border-bottom-color: #303030;
+}
+.dark-mode .footer {
+    background: #1f1f1f;
+    border-top-color: #303030;
+}
+
+/* ── Tablet & Mobile (< 992px): sidebar hidden, shown via Drawer ── */
+@media (max-width: 991px) {
+    .sidebar {
+        display: none;
+    }
+    .admin-content {
+        padding: 16px;
+    }
+}
+
+/* ── Extra small screens ── */
+@media (max-width: 575px) {
+    .admin-content {
+        padding: 12px 10px;
+    }
+}

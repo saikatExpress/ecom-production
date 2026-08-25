@@ -9,18 +9,11 @@ export default function Management() {
     useTitle('Management List');
 
     // States
-    const [management, setManagement] = useState([]);
-    const [loading, setLoading]       = useState(false);
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 25,
-        total: 0,
-    });
-    const [filters, setFilters] = useState({
-        search_key: '',
-        status: ''
-    });
-    const [activeCount, setActiveCount] = useState(0);
+    const [management, setManagement]       = useState([]);
+    const [loading, setLoading]             = useState(false);
+    const [pagination, setPagination]       = useState({current: 1,pageSize: 25,total: 0});
+    const [filters, setFilters]             = useState({search_key: '',status: ''});
+    const [activeCount, setActiveCount]     = useState(0);
     const [inactiveCount, setInactiveCount] = useState(0);
 
     const getManagement = async (page = 1, paginate_size = 25, search_key = filters.search_key, status = filters.status) => {
@@ -134,26 +127,14 @@ export default function Management() {
     ];
 
     const renderHeader = () => (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Space>
-                <Input.Search 
-                    placeholder="Search username, phone..." 
-                    onSearch={handleSearch}
-                    allowClear
-                    style={{ width: 250 }}
-                />
-                <Select
-                    placeholder="Filter by Status"
-                    allowClear
-                    onChange={handleStatusChange}
-                    style={{ width: 150 }}
-                    options={[
-                        { value: 'active', label: 'Active' },
-                        { value: 'inactive', label: 'Inactive' },
-                    ]}
-                />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: 16 }}>
+            <Space wrap>
+                <Input.Search placeholder="Search username, phone..." onSearch={handleSearch} allowClear style={{ width: 250 }}/>
+
+                <Select placeholder="Filter by Status" allowClear onChange={handleStatusChange} style={{ width: 150 }}
+                    options={[{ value: 'active', label: 'Active' },{ value: 'inactive', label: 'Inactive' }]}/>
             </Space>
-            <Space>
+            <Space wrap>
                 <Button danger icon={<DeleteOutlined />}>
                     Trash
                 </Button>
@@ -212,10 +193,12 @@ export default function Management() {
                     dataSource={management}
                     rowKey="id"
                     loading={loading}
+                    scroll={{ x: 'max-content' }}
                     pagination={{
                         ...pagination,
                         showSizeChanger: true,
                         pageSizeOptions: ['25', '50', '100', '150', '200', '250', '300', '350', '400'],
+                        responsive: true,
                     }}
                     onChange={handleTableChange}
                 />

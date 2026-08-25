@@ -1,4 +1,4 @@
-import { BellOutlined, LogoutOutlined, MoonOutlined, ProfileOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
+import { BellOutlined, LogoutOutlined, MenuOutlined, MoonOutlined, ProfileOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Badge, Button, Dropdown, Input, List, Space, Typography, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
@@ -7,7 +7,7 @@ import "./Header.css";
 
 const { Text } = Typography;
 
-export default function Header({ isDarkMode, setIsDarkMode }) {
+export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
 
@@ -95,12 +95,31 @@ export default function Header({ isDarkMode, setIsDarkMode }) {
     return (
         <header className="header-container">
             <div className="header-left">
-                <Input size="large" placeholder="Search here..." prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} className="header-search" allowClear style={{ borderRadius: '20px' }}/>
+                {/* Hamburger — only visible on mobile/tablet */}
+                <Button
+                    type="text"
+                    icon={<MenuOutlined style={{ fontSize: '18px' }} />}
+                    className="header-hamburger"
+                    onClick={() => setSidebarOpen(true)}
+                />
+                <Input
+                    size="large"
+                    placeholder="Search here..."
+                    prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                    className="header-search"
+                    allowClear
+                    style={{ borderRadius: '20px' }}
+                />
             </div>
 
             <div className="header-right">
-                <Space size="large" align="center">
-                    <Button type="text" shape="circle" icon={isDarkMode ? <SunOutlined style={{ fontSize: '18px' }} /> : <MoonOutlined style={{ fontSize: '18px' }} />}onClick={toggleTheme} className="header-icon-btn"
+                <Space size="middle" align="center">
+                    <Button
+                        type="text"
+                        shape="circle"
+                        icon={isDarkMode ? <SunOutlined style={{ fontSize: '18px' }} /> : <MoonOutlined style={{ fontSize: '18px' }} />}
+                        onClick={toggleTheme}
+                        className="header-icon-btn"
                     />
 
                     <Dropdown
@@ -140,4 +159,4 @@ export default function Header({ isDarkMode, setIsDarkMode }) {
             </div>
         </header>
     );
-}
+}
