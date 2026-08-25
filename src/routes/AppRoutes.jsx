@@ -8,13 +8,14 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
-import ProductList from "../pages/products/ProductList";
 import AddProduct from "../pages/products/AddProduct";
-import Brand from "../pages/products/Brand";
-import Category from "../pages/products/Category";
-import SubCategory from "../pages/products/SubCategory";
 import Attribute from "../pages/products/Attribute";
 import AttributeValue from "../pages/products/AttributeValue";
+import Brand from "../pages/products/Brand";
+import Category from "../pages/products/Category";
+import ProductList from "../pages/products/ProductList";
+import SubCategory from "../pages/products/SubCategory";
+import User from "../pages/user/User";
 
 export default function AppRoutes() {
     return (
@@ -33,6 +34,10 @@ export default function AppRoutes() {
                     <Route element={<AdminLayout />}>
 
                         <Route path="/dashboard" element={<Dashboard />} />
+
+                        {/* User Menu */}
+                        <Route path="/users/list" element={<User/>} />
+
                         <Route path="/products" element={<ProductList />} />
                         <Route path="/products/create" element={<AddProduct />} />
                         <Route path="/products/category" element={<Category />} />
@@ -48,4 +53,4 @@ export default function AppRoutes() {
             </Routes>
         </BrowserRouter>
     );
-}
+}

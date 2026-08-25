@@ -1,4 +1,4 @@
-import { AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
+import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 
 import { Menu } from "antd";
 import { useSelector } from "react-redux";
@@ -134,6 +134,31 @@ export default function Sidebar() {
             icon: <UserOutlined />,
             label: "Customers",
             permission: "user_read"
+        },
+        {
+            key: "courier",
+            icon: <SendOutlined />,
+            label: "Courier",
+            children: [
+                {
+                    key: "courier/all",
+                    icon: <UnorderedListOutlined />,
+                    label: "All Courier",
+                    permission: "courier_read"
+                },
+                {
+                    key: "courier/settings",
+                    icon: <SettingOutlined />,
+                    label: "Courier Settings",
+                    permission: "courier_settings_read"
+                },
+                {
+                    key: "courier/integration",
+                    icon: <ApiOutlined />,
+                    label: "Courier Integration",
+                    permission: "courier_settings_read"
+                }
+            ]
         }
     ];
 
