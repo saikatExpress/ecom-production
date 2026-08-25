@@ -15,7 +15,7 @@ import Brand from "../pages/products/Brand";
 import Category from "../pages/products/Category";
 import ProductList from "../pages/products/ProductList";
 import SubCategory from "../pages/products/SubCategory";
-import User from "../pages/user/User";
+import Management from "../pages/user/management/Management";
 
 export default function AppRoutes() {
     return (
@@ -36,7 +36,7 @@ export default function AppRoutes() {
                         <Route path="/dashboard" element={<Dashboard />} />
 
                         {/* User Menu */}
-                        <Route path="/users/list" element={<User/>} />
+                        <Route path="/users/list" element={<Management/>} />
 
                         <Route path="/products" element={<ProductList />} />
                         <Route path="/products/create" element={<AddProduct />} />

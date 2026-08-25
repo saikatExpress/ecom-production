@@ -26,7 +26,7 @@ export default function Sidebar() {
                 {
                     key: "users/list",
                     icon: <UnorderedListOutlined />,
-                    label: "User List",
+                    label: "Management",
                     permission: "user_read"
                 },
                 {
