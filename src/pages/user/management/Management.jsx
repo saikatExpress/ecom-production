@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Table, Tag } from "antd";
+import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Input, Row, Select, Space, Statistic, Table, Tag } from "antd";
+import { useEffect, useState } from "react";
 import useTitle from "../../../hooks/useTitle";
 import { getDatas } from "../../../services/request";
 
@@ -15,16 +16,27 @@ export default function Management() {
         pageSize: 25,
         total: 0,
     });
+    const [filters, setFilters] = useState({
+        search_key: '',
+        status: ''
+    });
+    const [activeCount, setActiveCount] = useState(0);
+    const [inactiveCount, setInactiveCount] = useState(0);
 
-    const getManagement = async (page = 1, paginate_size = 25) => {
+    const getManagement = async (page = 1, paginate_size = 25, search_key = filters.search_key, status = filters.status) => {
         try {
             setLoading(true);
 
-            const res = await getDatas('/admin/user', {
+            const params = {
                 user_category_id: 2,
                 page,
                 paginate_size
-            });
+            };
+            
+            if (search_key) params.search_key = search_key;
+            if (status) params.status = status;
+
+            const res = await getDatas('/admin/user', params);
 
             if(res && res?.success){
                 setManagement(res?.data?.items || []);
@@ -41,16 +53,42 @@ export default function Management() {
         }
     }
 
+    const fetchCounts = async () => {
+        try {
+            const [activeRes, inactiveRes] = await Promise.all([
+                getDatas('/admin/user', { user_category_id: 2, status: 'active', paginate_size: 1, page: 1 }),
+                getDatas('/admin/user', { user_category_id: 2, status: 'inactive', paginate_size: 1, page: 1 })
+            ]);
+            
+            if (activeRes?.success) setActiveCount(activeRes?.data?.pagination?.total || 0);
+            if (inactiveRes?.success) setInactiveCount(inactiveRes?.data?.pagination?.total || 0);
+        } catch (error) {
+            console.error("Error fetching counts", error);
+        }
+    };
+
     useEffect(() => {
-        getManagement(pagination.current, pagination.pageSize);
+        getManagement(pagination.current, pagination.pageSize, filters.search_key, filters.status);
+        fetchCounts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleTableChange = (newPagination) => {
-        getManagement(newPagination.current, newPagination.pageSize);
+    const handleSearch = (value) => {
+        setFilters(prev => ({ ...prev, search_key: value }));
+        getManagement(1, pagination.pageSize, value, filters.status);
     };
 
-    const columns = [
+    const handleStatusChange = (value) => {
+        setFilters(prev => ({ ...prev, status: value }));
+        getManagement(1, pagination.pageSize, filters.search_key, value);
+    };
+
+    const handleTableChange = (newPagination) => {
+        getManagement(newPagination.current, newPagination.pageSize, filters.search_key, filters.status);
+    };
+
+    const columns = 
+    [
         {
             title: 'ID',
             dataIndex: 'id',
@@ -94,21 +132,94 @@ export default function Management() {
             ),
         }
     ];
+
+    const renderHeader = () => (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Space>
+                <Input.Search 
+                    placeholder="Search username, phone..." 
+                    onSearch={handleSearch}
+                    allowClear
+                    style={{ width: 250 }}
+                />
+                <Select
+                    placeholder="Filter by Status"
+                    allowClear
+                    onChange={handleStatusChange}
+                    style={{ width: 150 }}
+                    options={[
+                        { value: 'active', label: 'Active' },
+                        { value: 'inactive', label: 'Inactive' },
+                    ]}
+                />
+            </Space>
+            <Space>
+                <Button danger icon={<DeleteOutlined />}>
+                    Trash
+                </Button>
+                <Button type="primary" icon={<PlusOutlined />}>
+                    Add Admin
+                </Button>
+            </Space>
+        </div>
+    );
     
     return (
-        <div>
-            <Table
-                columns={columns}
-                dataSource={management}
-                rowKey="id"
-                loading={loading}
-                pagination={{
-                    ...pagination,
-                    showSizeChanger: true,
-                    pageSizeOptions: ['25', '50', '100', '150', '200', '250', '300', '350', '400'],
-                }}
-                onChange={handleTableChange}
-            />
-        </div>
+        <Space direction="vertical" size="large" style={{ display: 'flex' }}>
+            <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12}>
+                    <Card 
+                        bordered={false}
+                        style={{
+                            background: 'linear-gradient(to right, #ffffff, #f0fdf4)',
+                            borderRadius: '12px',
+                            borderLeft: '5px solid #52c41a',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                        }}
+                    >
+                        <Statistic
+                            title={<span style={{ fontSize: '16px', fontWeight: 600, color: '#8c8c8c' }}>Active Users</span>}
+                            value={activeCount}
+                            prefix={<CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />}
+                            valueStyle={{ fontSize: '28px', fontWeight: 'bold', color: '#3f8600' }}
+                        />
+                    </Card>
+                </Col>
+                <Col xs={24} sm={12}>
+                    <Card 
+                        bordered={false}
+                        style={{
+                            background: 'linear-gradient(to right, #ffffff, #fff1f0)',
+                            borderRadius: '12px',
+                            borderLeft: '5px solid #ff4d4f',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                        }}
+                    >
+                        <Statistic
+                            title={<span style={{ fontSize: '16px', fontWeight: 600, color: '#8c8c8c' }}>Inactive Users</span>}
+                            value={inactiveCount}
+                            prefix={<StopOutlined style={{ color: '#ff4d4f', marginRight: '8px' }} />}
+                            valueStyle={{ fontSize: '28px', fontWeight: 'bold', color: '#cf1322' }}
+                        />
+                    </Card>
+                </Col>
+            </Row>
+
+            <Card>
+                {renderHeader()}
+                <Table
+                    columns={columns}
+                    dataSource={management}
+                    rowKey="id"
+                    loading={loading}
+                    pagination={{
+                        ...pagination,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['25', '50', '100', '150', '200', '250', '300', '350', '400'],
+                    }}
+                    onChange={handleTableChange}
+                />
+            </Card>
+        </Space>
     );
 }
