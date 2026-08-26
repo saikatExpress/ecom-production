@@ -151,7 +151,7 @@ export default function EditManagement() {
         <Card 
             title="Edit Management User" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/managemet/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list')}>
                     Back to List
                 </Button>
             }

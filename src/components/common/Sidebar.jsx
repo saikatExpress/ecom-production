@@ -38,6 +38,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "user_read"
                 },
                 {
+                    key: "employee/list",
+                    icon: <UnorderedListOutlined />,
+                    label: "Employee",
+                    permission: "user_read"
+                },
+                {
                     key: "users/role-permission",
                     icon: <ControlOutlined />,
                     label: "Role Permission",

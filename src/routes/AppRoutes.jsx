@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import GuestRoute from "./GuestRoute";
+import PermissionRoute from "./PermissionRoute";
 import ProtectedRoute from "./ProtectedRoute";
 
 import AdminLayout from "../layouts/AdminLayout";
@@ -15,6 +16,7 @@ import Brand from "../pages/products/Brand";
 import Category from "../pages/products/Category";
 import ProductList from "../pages/products/ProductList";
 import SubCategory from "../pages/products/SubCategory";
+import Employee from "../pages/user/employee/Employee";
 import AddManagement from "../pages/user/management/AddManagement";
 import EditManagement from "../pages/user/management/EditManagement";
 import Management from "../pages/user/management/Management";
@@ -39,10 +41,36 @@ export default function AppRoutes() {
                         <Route path="/dashboard" element={<Dashboard />} />
 
                         {/* User Menu */}
-                        <Route path="/management/list" element={<Management/>} />
-                        <Route path="/add/management" element={<AddManagement/>} />
-                        <Route path="/edit/management/:id" element={<EditManagement/>} />
-                        <Route path="/management/trash" element={<ManagementTrash/>} />
+                        <Route path="/management/list" element={
+                            <PermissionRoute permission="user_read">
+                                <Management/>
+                            </PermissionRoute>
+                        } />
+                        
+                        <Route path="/add/management" element={
+                            <PermissionRoute permission="user_create">
+                                <AddManagement/>
+                            </PermissionRoute>
+                        } />
+                        
+                        <Route path="/edit/management/:id" element={
+                            <PermissionRoute permission="user_update">
+                                <EditManagement/>
+                            </PermissionRoute>
+                        } />
+                        
+                        <Route path="/management/trash" element={
+                            <PermissionRoute permission="user_delete">
+                                <ManagementTrash/>
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/employee/list" element={
+                            <PermissionRoute permission="user_read">
+                                <Employee/>
+                            </PermissionRoute>
+                        }/>
+                        {/* User Menu */}
 
                         <Route path="/products" element={<ProductList />} />
                         <Route path="/products/create" element={<AddProduct />} />
