@@ -44,6 +44,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "user_read"
                 },
                 {
+                    key: "customers",
+                    icon: <UserOutlined />,
+                    label: "Customers",
+                    permission: "user_read"
+                },
+                {
                     key: "users/role-permission",
                     icon: <ControlOutlined />,
                     label: "Role Permission",
@@ -142,12 +148,6 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "payment_gateway_read"
                 }
             ]
-        },
-        {
-            key: "customers",
-            icon: <UserOutlined />,
-            label: "Customers",
-            permission: "user_read"
         },
         {
             key: "courier",

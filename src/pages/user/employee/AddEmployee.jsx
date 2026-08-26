@@ -12,6 +12,7 @@ export default function AddEmployee() {
     // Variable
     const navigate = useNavigate();
 
+    // States
     const [form]                          = Form.useForm();
     const [roles, setRoles]               = useState([]);
     const [categories, setCategories]     = useState([]);

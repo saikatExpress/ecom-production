@@ -19,10 +19,12 @@ import SubCategory from "../pages/products/SubCategory";
 import AddEmployee from "../pages/user/employee/AddEmployee";
 import EditEmployee from "../pages/user/employee/EditEmployee";
 import Employee from "../pages/user/employee/Employee";
+import EmployeeTrash from "../pages/user/employee/EmployeeTrash";
 import AddManagement from "../pages/user/management/AddManagement";
 import EditManagement from "../pages/user/management/EditManagement";
 import Management from "../pages/user/management/Management";
 import ManagementTrash from "../pages/user/management/ManagementTrash";
+import Customer from './../pages/user/Customer';
 
 export default function AppRoutes() {
     return (
@@ -73,6 +75,12 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
 
+                        <Route path="/employee/trash" element={
+                            <PermissionRoute permission="user_read">
+                                <EmployeeTrash/>
+                            </PermissionRoute>
+                        }/>
+
                         <Route path="/add/employee" element={
                             <PermissionRoute permission="user_create">
                                 <AddEmployee/>
@@ -82,6 +90,12 @@ export default function AppRoutes() {
                         <Route path="/edit/employee/:id" element={
                             <PermissionRoute permission="user_update">
                                 <EditEmployee/>
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/customers" element={
+                            <PermissionRoute permission="user_read">
+                                <Customer/>
                             </PermissionRoute>
                         } />
                         {/* User Menu */}

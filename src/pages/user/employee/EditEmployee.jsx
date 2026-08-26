@@ -14,6 +14,7 @@ const EditEmployee = () => {
     const navigate = useNavigate();
     const [form]   = Form.useForm();
     
+    // States
     const [roles, setRoles]                   = useState([]);
     const [categories, setCategories]         = useState([]);
     const [loading, setLoading]               = useState(false);
