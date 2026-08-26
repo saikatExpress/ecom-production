@@ -3,6 +3,7 @@ import { Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Statistic,
 import dayjs from 'dayjs';
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import usePermissions from '../../../hooks/usePermissions';
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas } from "../../../services/request";
 
@@ -12,6 +13,7 @@ export default function Management() {
 
     // Variable
     const navigate = useNavigate();
+    const {hasPermission} = usePermissions();
 
     // States
     const [management, setManagement]       = useState([]);
@@ -183,12 +185,16 @@ export default function Management() {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => navigate(`/edit/management/${record.id}`)}>
-                        Edit
-                    </Button>
-                    <Button danger icon={<DeleteOutlined />} size="small" onClick={() => handleDelete(record)}>
-                        Delete
-                    </Button>
+                    {hasPermission('user_update') && (
+                        <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => navigate(`/edit/management/${record.id}`)}>
+                            Edit
+                        </Button>
+                    )}
+                    {hasPermission('user_delete') && (
+                        <Button danger icon={<DeleteOutlined />} size="small" onClick={() => handleDelete(record)}>
+                            Delete
+                        </Button>
+                    )}
                 </Space>
             ),
         }
@@ -209,12 +215,18 @@ export default function Management() {
                 }}>
                     Refresh
                 </Button>
-                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/management/trash')}>
-                    Trash
-                </Button>
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/management')}>
-                    Add Admin
-                </Button>
+                
+                {hasPermission('user_delete') && (
+                    <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/management/trash')}>
+                        Trash
+                    </Button>
+                )}
+
+                {hasPermission('user_create') && (
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/management')}>
+                        Add Admin
+                    </Button>
+                )}
             </Space>
         </div>
     );

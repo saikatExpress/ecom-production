@@ -109,7 +109,7 @@ export default function AddManagement() {
     return (
         <Card title="Create Management User" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/users/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list')}>
                     Back to List
                 </Button>
             }
