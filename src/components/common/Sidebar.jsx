@@ -212,7 +212,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             <Menu
                 mode="inline"
                 selectedKeys={[currentKey]}
-                defaultOpenKeys={["users-menu"]}
+                defaultOpenKeys={["dashboard"]}
                 items={items}
                 onClick={handleClick}
                 style={{ border: 'none' }}

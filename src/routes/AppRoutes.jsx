@@ -15,6 +15,7 @@ import AttributeValue from "../pages/products/AttributeValue";
 import Brand from "../pages/products/Brand";
 import AddCategory from "../pages/products/category/AddCategory";
 import Category from "../pages/products/category/Category";
+import CategoryTrash from "../pages/products/category/CategoryTrash";
 import EditCategory from "../pages/products/category/EditCategory";
 import ProductList from "../pages/products/ProductList";
 import SubCategory from "../pages/products/SubCategory";
@@ -139,6 +140,12 @@ export default function AppRoutes() {
                         <Route path="/categories" element={
                             <PermissionRoute permission="category_read">
                                 <Category />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/category/trash/list" element={
+                            <PermissionRoute permission="category_read">
+                                <CategoryTrash />
                             </PermissionRoute>
                         } />
 

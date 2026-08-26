@@ -59,7 +59,7 @@ const AddCategory = () => {
                 form={form} 
                 layout="vertical" 
                 onFinish={onFinish}
-                initialValues={{ status: 1, position: 0 }}
+                initialValues={{ status: "active", position: 0 }}
             >
                 <Card 
                     title="Create New Category" 
@@ -93,8 +93,8 @@ const AddCategory = () => {
                                 rules={[{ required: true, message: 'Please select status' }]}
                             >
                                 <Select>
-                                    <Select.Option value={1}>Active</Select.Option>
-                                    <Select.Option value={0}>Inactive</Select.Option>
+                                    <Select.Option value="active">Active</Select.Option>
+                                    <Select.Option value="inactive">Inactive</Select.Option>
                                 </Select>
                             </Form.Item>
                         </Col>
