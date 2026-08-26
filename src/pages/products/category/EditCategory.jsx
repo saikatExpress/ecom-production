@@ -8,12 +8,14 @@ import { getData, postData } from "../../../services/request";
 const EditCategory = () => {
     // Hook
     useTitle("Edit Category");
-    const { id } = useParams();
+
+    // Variable
+    const { id }   = useParams();
     const navigate = useNavigate();
-    const [form] = Form.useForm();
+    const [form]   = Form.useForm();
 
     // State
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading]       = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -24,7 +26,6 @@ const EditCategory = () => {
                     const category = res.data;
                     
                     let initialFileList = [];
-                    // Check for img_url or img_path based on your backend response format
                     const imageUrl = category.img_url || category.img_path; 
                     if (imageUrl) {
                         initialFileList = [
@@ -32,16 +33,16 @@ const EditCategory = () => {
                                 uid: '-1',
                                 name: 'Existing Image',
                                 status: 'done',
-                                url: imageUrl, // Full URL preferred if backend appends domain
+                                url: imageUrl,
                             }
                         ];
                     }
 
                     form.setFieldsValue({
-                        name: category.name,
+                        name    : category.name,
                         position: category.position,
-                        status: category.status,
-                        image: initialFileList
+                        status  : category.status,
+                        image   : initialFileList
                     });
                 } else {
                     message.error("Failed to load category details");
@@ -59,7 +60,6 @@ const EditCategory = () => {
         }
     }, [id, form]);
 
-    // Normalize file input for Ant Design Upload
     const normFile = (e) => {
         if (Array.isArray(e)) {
             return e;
@@ -75,18 +75,14 @@ const EditCategory = () => {
             formData.append('position', values.position || 0);
             formData.append('status', values.status);
             
-            // In Laravel, PUT requests with FormData (file uploads) require method spoofing
             formData.append('_method', 'PUT');
             
-            // Append the new image file if it was uploaded
             if (values.image && values.image.length > 0) {
-                // originFileObj only exists for newly selected files, not for our initial fake file list
                 if (values.image[0].originFileObj) {
                     formData.append('image', values.image[0].originFileObj);
                 }
             }
 
-            // We use postData instead of putData because of the multipart/form-data + Laravel restriction
             const res = await postData(`/admin/category/${id}`, formData);
             
             if (res?.success) {
@@ -113,11 +109,7 @@ const EditCategory = () => {
 
     return (
         <Space direction="vertical" size="large" style={{ display: 'flex', width: '100%' }}>
-            <Form 
-                form={form} 
-                layout="vertical" 
-                onFinish={onFinish}
-            >
+            <Form form={form} layout="vertical" onFinish={onFinish}>
                 <Card 
                     title="Edit Category" 
                     extra={
@@ -134,21 +126,13 @@ const EditCategory = () => {
                 >
                     <Row gutter={16}>
                         <Col xs={24} md={12}>
-                            <Form.Item 
-                                name="name" 
-                                label="Category Name" 
-                                rules={[{ required: true, message: 'Please enter category name' }]}
-                            >
+                            <Form.Item name="name" label="Category Name" rules={[{ required: true, message: 'Please enter category name' }]}>
                                 <Input placeholder="e.g. Electronics" />
                             </Form.Item>
                         </Col>
                         
                         <Col xs={24} md={12}>
-                            <Form.Item 
-                                name="status" 
-                                label="Status" 
-                                rules={[{ required: true, message: 'Please select status' }]}
-                            >
+                            <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status' }]}>
                                 <Select>
                                     <Select.Option value={1}>Active</Select.Option>
                                     <Select.Option value={0}>Inactive</Select.Option>
@@ -157,31 +141,16 @@ const EditCategory = () => {
                         </Col>
 
                         <Col xs={24} md={12}>
-                            <Form.Item 
-                                name="position" 
-                                label="Position / Order" 
-                                rules={[{ required: true, message: 'Please enter position' }]}
-                                help="Determines the display order of the category"
-                            >
+                            <Form.Item name="position" label="Position / Order" rules={[{ required: true, message: 'Please enter position' }]} help="Determines the display order of the category">
                                 <InputNumber style={{ width: '100%' }} min={0} placeholder="e.g. 1" />
                             </Form.Item>
                         </Col>
 
                         <Col xs={24}>
-                            <Form.Item 
-                                name="image" 
-                                label="Category Image"
-                                valuePropName="fileList"
-                                getValueFromEvent={normFile}
+                            <Form.Item name="image" label="Category Image" valuePropName="fileList" getValueFromEvent={normFile}
                                 extra="Recommended size: 400x400px. Max size: 2MB. Leave unchanged to keep the existing image."
                             >
-                                <Upload 
-                                    name="image"
-                                    listType="picture-card"
-                                    maxCount={1}
-                                    beforeUpload={() => false}
-                                    accept="image/*"
-                                >
+                                <Upload name="image" listType="picture-card" maxCount={1} beforeUpload={() => false} accept="image/*">
                                     <div>
                                         <PlusOutlined />
                                         <div style={{ marginTop: 8 }}>Upload New</div>

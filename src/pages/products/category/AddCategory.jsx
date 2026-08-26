@@ -8,8 +8,10 @@ import { postData } from "../../../services/request";
 const AddCategory = () => {
     // Hook
     useTitle("Create Category");
+
+    // Variable
     const navigate = useNavigate();
-    const [form] = Form.useForm();
+    const [form]   = Form.useForm();
 
     // State
     const [submitting, setSubmitting] = useState(false);
@@ -31,9 +33,7 @@ const AddCategory = () => {
             formData.append('position', values.position || 0);
             formData.append('status', values.status);
             
-            // Append the image file if it was uploaded
             if (values.image && values.image.length > 0) {
-                // originFileObj contains the actual File object
                 formData.append('image', values.image[0].originFileObj);
             }
 
@@ -55,12 +55,7 @@ const AddCategory = () => {
 
     return (
         <Space direction="vertical" size="large" style={{ display: 'flex', width: '100%' }}>
-            <Form 
-                form={form} 
-                layout="vertical" 
-                onFinish={onFinish}
-                initialValues={{ status: "active", position: 0 }}
-            >
+            <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ status: "active", position: 0 }}>
                 <Card 
                     title="Create New Category" 
                     extra={
@@ -77,21 +72,13 @@ const AddCategory = () => {
                 >
                     <Row gutter={16}>
                         <Col xs={24} md={12}>
-                            <Form.Item 
-                                name="name" 
-                                label="Category Name" 
-                                rules={[{ required: true, message: 'Please enter category name' }]}
-                            >
+                            <Form.Item name="name" label="Category Name" rules={[{ required: true, message: 'Please enter category name' }]}>
                                 <Input placeholder="e.g. Electronics" />
                             </Form.Item>
                         </Col>
                         
                         <Col xs={24} md={12}>
-                            <Form.Item 
-                                name="status" 
-                                label="Status" 
-                                rules={[{ required: true, message: 'Please select status' }]}
-                            >
+                            <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status' }]}>
                                 <Select>
                                     <Select.Option value="active">Active</Select.Option>
                                     <Select.Option value="inactive">Inactive</Select.Option>
@@ -100,23 +87,13 @@ const AddCategory = () => {
                         </Col>
 
                         <Col xs={24} md={12}>
-                            <Form.Item 
-                                name="position" 
-                                label="Position / Order" 
-                                rules={[{ required: true, message: 'Please enter position' }]}
-                                help="Determines the display order of the category"
-                            >
+                            <Form.Item name="position" label="Position / Order" rules={[{ required: true, message: 'Please enter position' }]} help="Determines the display order of the category">
                                 <InputNumber style={{ width: '100%' }} min={0} placeholder="e.g. 1" />
                             </Form.Item>
                         </Col>
 
                         <Col xs={24}>
-                            <Form.Item 
-                                name="image" 
-                                label="Category Image"
-                                valuePropName="fileList"
-                                getValueFromEvent={normFile}
-                            >
+                            <Form.Item name="image" label="Category Image" valuePropName="fileList" getValueFromEvent={normFile}>
                                 <Upload 
                                     name="image"
                                     listType="picture-card"
