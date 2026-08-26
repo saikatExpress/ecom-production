@@ -16,6 +16,8 @@ import Brand from "../pages/products/Brand";
 import Category from "../pages/products/Category";
 import ProductList from "../pages/products/ProductList";
 import SubCategory from "../pages/products/SubCategory";
+import AddEmployee from "../pages/user/employee/AddEmployee";
+import EditEmployee from "../pages/user/employee/EditEmployee";
 import Employee from "../pages/user/employee/Employee";
 import AddManagement from "../pages/user/management/AddManagement";
 import EditManagement from "../pages/user/management/EditManagement";
@@ -70,6 +72,18 @@ export default function AppRoutes() {
                                 <Employee/>
                             </PermissionRoute>
                         }/>
+
+                        <Route path="/add/employee" element={
+                            <PermissionRoute permission="user_create">
+                                <AddEmployee/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/employee/:id" element={
+                            <PermissionRoute permission="user_update">
+                                <EditEmployee/>
+                            </PermissionRoute>
+                        } />
                         {/* User Menu */}
 
                         <Route path="/products" element={<ProductList />} />
