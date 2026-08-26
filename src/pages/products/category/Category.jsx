@@ -1,19 +1,24 @@
 import { DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
 import { useCallback, useEffect, useState } from "react";
-import { getDatas } from "../../services/request";
+import { useNavigate } from "react-router-dom";
+import useTitle from "../../../hooks/useTitle";
+import { getDatas } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
 export default function Category() {
+    // Hook
+    useTitle("Category List");
+
+    // Variable
+    const navigate = useNavigate();
+
+    // States
     const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchKey, setSearchKey] = useState("");
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 25,
-        total: 0,
-    });
+    const [loading, setLoading]       = useState(false);
+    const [searchKey, setSearchKey]   = useState("");
+    const [pagination, setPagination] = useState({current: 1,pageSize: 25,total: 0,});
 
     const fetchCategories = useCallback(async (page = 1, pageSize = 25, search = "") => {
         setLoading(true);
@@ -121,6 +126,11 @@ export default function Category() {
             },
         },
         {
+            title : "Position",
+            dataIndex: "position",
+            key: "position"
+        },
+        {
             title: "Created At",
             dataIndex: "created_at",
             key: "created_at",
@@ -132,15 +142,10 @@ export default function Category() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />}>
+                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/category/${record.id}`)}>
                         Edit
                     </Button>
-                    <Popconfirm
-                        title="Delete Category"
-                        description={`Are you sure to delete "${record.name}"?`}
-                        okText="Yes"
-                        cancelText="No"
-                    >
+                    <Popconfirm title="Delete Category" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No">
                         <Button type="link" danger size="small" icon={<DeleteOutlined />}>
                             Delete
                         </Button>
@@ -171,7 +176,7 @@ export default function Category() {
                             <Button danger icon={<DeleteOutlined />}>
                                 Trash
                             </Button>
-                            <Button type="primary" icon={<PlusOutlined />}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/category')}>
                                 Add Category
                             </Button>
                         </Space>

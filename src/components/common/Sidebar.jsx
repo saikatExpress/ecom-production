@@ -69,7 +69,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "product_read"
                 },
                 {
-                    key: "products/category",
+                    key: "categories",
                     icon: <AppstoreOutlined />,
                     label: "Category",
                     permission: "category_read"

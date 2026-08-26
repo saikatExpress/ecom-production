@@ -13,7 +13,9 @@ import AddProduct from "../pages/products/AddProduct";
 import Attribute from "../pages/products/Attribute";
 import AttributeValue from "../pages/products/AttributeValue";
 import Brand from "../pages/products/Brand";
-import Category from "../pages/products/Category";
+import AddCategory from "../pages/products/category/AddCategory";
+import Category from "../pages/products/category/Category";
+import EditCategory from "../pages/products/category/EditCategory";
 import ProductList from "../pages/products/ProductList";
 import SubCategory from "../pages/products/SubCategory";
 import AddEmployee from "../pages/user/employee/AddEmployee";
@@ -24,6 +26,9 @@ import AddManagement from "../pages/user/management/AddManagement";
 import EditManagement from "../pages/user/management/EditManagement";
 import Management from "../pages/user/management/Management";
 import ManagementTrash from "../pages/user/management/ManagementTrash";
+import AddRole from "../pages/user/Role/AddRole";
+import EditRole from "../pages/user/Role/EditRole";
+import Role from "../pages/user/Role/Role";
 import Customer from './../pages/user/Customer';
 
 export default function AppRoutes() {
@@ -98,15 +103,81 @@ export default function AppRoutes() {
                                 <Customer/>
                             </PermissionRoute>
                         } />
+
+                        <Route path="/users/role-permission" element={
+                            <PermissionRoute permission="role_read">
+                                <Role/>
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/role/create" element={
+                            <PermissionRoute permission="role_create">
+                                <AddRole/>
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/role/edit/:id" element={
+                            <PermissionRoute permission="role_update">
+                                <EditRole/>
+                            </PermissionRoute>
+                        } />
                         {/* User Menu */}
 
-                        <Route path="/products" element={<ProductList />} />
-                        <Route path="/products/create" element={<AddProduct />} />
-                        <Route path="/products/category" element={<Category />} />
-                        <Route path="/products/sub-category" element={<SubCategory />} />
-                        <Route path="/products/brand" element={<Brand />} />
-                        <Route path="/products/attribute" element={<Attribute />} />
-                        <Route path="/products/attribute-values" element={<AttributeValue />} />
+                        {/* Product Menu */}
+                        <Route path="/products" element={
+                            <PermissionRoute permission="product_read">
+                                <ProductList />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/products/create" element={
+                            <PermissionRoute permission="product_create">
+                                <AddProduct />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/categories" element={
+                            <PermissionRoute permission="category_read">
+                                <Category />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/create/category" element={
+                            <PermissionRoute permission="category_create">
+                                <AddCategory />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/edit/category/:id" element={
+                            <PermissionRoute permission="category_update">
+                                <EditCategory />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/products/sub-category" element={
+                            <PermissionRoute permission="sub_category_read">
+                                <SubCategory />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/products/brand" element={
+                            <PermissionRoute permission="brand_read">
+                                <Brand />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/products/attribute" element={
+                            <PermissionRoute permission="attribute_read">
+                                <Attribute />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/products/attribute-values" element={
+                            <PermissionRoute permission="attribute_value_read">
+                                <AttributeValue />
+                            </PermissionRoute>
+                        } />
+                        {/* Product Menu */}
 
                     </Route>
 
