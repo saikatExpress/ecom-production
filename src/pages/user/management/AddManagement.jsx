@@ -68,7 +68,7 @@ export default function AddManagement() {
             
             if (res?.success) {
                 message.success('Management user created successfully!');
-                navigate('/users/list');
+                navigate('/management/list');
             } else {
                 message.error(res?.message || 'Failed to create user');
             }

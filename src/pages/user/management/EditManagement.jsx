@@ -97,7 +97,7 @@ export default function EditManagement() {
             
             if (res?.success) {
                 message.success('Management user updated successfully!');
-                navigate('/users/list');
+                navigate('/management/list');
             } else {
                 message.error(res?.message || 'Failed to update user');
             }

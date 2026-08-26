@@ -1,9 +1,9 @@
 import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 
 import { Drawer, Menu } from "antd";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Users",
             children: [
                 {
-                    key: "users/list",
+                    key: "management/list",
                     icon: <UnorderedListOutlined />,
                     label: "Management",
                     permission: "user_read"

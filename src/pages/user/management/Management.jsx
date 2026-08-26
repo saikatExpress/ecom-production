@@ -1,10 +1,10 @@
-import { CheckCircleOutlined, DeleteOutlined, EditOutlined, PlusOutlined, StopOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Input, Row, Select, Space, Statistic, Table, Tag } from "antd";
+import { CheckCircleOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, StopOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Statistic, Table, Tag, message } from "antd";
 import dayjs from 'dayjs';
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import useTitle from "../../../hooks/useTitle";
-import { getDatas } from "../../../services/request";
+import { deleteData, getDatas } from "../../../services/request";
 
 export default function Management() {
     // Hook
@@ -17,7 +17,7 @@ export default function Management() {
     const [management, setManagement]       = useState([]);
     const [loading, setLoading]             = useState(false);
     const [pagination, setPagination]       = useState({current: 1,pageSize: 25,total: 0});
-    const [filters, setFilters]             = useState({search_key: '',status: ''});
+    const [filters, setFilters]             = useState({search_key: '',status: 'active'});
     const [activeCount, setActiveCount]     = useState(0);
     const [inactiveCount, setInactiveCount] = useState(0);
 
@@ -83,6 +83,37 @@ export default function Management() {
 
     const handleTableChange = (newPagination) => {
         getManagement(newPagination.current, newPagination.pageSize, filters.search_key, filters.status);
+    };
+
+    const handleDelete = (record) => {
+        Modal.confirm({
+            title: 'Are you sure you want to delete this user?',
+            content: 'This action cannot be undone.',
+            okText: 'Yes',
+            okType: 'danger',
+            cancelText: 'No',
+            onOk: async () => {
+                try {
+                    const res = await deleteData(`/admin/user/${record.id}`);
+                    if (res?.success) {
+                        message.success(res?.message || 'Deleted successfully');
+                        setManagement(prev => prev.filter(item => item.id !== record.id));
+                        setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+                        
+                        if (record.status === 'active') {
+                            setActiveCount(prev => prev - 1);
+                        } else if (record.status === 'inactive') {
+                            setInactiveCount(prev => prev - 1);
+                        }
+                    } else {
+                        message.error(res?.message || 'Failed to delete');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    message.error('An error occurred while deleting');
+                }
+            }
+        });
     };
 
     const columns = 
@@ -155,7 +186,7 @@ export default function Management() {
                     <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => navigate(`/edit/management/${record.id}`)}>
                         Edit
                     </Button>
-                    <Button danger icon={<DeleteOutlined />} size="small">
+                    <Button danger icon={<DeleteOutlined />} size="small" onClick={() => handleDelete(record)}>
                         Delete
                     </Button>
                 </Space>
@@ -168,11 +199,17 @@ export default function Management() {
             <Space wrap>
                 <Input.Search placeholder="Search username, phone..." onSearch={handleSearch} allowClear style={{ width: 250 }}/>
 
-                <Select placeholder="Filter by Status" allowClear onChange={handleStatusChange} style={{ width: 150 }}
+                <Select placeholder="Filter by Status" allowClear onChange={handleStatusChange} style={{ width: 150 }} value={filters.status || undefined}
                     options={[{ value: 'active', label: 'Active' },{ value: 'inactive', label: 'Inactive' }]}/>
             </Space>
             <Space wrap>
-                <Button danger icon={<DeleteOutlined />}>
+                <Button icon={<ReloadOutlined />} onClick={() => {
+                    getManagement(pagination.current, pagination.pageSize, filters.search_key, filters.status);
+                    fetchCounts();
+                }}>
+                    Refresh
+                </Button>
+                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/management/trash')}>
                     Trash
                 </Button>
                 <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/management')}>
@@ -188,11 +225,15 @@ export default function Management() {
                 <Col xs={24} sm={12}>
                     <Card 
                         bordered={false}
+                        onClick={() => handleStatusChange(filters.status === 'active' ? '' : 'active')}
                         style={{
+                            cursor: 'pointer',
                             background: 'linear-gradient(to right, #ffffff, #f0fdf4)',
                             borderRadius: '12px',
                             borderLeft: '5px solid #52c41a',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                            boxShadow: filters.status === 'active' ? '0 4px 12px rgba(82, 196, 26, 0.4)' : '0 2px 8px rgba(0,0,0,0.08)',
+                            transform: filters.status === 'active' ? 'scale(1.02)' : 'scale(1)',
+                            transition: 'all 0.3s'
                         }}
                     >
                         <Statistic
@@ -206,11 +247,15 @@ export default function Management() {
                 <Col xs={24} sm={12}>
                     <Card 
                         bordered={false}
+                        onClick={() => handleStatusChange(filters.status === 'inactive' ? '' : 'inactive')}
                         style={{
-                            background: 'linear-gradient(to right, #ffffff, #fff1f0)',
+                            cursor      : 'pointer',
+                            background  : 'linear-gradient(to right, #ffffff, #fff1f0)',
                             borderRadius: '12px',
-                            borderLeft: '5px solid #ff4d4f',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                            borderLeft  : '5px solid #ff4d4f',
+                            boxShadow   : filters.status === 'inactive' ? '0 4px 12px rgba(255, 77, 79, 0.4)': '0 2px 8px rgba(0,0,0,0.08)',
+                            transform   : filters.status === 'inactive' ? 'scale(1.02)'                      : 'scale(1)',
+                            transition  : 'all 0.3s'
                         }}
                     >
                         <Statistic

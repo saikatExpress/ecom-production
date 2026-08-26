@@ -52,14 +52,25 @@ export const putData = async (url, data = {}) => {
     return response.data;
 };
 
+/**
+ * |--------------------------------------------------------------------------|
+ * | PATCH
+ * |--------------------------------------------------------------------------|
+ */
+export const patchData = async (url, data = {}) => {
+    const response = await api.patch(url, data);
+
+    return response.data;
+};
+
 /*
 |--------------------------------------------------------------------------
 | DELETE
 |--------------------------------------------------------------------------
 */
-export const deleteData = async (url) => {
+export const deleteData = async (url, data = {}) => {
 
-    const response = await api.delete(url);
+    const response = await api.delete(url, data);
 
     return response.data;
 };

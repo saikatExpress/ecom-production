@@ -18,6 +18,7 @@ import SubCategory from "../pages/products/SubCategory";
 import AddManagement from "../pages/user/management/AddManagement";
 import EditManagement from "../pages/user/management/EditManagement";
 import Management from "../pages/user/management/Management";
+import ManagementTrash from "../pages/user/management/ManagementTrash";
 
 export default function AppRoutes() {
     return (
@@ -38,9 +39,10 @@ export default function AppRoutes() {
                         <Route path="/dashboard" element={<Dashboard />} />
 
                         {/* User Menu */}
-                        <Route path="/users/list" element={<Management/>} />
+                        <Route path="/management/list" element={<Management/>} />
                         <Route path="/add/management" element={<AddManagement/>} />
                         <Route path="/edit/management/:id" element={<EditManagement/>} />
+                        <Route path="/management/trash" element={<ManagementTrash/>} />
 
                         <Route path="/products" element={<ProductList />} />
                         <Route path="/products/create" element={<AddProduct />} />
