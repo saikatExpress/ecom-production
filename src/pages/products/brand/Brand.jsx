@@ -3,7 +3,7 @@ import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Space
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import useTitle from "../../../hooks/useTitle";
-import { getDatas } from "../../../services/request";
+import { deleteData, getDatas } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
@@ -55,6 +55,21 @@ export default function Brand() {
             current: newPagination.current,
             pageSize: newPagination.pageSize,
         }));
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            const res = await deleteData(`/admin/brand/${id}`);
+            if (res?.success) {
+                message.success(res?.message || "Brand deleted successfully");
+                setBrands((prev) => prev.filter((item) => item.id !== id));
+            } else {
+                message.error(res?.message || "Failed to delete brand");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during deletion");
+        }
     };
 
     const handleSearch = (value) => {
@@ -134,6 +149,7 @@ export default function Brand() {
                     <Popconfirm
                         title="Delete Brand"
                         description={`Are you sure to delete "${record.name}"?`}
+                        onConfirm={() => handleDelete(record.id)}
                         okText="Yes"
                         cancelText="No"
                     >
