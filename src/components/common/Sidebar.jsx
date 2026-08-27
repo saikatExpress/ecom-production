@@ -87,7 +87,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "brand_read"
                 },
                 {
-                    key: "products/attribute",
+                    key: "attributes",
                     icon: <ControlOutlined />,
                     label: "Attribute",
                     permission: "attribute_read"

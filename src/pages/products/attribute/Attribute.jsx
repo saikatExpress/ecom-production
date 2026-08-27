@@ -1,62 +1,36 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-    Card,
-    Typography,
-    Breadcrumb,
-    Table,
-    Tag,
-    Input,
-    Button,
-    Space,
-    Popconfirm,
-    message,
-    Flex,
-    Tooltip
-} from "antd";
-import {
-    SearchOutlined,
-    ReloadOutlined,
-    PlusOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    ClearOutlined
-} from "@ant-design/icons";
-import { getDatas } from "../../services/request";
+import { ClearOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Card, Flex, Input, Popconfirm, Space, Table, Tag, Tooltip, Typography, message } from "antd";
+import { useEffect, useState } from "react";
+import useTitle from "../../../hooks/useTitle";
+import { getDatas } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
 export default function Attribute() {
-    const [attributes, setAttributes] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchKey, setSearchKey] = useState("");
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 25,
-        total: 0,
-    });
+    // Hook
+    useTitle("Attribute List");
 
-    const fetchAttributes = useCallback(async (page = 1, pageSize = 25, search = "") => {
+    // States
+    const [attributes, setAttributes] = useState([]);
+    const [loading, setLoading]       = useState(false);
+    const [searchKey, setSearchKey]   = useState("");
+    const [pagination, setPagination] = useState({current: 1,pageSize: 25,total: 0});
+
+    const fetchAttributes = async (page = 1, pageSize = 25, search = "") => {
         setLoading(true);
         try {
-            const response = await getDatas("admin/attribute", {
+            const res = await getDatas("admin/attribute", {
                 page: page,
                 paginate_size: pageSize,
                 search_key: search,
             });
 
-            if (response?.success && response?.data) {
-                setAttributes(response.data.items || []);
+            if (res && res?.success) {
+                setAttributes(res.data.items || []);
                 setPagination({
-                    current: response.data.pagination?.current_page || page,
-                    pageSize: response.data.pagination?.per_page || pageSize,
-                    total: response.data.pagination?.total || 0,
-                });
-            } else if (response?.data?.items) {
-                setAttributes(response.data.items || []);
-                setPagination({
-                    current: response.data.pagination?.current_page || page,
-                    pageSize: response.data.pagination?.per_page || pageSize,
-                    total: response.data.pagination?.total || 0,
+                    current : res.data.pagination?.current_page || page,
+                    pageSize: res.data.pagination?.per_page || pageSize,
+                    total   : res.data.pagination?.total || 0,
                 });
             }
         } catch (error) {
@@ -65,11 +39,11 @@ export default function Attribute() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    };
 
     useEffect(() => {
         fetchAttributes(pagination.current, pagination.pageSize, searchKey);
-    }, [fetchAttributes, pagination.current, pagination.pageSize, searchKey]);
+    }, [pagination.current, pagination.pageSize, searchKey]);
 
     const handleTableChange = (newPagination) => {
         setPagination((prev) => ({
@@ -93,13 +67,13 @@ export default function Attribute() {
         fetchAttributes(pagination.current, pagination.pageSize, searchKey);
     };
 
-    const columns = [
+    const columns = 
+    [
         {
-            title: "ID",
-            dataIndex: "id",
-            key: "id",
+            title: "SL",
+            key: "sl",
             width: 70,
-            sorter: (a, b) => a.id - b.id,
+            render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
             title: "Attribute Name",
@@ -159,12 +133,7 @@ export default function Attribute() {
                     <Button type="link" size="small" icon={<EditOutlined />}>
                         Edit
                     </Button>
-                    <Popconfirm
-                        title="Delete Attribute"
-                        description={`Are you sure to delete "${record.name}"?`}
-                        okText="Yes"
-                        cancelText="No"
-                    >
+                    <Popconfirm title="Delete Attribute" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No">
                         <Button type="link" danger size="small" icon={<DeleteOutlined />}>
                             Delete
                         </Button>
