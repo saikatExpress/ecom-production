@@ -1,8 +1,10 @@
 import { ClearOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Flex, Input, Popconfirm, Space, Table, Tag, Tooltip, Typography, message } from "antd";
+import { Breadcrumb, Button, Card, Flex, Form, Input, Modal, Popconfirm, Space, Table, Tag, Tooltip, Typography, message } from "antd";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
-import { getDatas } from "../../../services/request";
+import { deleteData, getDatas, postData, putData } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
@@ -10,11 +12,21 @@ export default function Attribute() {
     // Hook
     useTitle("Attribute List");
 
+    // Variable
+    const {hasPermission} = usePermissions();
+    const navigate        = useNavigate();
+
     // States
     const [attributes, setAttributes] = useState([]);
     const [loading, setLoading]       = useState(false);
     const [searchKey, setSearchKey]   = useState("");
     const [pagination, setPagination] = useState({current: 1,pageSize: 25,total: 0});
+
+    // Modal States
+    const [isModalOpen, setIsModalOpen]           = useState(false);
+    const [editingAttribute, setEditingAttribute] = useState(null);
+    const [submitting, setSubmitting]             = useState(false);
+    const [form]                                  = Form.useForm();
 
     const fetchAttributes = async (page = 1, pageSize = 25, search = "") => {
         setLoading(true);
@@ -43,6 +55,7 @@ export default function Attribute() {
 
     useEffect(() => {
         fetchAttributes(pagination.current, pagination.pageSize, searchKey);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pagination.current, pagination.pageSize, searchKey]);
 
     const handleTableChange = (newPagination) => {
@@ -51,6 +64,21 @@ export default function Attribute() {
             current: newPagination.current,
             pageSize: newPagination.pageSize,
         }));
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            const res = await deleteData(`/admin/attribute/${id}`);
+            if (res?.success) {
+                message.success(res?.message || "Attribute deleted successfully");
+                setAttributes((prev) => prev.filter((item) => item.id !== id));
+            } else {
+                message.error(res?.message || "Failed to delete attribute");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during deletion");
+        }
     };
 
     const handleSearch = (value) => {
@@ -65,6 +93,58 @@ export default function Attribute() {
 
     const handleRefresh = () => {
         fetchAttributes(pagination.current, pagination.pageSize, searchKey);
+    };
+
+    // Modal Handlers
+    const showAddModal = () => {
+        setEditingAttribute(null);
+        form.resetFields();
+        setIsModalOpen(true);
+    };
+
+    const showEditModal = (record) => {
+        setEditingAttribute(record);
+        form.setFieldsValue({
+            name: record.name,
+        });
+        setIsModalOpen(true);
+    };
+
+    const handleModalCancel = () => {
+        setIsModalOpen(false);
+        form.resetFields();
+    };
+
+    const handleFormSubmit = async (values) => {
+        setSubmitting(true);
+        try {
+            if (editingAttribute) {
+                // Update
+                const res = await putData(`/admin/attribute/${editingAttribute.id}`, values);
+                if (res?.success) {
+                    message.success(res?.message || "Attribute updated successfully");
+                    setIsModalOpen(false);
+                    fetchAttributes(pagination.current, pagination.pageSize, searchKey);
+                } else {
+                    message.error(res?.message || "Failed to update attribute");
+                }
+            } else {
+                // Create
+                const res = await postData("/admin/attribute", values);
+                if (res?.success) {
+                    message.success(res?.message || "Attribute created successfully");
+                    setIsModalOpen(false);
+                    fetchAttributes(pagination.current, pagination.pageSize, searchKey);
+                } else {
+                    message.error(res?.message || "Failed to create attribute");
+                }
+            }
+        } catch (error) {
+            console.error("Submit error:", error);
+            message.error(error?.response?.data?.message || "An error occurred");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const columns = 
@@ -130,10 +210,12 @@ export default function Attribute() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />}>
+                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => showEditModal(record)}>
                         Edit
                     </Button>
-                    <Popconfirm title="Delete Attribute" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No">
+                    <Popconfirm title="Delete Attribute" description={`Are you sure to delete "${record.name}"?`}  onConfirm={() => handleDelete(record.id)}
+                        okText="Yes" cancelText="No"
+                    >
                         <Button type="link" danger size="small" icon={<DeleteOutlined />}>
                             Delete
                         </Button>
@@ -161,17 +243,21 @@ export default function Attribute() {
                             Attribute List
                         </Title>
                         <Space>
-                            <Button danger icon={<DeleteOutlined />}>
-                                Trash
-                            </Button>
-                            <Button type="primary" icon={<PlusOutlined />}>
-                                Add Attribute
-                            </Button>
+                            {hasPermission('attribute_delete') && (
+                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/attribute/trash')}>
+                                    Trash
+                                </Button>
+                            )}
+                            
+                            {hasPermission('attribute_create') && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={showAddModal}>
+                                    Add Attribute
+                                </Button>
+                            )}
                         </Space>
                     </Flex>
                 }
             >
-                {/* Search & Actions Toolbar */}
                 <Flex justify="space-between" align="center" style={{ marginBottom: 16 }} wrap="wrap" gap="small">
                     <Space wrap gap="small">
                         <Input.Search
@@ -211,6 +297,33 @@ export default function Attribute() {
                     onChange={handleTableChange}
                 />
             </Card>
+
+            {/* Create / Edit Modal */}
+            <Modal
+                title={editingAttribute ? "Edit Attribute" : "Add Attribute"}
+                open={isModalOpen}
+                onCancel={handleModalCancel}
+                footer={null}
+            >
+                <Form form={form} layout="vertical" onFinish={handleFormSubmit}>
+                    <Form.Item
+                        name="name"
+                        label="Attribute Name"
+                        rules={[{ required: true, message: "Please enter attribute name" }]}
+                    >
+                        <Input placeholder="e.g. Color, Size, Material" />
+                    </Form.Item>
+                    
+                    <Flex justify="flex-end" gap="small">
+                        <Button onClick={handleModalCancel}>
+                            Cancel
+                        </Button>
+                        <Button type="primary" htmlType="submit" loading={submitting}>
+                            {editingAttribute ? "Update" : "Save"}
+                        </Button>
+                    </Flex>
+                </Form>
+            </Modal>
         </div>
     );
 }

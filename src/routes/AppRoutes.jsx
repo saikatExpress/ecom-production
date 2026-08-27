@@ -11,6 +11,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 
 import AddProduct from "../pages/products/AddProduct";
 import Attribute from "../pages/products/attribute/Attribute";
+import AttributeTrash from "../pages/products/attribute/AttributeTrash";
 import AttributeValue from "../pages/products/AttributeValue";
 import AddBrand from "../pages/products/brand/AddBrand";
 import Brand from "../pages/products/brand/Brand";
@@ -218,6 +219,12 @@ export default function AppRoutes() {
                         <Route path="/attributes" element={
                             <PermissionRoute permission="attribute_read">
                                 <Attribute />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/attribute/trash" element={
+                            <PermissionRoute permission="attribute_read">
+                                <AttributeTrash />
                             </PermissionRoute>
                         } />
 
