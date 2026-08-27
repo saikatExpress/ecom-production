@@ -210,16 +210,21 @@ export default function Attribute() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => showEditModal(record)}>
-                        Edit
-                    </Button>
-                    <Popconfirm title="Delete Attribute" description={`Are you sure to delete "${record.name}"?`}  onConfirm={() => handleDelete(record.id)}
-                        okText="Yes" cancelText="No"
-                    >
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                            Delete
+                    {hasPermission('attribute_update') && (
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => showEditModal(record)}>
+                            Edit
                         </Button>
-                    </Popconfirm>
+                    )}
+
+                    {hasPermission('attribute_delete') && (
+                        <Popconfirm title="Delete Attribute" description={`Are you sure to delete "${record.name}"?`}  onConfirm={() => handleDelete(record.id)}
+                            okText="Yes" cancelText="No"
+                        >
+                            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+                                Delete
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -298,19 +303,9 @@ export default function Attribute() {
                 />
             </Card>
 
-            {/* Create / Edit Modal */}
-            <Modal
-                title={editingAttribute ? "Edit Attribute" : "Add Attribute"}
-                open={isModalOpen}
-                onCancel={handleModalCancel}
-                footer={null}
-            >
+            <Modal title={editingAttribute ? "Edit Attribute" : "Add Attribute"} open={isModalOpen} onCancel={handleModalCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleFormSubmit}>
-                    <Form.Item
-                        name="name"
-                        label="Attribute Name"
-                        rules={[{ required: true, message: "Please enter attribute name" }]}
-                    >
+                    <Form.Item name="name" label="Attribute Name" rules={[{ required: true, message: "Please enter attribute name" }]}>
                         <Input placeholder="e.g. Color, Size, Material" />
                     </Form.Item>
                     

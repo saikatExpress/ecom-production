@@ -10,9 +10,9 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
 import AddProduct from "../pages/products/AddProduct";
+import AttributeValue from "../pages/products/attribute-value/AttributeValue";
 import Attribute from "../pages/products/attribute/Attribute";
 import AttributeTrash from "../pages/products/attribute/AttributeTrash";
-import AttributeValue from "../pages/products/AttributeValue";
 import AddBrand from "../pages/products/brand/AddBrand";
 import Brand from "../pages/products/brand/Brand";
 import BrandTrash from "../pages/products/brand/BrandTrash";
@@ -228,7 +228,7 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         } />
 
-                        <Route path="/products/attribute-values" element={
+                        <Route path="/attribute-values" element={
                             <PermissionRoute permission="attribute_value_read">
                                 <AttributeValue />
                             </PermissionRoute>

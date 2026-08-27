@@ -93,7 +93,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "attribute_read"
                 },
                 {
-                    key: "products/attribute-values",
+                    key: "attribute-values",
                     icon: <SlidersOutlined />,
                     label: "Attribute Values",
                     permission: "attribute_value_read"
