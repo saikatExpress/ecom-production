@@ -18,7 +18,9 @@ import Category from "../pages/products/category/Category";
 import CategoryTrash from "../pages/products/category/CategoryTrash";
 import EditCategory from "../pages/products/category/EditCategory";
 import ProductList from "../pages/products/ProductList";
-import SubCategory from "../pages/products/SubCategory";
+import AddSubCategory from "../pages/products/sub-category/AddSubCategory";
+import EditSubCategory from "../pages/products/sub-category/EditSubCategory";
+import SubCategory from "../pages/products/sub-category/SubCategory";
 import AddEmployee from "../pages/user/employee/AddEmployee";
 import EditEmployee from "../pages/user/employee/EditEmployee";
 import Employee from "../pages/user/employee/Employee";
@@ -161,9 +163,21 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         } />
 
-                        <Route path="/products/sub-category" element={
+                        <Route path="/sub-categories" element={
                             <PermissionRoute permission="sub_category_read">
                                 <SubCategory />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/add/subcategory" element={
+                            <PermissionRoute permission="sub_category_create">
+                                <AddSubCategory />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/edit/subcategory/:id" element={
+                            <PermissionRoute permission="sub_category_update">
+                                <EditSubCategory />
                             </PermissionRoute>
                         } />
 

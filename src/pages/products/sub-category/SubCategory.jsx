@@ -1,47 +1,26 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-    Card,
-    Typography,
-    Breadcrumb,
-    Table,
-    Tag,
-    Input,
-    Select,
-    Button,
-    Space,
-    Image,
-    Avatar,
-    Popconfirm,
-    message,
-    Flex
-} from "antd";
-import {
-    SearchOutlined,
-    ReloadOutlined,
-    PlusOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    PictureOutlined,
-    ClearOutlined
-} from "@ant-design/icons";
-import { getDatas } from "../../services/request";
+import { ClearOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useTitle from "../../../hooks/useTitle";
+import { getDatas } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
 export default function SubCategory() {
+    // Hook
+    useTitle("Sub Category");
+
+    // Variable
+    const navigate = useNavigate();
+
+    // States
     const [subCategories, setSubCategories] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    // Filter states
-    const [searchKey, setSearchKey] = useState("");
-    const [categoryId, setCategoryId] = useState(undefined);
-
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 25,
-        total: 0,
-    });
+    const [categories, setCategories]       = useState([]);
+    const [loading, setLoading]             = useState(false);
+    const [searchKey, setSearchKey]         = useState("");
+    const [categoryId, setCategoryId]       = useState(undefined);
+    const [pagination, setPagination]       = useState({current: 1,pageSize: 25,total: 0});
 
     // Fetch Sub Categories from backend API
     const fetchSubCategories = useCallback(async (page = 1, pageSize = 25) => {
@@ -55,16 +34,9 @@ export default function SubCategory() {
             if (searchKey) params.search_key = searchKey;
             if (categoryId) params.category_id = categoryId;
 
-            const response = await getDatas("admin/subcategory", params);
+            const response = await getDatas("/admin/subcategory", params);
 
             if (response?.success && response?.data) {
-                setSubCategories(response.data.items || []);
-                setPagination({
-                    current: response.data.pagination?.current_page || page,
-                    pageSize: response.data.pagination?.per_page || pageSize,
-                    total: response.data.pagination?.total || 0,
-                });
-            } else if (response?.data?.items) {
                 setSubCategories(response.data.items || []);
                 setPagination({
                     current: response.data.pagination?.current_page || page,
@@ -84,9 +56,10 @@ export default function SubCategory() {
     useEffect(() => {
         const fetchCategoryList = async () => {
             try {
-                const res = await getDatas("/admin/category", { paginate_size: 100 });
-                if (res?.data?.items) {
-                    setCategories(res.data.items);
+                const res = await getDatas("/admin/category/list");
+                if (res?.data) {
+                    // Adjust based on typical responses - assumes data is array or has items
+                    setCategories(Array.isArray(res.data) ? res.data : (res.data.items || []));
                 }
             } catch (err) {
                 console.log("Could not load categories for filter:", err);
@@ -124,13 +97,13 @@ export default function SubCategory() {
         fetchSubCategories(pagination.current, pagination.pageSize);
     };
 
-    const columns = [
+    const columns = 
+    [
         {
-            title: "ID",
-            dataIndex: "id",
-            key: "id",
+            title: "SL",
+            key: "sl",
             width: 70,
-            sorter: (a, b) => a.id - b.id,
+            render: (text, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
             title: "Image",
@@ -197,7 +170,7 @@ export default function SubCategory() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />}>
+                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/subcategory/${record.id}`)}>
                         Edit
                     </Button>
                     <Popconfirm
@@ -236,17 +209,15 @@ export default function SubCategory() {
                             <Button danger icon={<DeleteOutlined />}>
                                 Trash
                             </Button>
-                            <Button type="primary" icon={<PlusOutlined />}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/subcategory')}>
                                 Add Sub Category
                             </Button>
                         </Space>
                     </Flex>
                 }
             >
-                {/* Search & Filters Toolbar */}
                 <Flex justify="space-between" align="center" style={{ marginBottom: 16 }} wrap="wrap" gap="small">
                     <Space wrap gap="small">
-                        {/* Search by Sub Category Name */}
                         <Input.Search
                             placeholder="Search sub category..."
                             allowClear

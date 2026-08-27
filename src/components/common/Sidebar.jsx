@@ -75,7 +75,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "category_read"
                 },
                 {
-                    key: "products/sub-category",
+                    key: "sub-categories",
                     icon: <BranchesOutlined />,
                     label: "Sub Category",
                     permission: "sub_category_read"
