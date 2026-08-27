@@ -15,9 +15,9 @@ const EditSubCategory = () => {
     const [form]   = Form.useForm();
 
     // State
-    const [loading, setLoading]       = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [categories, setCategories] = useState([]);
+    const [loading, setLoading]                     = useState(true);
+    const [submitting, setSubmitting]               = useState(false);
+    const [categories, setCategories]               = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
 
     // Fetch Initial Data

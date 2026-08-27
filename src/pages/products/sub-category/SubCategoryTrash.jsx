@@ -1,15 +1,16 @@
-import { ClearOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
+import { ArrowLeftOutlined, ClearOutlined, DeleteOutlined, PictureOutlined, ReloadOutlined, SearchOutlined, UndoOutlined } from '@ant-design/icons';
+import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Modal, Select, Space, Table, Tag, Typography, message } from "antd";
+import dayjs from 'dayjs';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
-import { deleteData, getDatas } from "../../../services/request";
+import { deleteData, getDatas, patchData } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
-export default function SubCategory() {
+export default function SubCategoryTrash() {
     // Hook
-    useTitle("Sub Category");
+    useTitle("Sub Category Trash List");
 
     // Variable
     const navigate = useNavigate();
@@ -20,21 +21,17 @@ export default function SubCategory() {
     const [loading, setLoading]             = useState(false);
     const [searchKey, setSearchKey]         = useState("");
     const [categoryId, setCategoryId]       = useState(undefined);
-    const [pagination, setPagination]       = useState({current: 1,pageSize: 25,total: 0});
+    const [pagination, setPagination]       = useState({current: 1,pageSize: 25,total: 0,});
 
-    // Fetch Sub Categories from backend API
     const fetchSubCategories = async (page = 1, pageSize = 25) => {
         setLoading(true);
         try {
-            const params = {
-                page: page,
-                paginate_size: pageSize,
-            };
+            const params = {page: page,paginate_size: pageSize};
 
             if (searchKey) params.search_key = searchKey;
             if (categoryId) params.category_id = categoryId;
 
-            const response = await getDatas("/admin/subcategory", params);
+            const response = await getDatas("/admin/subcategory/trash", params);
 
             if (response?.success && response?.data) {
                 setSubCategories(response.data.items || []);
@@ -46,7 +43,7 @@ export default function SubCategory() {
             }
         } catch (error) {
             console.error("Failed to fetch sub-categories:", error);
-            message.error(error?.response?.data?.message || "Failed to fetch sub-category list.");
+            message.error(error?.response?.data?.message || "Failed to fetch trash data.");
         } finally {
             setLoading(false);
         }
@@ -79,21 +76,6 @@ export default function SubCategory() {
         }));
     };
 
-    const handleDelete = async (id) => {
-        try {
-            const res = await deleteData(`/admin/subcategory/${id}`);
-            if (res?.success) {
-                message.success(res?.message || "Sub category deleted successfully");
-                setSubCategories((prev) => prev.filter((item) => item.id !== id));
-            } else {
-                message.error(res?.message || "Failed to delete sub category");
-            }
-        } catch (error) {
-            console.error("Delete error:", error);
-            message.error(error?.response?.data?.message || "An error occurred during deletion");
-        }
-    };
-
     const handleSearchSubmit = (value) => {
         setSearchKey(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
@@ -109,13 +91,62 @@ export default function SubCategory() {
         fetchSubCategories(pagination.current, pagination.pageSize);
     };
 
+    const handleRestore = (id) => {
+        Modal.confirm({
+            title: 'Are you sure you want to restore this sub category?',
+            content: 'This sub category will be moved back to the active sub category list.',
+            okText: 'Yes, Restore',
+            cancelText: 'No',
+            onOk: async () => {
+                try {
+                    const res = await patchData(`/admin/subcategory/${id}/restore`);
+                    if (res?.success) {
+                        message.success(res?.message || 'Restored successfully');
+                        setSubCategories(prev => prev.filter(item => item.id !== id));
+                        setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+                    } else {
+                        message.error(res?.message || 'Failed to restore sub category');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    message.error(error?.response?.data?.message || 'An error occurred while restoring');
+                }
+            }
+        });
+    };
+
+    const handlePermanentDelete = (id) => {
+        Modal.confirm({
+            title: 'Are you sure you want to permanently delete this sub category?',
+            content: 'This action cannot be undone. All data will be lost forever.',
+            okText: 'Yes, Delete Permanently',
+            okType: 'danger',
+            cancelText: 'No',
+            onOk: async () => {
+                try {
+                    const res = await deleteData(`/admin/subcategory/permanent-delete/${id}`);
+                    if (res?.success) {
+                        message.success(res?.message || 'Deleted permanently');
+                        setSubCategories(prev => prev.filter(item => item.id !== id));
+                        setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+                    } else {
+                        message.error(res?.message || 'Failed to delete permanently');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    message.error(error?.response?.data?.message || 'An error occurred while deleting permanently');
+                }
+            }
+        });
+    };
+
     const columns = 
     [
         {
             title: "SL",
             key: "sl",
             width: 70,
-            render: (text, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+            render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
             title: "Image",
@@ -165,44 +196,42 @@ export default function SubCategory() {
             },
         },
         {
-            title: "Created At",
-            dataIndex: "created_at",
-            key: "created_at",
-            render: (date) => (date ? new Date(date).toLocaleString() : "-"),
+            title: 'Deleted By',
+            key: 'deleted_by',
+            render: (_, record) => record?.deleted_by?.username || 'N/A',
+        },
+        {
+            title: 'Deleted At',
+            dataIndex: 'deleted_at',
+            key: 'deleted_at',
+            render: (value) => value ? dayjs(value).format('DD MMMM, YY, hh:mm A') : 'N/A',
         },
         {
             title: "Action",
             key: "action",
-            width: 150,
+            width: 280,
             render: (_, record) => (
-                <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/subcategory/${record.id}`)}>
-                        Edit
+                <Space size="middle">
+                    <Button type="primary" icon={<UndoOutlined />} size="small" onClick={() => handleRestore(record.id)}>
+                        Restore
                     </Button>
 
-                    <Popconfirm 
-                        title="Delete Sub Category" 
-                        description={`Are you sure to delete "${record.name}"?`} 
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Yes" 
-                        cancelText="No"
-                    >
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                            Delete
-                        </Button>
-                    </Popconfirm>
+                    <Button danger icon={<DeleteOutlined />} size="small" onClick={() => handlePermanentDelete(record.id)}>
+                        Permanent Delete
+                    </Button>
                 </Space>
             ),
         },
     ];
 
     return (
-        <div className="sub-category-page">
+        <div className="sub-category-trash-page">
             <Breadcrumb
                 items={[
                     { title: "Dashboard" },
                     { title: "Product" },
                     { title: "Sub Category" },
+                    { title: "Trash" },
                 ]}
                 style={{ marginBottom: 16 }}
             />
@@ -211,14 +240,11 @@ export default function SubCategory() {
                 title={
                     <Flex justify="space-between" align="center" wrap="wrap" gap="small">
                         <Title level={3} style={{ margin: 0 }}>
-                            Sub Category List
+                            Sub Category Trash List
                         </Title>
                         <Space>
-                            <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/subcategory/trash')}>
-                                Trash
-                            </Button>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/subcategory')}>
-                                Add Sub Category
+                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                                Back to Sub Category List
                             </Button>
                         </Space>
                     </Flex>
@@ -226,24 +252,23 @@ export default function SubCategory() {
             >
                 <Flex justify="space-between" align="center" style={{ marginBottom: 16 }} wrap="wrap" gap="small">
                     <Space wrap gap="small">
-                        <Input.Search placeholder="Search sub category..." allowClear enterButton={<SearchOutlined />} style={{ width: 280 }} value={searchKey}
-                            onChange={(e) => setSearchKey(e.target.value)} onSearch={handleSearchSubmit}
+                        <Input.Search
+                            placeholder="Search trash..."
+                            allowClear
+                            enterButton={<SearchOutlined />}
+                            style={{ width: 280 }}
+                            value={searchKey}
+                            onChange={(e) => setSearchKey(e.target.value)}
+                            onSearch={handleSearchSubmit}
                         />
 
-                        {/* Filter by Category */}
                         <Select
                             placeholder="Filter by Category"
                             allowClear
                             style={{ width: 200 }}
                             value={categoryId}
-                            onChange={(val) => {
-                                setCategoryId(val);
-                                setPagination((prev) => ({ ...prev, current: 1 }));
-                            }}
-                            options={categories.map((cat) => ({
-                                label: cat.name,
-                                value: cat.id,
-                            }))}
+                            onChange={(val) => {setCategoryId(val);setPagination((prev) => ({ ...prev, current: 1 }));}}
+                            options={categories.map((cat) => ({label: cat.name,value: cat.id}))}
                         />
 
                         {/* Reset Filters */}
@@ -264,6 +289,7 @@ export default function SubCategory() {
                     dataSource={subCategories}
                     rowKey="id"
                     loading={loading}
+                    scroll={{ x: 'max-content' }}
                     pagination={{
                         current: pagination.current,
                         pageSize: pagination.pageSize,
