@@ -81,7 +81,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "sub_category_read"
                 },
                 {
-                    key: "products/brand",
+                    key: "brands",
                     icon: <TagsOutlined />,
                     label: "Brand",
                     permission: "brand_read"

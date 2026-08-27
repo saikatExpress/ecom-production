@@ -1,64 +1,40 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-    Card,
-    Typography,
-    Breadcrumb,
-    Table,
-    Tag,
-    Input,
-    Button,
-    Space,
-    Image,
-    Avatar,
-    Popconfirm,
-    message,
-    Flex
-} from "antd";
-import {
-    SearchOutlined,
-    ReloadOutlined,
-    PlusOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    PictureOutlined,
-    ClearOutlined
-} from "@ant-design/icons";
-import { getDatas } from "../../services/request";
+import { ClearOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
+import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import useTitle from "../../../hooks/useTitle";
+import { getDatas } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
 export default function Brand() {
-    const [brands, setBrands] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchKey, setSearchKey] = useState("");
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 25,
-        total: 0,
-    });
+    // Hook
+    useTitle("Brand List");
 
-    const fetchBrands = useCallback(async (page = 1, pageSize = 25, search = "") => {
+    // Variable
+    const navigate = useNavigate();
+
+    // States
+    const [brands, setBrands]         = useState([]);
+    const [loading, setLoading]       = useState(false);
+    const [searchKey, setSearchKey]   = useState("");
+    const [pagination, setPagination] = useState({current: 1,pageSize: 25,total: 0,});
+
+    const fetchBrands = async (page = 1, pageSize = 25, search = "") => {
         setLoading(true);
         try {
-            const response = await getDatas("admin/brand", {
+            const res = await getDatas("admin/brand", {
                 page: page,
                 paginate_size: pageSize,
                 search_key: search,
             });
 
-            if (response?.success && response?.data) {
-                setBrands(response.data.items || []);
+            if (res && res?.success) {
+                setBrands(res.data.items || []);
                 setPagination({
-                    current: response.data.pagination?.current_page || page,
-                    pageSize: response.data.pagination?.per_page || pageSize,
-                    total: response.data.pagination?.total || 0,
-                });
-            } else if (response?.data?.items) {
-                setBrands(response.data.items || []);
-                setPagination({
-                    current: response.data.pagination?.current_page || page,
-                    pageSize: response.data.pagination?.per_page || pageSize,
-                    total: response.data.pagination?.total || 0,
+                    current: res.data.pagination?.current_page || page,
+                    pageSize: res.data.pagination?.per_page || pageSize,
+                    total: res.data.pagination?.total || 0,
                 });
             }
         } catch (error) {
@@ -67,11 +43,11 @@ export default function Brand() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    };
 
     useEffect(() => {
         fetchBrands(pagination.current, pagination.pageSize, searchKey);
-    }, [fetchBrands, pagination.current, pagination.pageSize, searchKey]);
+    }, [pagination.current, pagination.pageSize, searchKey]);
 
     const handleTableChange = (newPagination) => {
         setPagination((prev) => ({
@@ -95,28 +71,22 @@ export default function Brand() {
         fetchBrands(pagination.current, pagination.pageSize, searchKey);
     };
 
-    const columns = [
+    const columns = 
+    [
         {
-            title: "ID",
-            dataIndex: "id",
-            key: "id",
+            title: "SL",
+            key: "sl",
             width: 70,
-            sorter: (a, b) => a.id - b.id,
+            render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
-            title: "Logo / Image",
+            title: "Image",
             dataIndex: "image",
             key: "image",
             width: 100,
             render: (image, record) =>
                 image ? (
-                    <Image
-                        src={image}
-                        alt={record.name}
-                        width={40}
-                        height={40}
-                        style={{ objectFit: "cover", borderRadius: 4 }}
-                    />
+                    <Image src={image} alt={record.name} width={40} height={40} style={{ objectFit: "cover", borderRadius: 4 }}/>
                 ) : (
                     <Avatar shape="square" icon={<PictureOutlined />} size={40} />
                 ),
@@ -158,7 +128,7 @@ export default function Brand() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />}>
+                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/brand/${record.id}`)}>
                         Edit
                     </Button>
                     <Popconfirm
@@ -194,10 +164,10 @@ export default function Brand() {
                             Brand List
                         </Title>
                         <Space>
-                            <Button danger icon={<DeleteOutlined />}>
+                            <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/brand/trash')}>
                                 Trash
                             </Button>
-                            <Button type="primary" icon={<PlusOutlined />}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/brand')}>
                                 Add Brand
                             </Button>
                         </Space>

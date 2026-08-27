@@ -12,7 +12,10 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import AddProduct from "../pages/products/AddProduct";
 import Attribute from "../pages/products/Attribute";
 import AttributeValue from "../pages/products/AttributeValue";
-import Brand from "../pages/products/Brand";
+import AddBrand from "../pages/products/brand/AddBrand";
+import Brand from "../pages/products/brand/Brand";
+import BrandTrash from "../pages/products/brand/BrandTrash";
+import EditBrand from "../pages/products/brand/EditBrand";
 import AddCategory from "../pages/products/category/AddCategory";
 import Category from "../pages/products/category/Category";
 import CategoryTrash from "../pages/products/category/CategoryTrash";
@@ -188,9 +191,27 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         } />
 
-                        <Route path="/products/brand" element={
+                        <Route path="/brands" element={
                             <PermissionRoute permission="brand_read">
                                 <Brand />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/create/brand" element={
+                            <PermissionRoute permission="brand_create">
+                                <AddBrand />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/brand/trash" element={
+                            <PermissionRoute permission="brand_delete">
+                                <BrandTrash />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/edit/brand/:id" element={
+                            <PermissionRoute permission="brand_update">
+                                <EditBrand />
                             </PermissionRoute>
                         } />
 
