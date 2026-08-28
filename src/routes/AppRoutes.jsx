@@ -9,6 +9,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
+import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
@@ -261,6 +262,12 @@ export default function AppRoutes() {
                         <Route path="/customer-type" element={
                             <PermissionRoute permission="customer_type_read">
                                 <CustomerType/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/cancel-reason" element={
+                            <PermissionRoute permission="cancel_reason_read">
+                                <CancelReason/>
                             </PermissionRoute>
                         }/>
                         {/* Order Menu */}

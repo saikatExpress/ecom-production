@@ -130,7 +130,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "customer_type_read"
                 },
                 {
-                    key: "orders/cancel-reason",
+                    key: "cancel-reason",
                     icon: <StopOutlined />,
                     label: "Cancel Reason",
                     permission: "cancel_reason_read"
