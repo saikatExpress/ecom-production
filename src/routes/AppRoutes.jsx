@@ -9,6 +9,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
+import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
 import OrderSource from "../pages/order/order-source/OrderSource";
@@ -254,6 +255,12 @@ export default function AppRoutes() {
                         <Route path="/edit/order-source/:id" element={
                             <PermissionRoute permission="order_source_update">
                                 <EditOrderSource/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/customer-type" element={
+                            <PermissionRoute permission="customer_type_read">
+                                <CustomerType/>
                             </PermissionRoute>
                         }/>
                         {/* Order Menu */}

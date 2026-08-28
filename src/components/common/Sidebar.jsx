@@ -124,7 +124,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "order_source_read"
                 },
                 {
-                    key: "orders/customer-type",
+                    key: "customer-type",
                     icon: <TeamOutlined />,
                     label: "Customer Type",
                     permission: "customer_type_read"
