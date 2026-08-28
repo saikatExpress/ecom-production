@@ -11,6 +11,9 @@ import Dashboard from "../pages/dashboard/Dashboard";
 
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import CustomerType from "../pages/order/customer-type/CustomerType";
+import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGateway";
+import DeliveryGateway from "../pages/order/delivery-gateway/DeliveryGateway";
+import EditDeliveryGateway from "../pages/order/delivery-gateway/EditDeliveryGateway";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
 import OrderSource from "../pages/order/order-source/OrderSource";
@@ -268,6 +271,24 @@ export default function AppRoutes() {
                         <Route path="/cancel-reason" element={
                             <PermissionRoute permission="cancel_reason_read">
                                 <CancelReason/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/delivery-gateway" element={
+                            <PermissionRoute permission="delivery_gateway_read">
+                                <DeliveryGateway/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/create/delivery-gateway" element={
+                            <PermissionRoute permission="delivery_gateway_create">
+                                <AddDeliveryGateway/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/delivery-gateway/:id" element={
+                            <PermissionRoute permission="delivery_gateway_update">
+                                <EditDeliveryGateway/>
                             </PermissionRoute>
                         }/>
                         {/* Order Menu */}

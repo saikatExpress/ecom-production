@@ -136,7 +136,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "cancel_reason_read"
                 },
                 {
-                    key: "orders/delivery-gateway",
+                    key: "delivery-gateway",
                     icon: <TruckOutlined />,
                     label: "Delivery Gateway",
                     permission: "delivery_gateway_read"
