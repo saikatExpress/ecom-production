@@ -9,6 +9,9 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
+import AddOrderSource from "../pages/order/order-source/AddOrderSource";
+import EditOrderSource from "../pages/order/order-source/EditOrderSource";
+import OrderSource from "../pages/order/order-source/OrderSource";
 import AddProduct from "../pages/products/AddProduct";
 import AttributeValue from "../pages/products/attribute-value/AttributeValue";
 import Attribute from "../pages/products/attribute/Attribute";
@@ -235,6 +238,25 @@ export default function AppRoutes() {
                         } />
                         {/* Product Menu */}
 
+                        {/* Order Menu */}
+                        <Route path="/order/source" element={
+                            <PermissionRoute permission="order_source_read">
+                                <OrderSource/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/create/order-source" element={
+                            <PermissionRoute permission="order_source_create">
+                                <AddOrderSource/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/order-source/:id" element={
+                            <PermissionRoute permission="order_source_update">
+                                <EditOrderSource/>
+                            </PermissionRoute>
+                        }/>
+                        {/* Order Menu */}
                     </Route>
 
                 </Route>
