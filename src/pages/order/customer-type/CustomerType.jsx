@@ -1,6 +1,7 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
+import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../../services/request";
 
@@ -10,16 +11,19 @@ const CustomerType = () => {
     // Hook
     useTitle("All Customer Type");
 
+    // Variable
+    const {hasPermission} = usePermissions();
+
     // States
     const [customerTypes, setCustomerTypes] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchKey, setSearchKey] = useState("");
+    const [loading, setLoading]             = useState(false);
+    const [searchKey, setSearchKey]         = useState("");
 
     // Modal States
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen]     = useState(false);
     const [editingRecord, setEditingRecord] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-    const [form] = Form.useForm();
+    const [submitting, setSubmitting]       = useState(false);
+    const [form]                            = Form.useForm();
 
     const fetchCustomerTypes = async (search = "") => {
         setLoading(true);
@@ -174,14 +178,19 @@ const CustomerType = () => {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => showEditModal(record)}>
-                        Edit
-                    </Button>
-                    <Popconfirm title="Delete Customer Type" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                            Delete
+                    {hasPermission('customer_type_update') && (
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => showEditModal(record)}>
+                            Edit
                         </Button>
-                    </Popconfirm>
+                    )}
+
+                    {hasPermission('customer_type_delete') && (
+                        <Popconfirm title="Delete Customer Type" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No" onConfirm={() => handleDelete(record.id)}>
+                            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+                                Delete
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -204,20 +213,17 @@ const CustomerType = () => {
                         <Title level={3} style={{ margin: 0 }}>
                             Customer Type List
                         </Title>
-                        <Button type="primary" icon={<PlusOutlined />} onClick={showAddModal}>
-                            Add Customer Type
-                        </Button>
+                        {hasPermission('customer_type_create') && (
+                            <Button type="primary" icon={<PlusOutlined />} onClick={showAddModal}>
+                                Add Customer Type
+                            </Button>
+                        )}
                     </Flex>
                 }
             >
                 <Flex justify="space-between" align="center" style={{ marginBottom: 16 }} wrap="wrap" gap="small">
-                    <Input.Search
-                        placeholder="Search customer type..."
-                        allowClear
-                        enterButton={<SearchOutlined />}
-                        style={{ maxWidth: 320 }}
-                        onSearch={handleSearch}
-                    />
+                    <Input.Search placeholder="Search customer type..." allowClear enterButton={<SearchOutlined />} style={{ maxWidth: 320 }} onSearch={handleSearch}/>
+
                     <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading}>
                         Refresh
                     </Button>
@@ -236,13 +242,7 @@ const CustomerType = () => {
                 />
             </Card>
 
-            {/* Add / Edit Modal */}
-            <Modal 
-                title={editingRecord ? "Edit Customer Type" : "Add Customer Type"} 
-                open={isModalOpen} 
-                onCancel={handleModalCancel} 
-                footer={null}
-            >
+            <Modal title={editingRecord ? "Edit Customer Type" : "Add Customer Type"} open={isModalOpen} onCancel={handleModalCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleFormSubmit} initialValues={{ status: 'active', order_range: 0 }}>
                     <Form.Item name="name" label="Customer Type Name" rules={[{ required: true, message: "Please enter customer type name" }]}>
                         <Input placeholder="e.g. Regular Customer" />

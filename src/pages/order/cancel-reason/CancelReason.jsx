@@ -1,6 +1,7 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Flex, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../../services/request";
 
@@ -10,16 +11,19 @@ const CancelReason = () => {
     // Hook
     useTitle("All Cancel Reason");
 
+    // Variable
+    const {hasPermission} = usePermissions();
+
     // States
     const [cancelReasons, setCancelReasons] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchKey, setSearchKey] = useState("");
+    const [loading, setLoading]             = useState(false);
+    const [searchKey, setSearchKey]         = useState("");
 
     // Modal States
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen]     = useState(false);
     const [editingRecord, setEditingRecord] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-    const [form] = Form.useForm();
+    const [submitting, setSubmitting]       = useState(false);
+    const [form]                            = Form.useForm();
 
     const fetchCancelReasons = async (search = "") => {
         setLoading(true);
@@ -119,7 +123,8 @@ const CancelReason = () => {
         }
     };
 
-    const columns = [
+    const columns = 
+    [
         {
             title: "SL",
             key: "sl",
@@ -165,14 +170,19 @@ const CancelReason = () => {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => showEditModal(record)}>
-                        Edit
-                    </Button>
-                    <Popconfirm title="Delete Cancel Reason" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                            Delete
+                    {hasPermission('cancel_reason_update') && (
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => showEditModal(record)}>
+                            Edit
                         </Button>
-                    </Popconfirm>
+                    )}
+
+                    {hasPermission('cancel_reason_delete') && (
+                        <Popconfirm title="Delete Cancel Reason" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No" onConfirm={() => handleDelete(record.id)}>
+                            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+                                Delete
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -195,9 +205,11 @@ const CancelReason = () => {
                         <Title level={3} style={{ margin: 0 }}>
                             Cancel Reason List
                         </Title>
-                        <Button type="primary" icon={<PlusOutlined />} onClick={showAddModal}>
-                            Add Cancel Reason
-                        </Button>
+                        {hasPermission('cancel_reason_create') && (
+                            <Button type="primary" icon={<PlusOutlined />} onClick={showAddModal}>
+                                Add Cancel Reason
+                            </Button>
+                        )}
                     </Flex>
                 }
             >
@@ -227,13 +239,7 @@ const CancelReason = () => {
                 />
             </Card>
 
-            {/* Add / Edit Modal */}
-            <Modal 
-                title={editingRecord ? "Edit Cancel Reason" : "Add Cancel Reason"} 
-                open={isModalOpen} 
-                onCancel={handleModalCancel} 
-                footer={null}
-            >
+            <Modal title={editingRecord ? "Edit Cancel Reason" : "Add Cancel Reason"} open={isModalOpen} onCancel={handleModalCancel} footer={null}>
                 <Form form={form} layout="vertical" onFinish={handleFormSubmit} initialValues={{ status: 'active' }}>
                     <Form.Item name="name" label="Reason Name" rules={[{ required: true, message: "Please enter cancel reason name" }]}>
                         <Input placeholder="e.g. Customer changed mind" />
