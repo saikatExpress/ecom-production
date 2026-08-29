@@ -1,4 +1,4 @@
-import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
+import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 
 import { Drawer, Menu } from "antd";
 import { useEffect, useState } from "react";
@@ -171,6 +171,31 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     icon: <ApiOutlined />,
                     label: "Courier Integration",
                     permission: "courier_settings_read"
+                }
+            ]
+        },
+        {
+            key: "section-banner-menu",
+            icon: <LayoutOutlined />,
+            label: "Section & Banner",
+            children: [
+                {
+                    key: "section",
+                    icon: <UnorderedListOutlined />,
+                    label: "Section",
+                    permission: "section_read"
+                },
+                {
+                    key: "section-banner",
+                    icon: <PictureOutlined />,
+                    label: "Section Banner",
+                    permission: "banner_read"
+                },
+                {
+                    key: "slider",
+                    icon: <SlidersOutlined />,
+                    label: "Slider",
+                    permission: "slider_read"
                 }
             ]
         },

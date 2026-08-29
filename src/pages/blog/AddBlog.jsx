@@ -106,12 +106,7 @@ export default function AddBlog() {
                     </div>
                 }
             >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={onFinish}
-                    initialValues={{ status: "active" }}
-                >
+                <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ status: "active" }}>
                     <Row gutter={16}>
                         <Col xs={24} md={16}>
                             <Card type="inner" title="Basic Information" style={{ marginBottom: 16 }}>

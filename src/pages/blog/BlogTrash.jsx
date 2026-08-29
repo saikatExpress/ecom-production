@@ -16,13 +16,13 @@ export default function BlogTrash() {
     const navigate = useNavigate();
 
     // States
-    const [blogs, setBlogs] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchKey, setSearchKey] = useState("");
+    const [blogs, setBlogs]           = useState([]);
+    const [loading, setLoading]       = useState(false);
+    const [searchKey, setSearchKey]   = useState("");
     const [pagination, setPagination] = useState({ current: 1, pageSize: 25, total: 0 });
 
     // Filter States
-    const [categoriesList, setCategoriesList] = useState([]);
+    const [categoriesList, setCategoriesList]         = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([]);
 
     // Fetch category filter on mount
