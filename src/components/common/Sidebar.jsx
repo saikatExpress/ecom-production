@@ -173,6 +173,31 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "courier_settings_read"
                 }
             ]
+        },
+        {
+            key: "blog-menu",
+            icon: <UnorderedListOutlined />,
+            label: "Blog Menu",
+            children: [
+                {
+                    key: "blog-category",
+                    icon: <AppstoreOutlined />,
+                    label: "Blog Category",
+                    permission: "blog_category_read"
+                },
+                {
+                    key: "blog-tag",
+                    icon: <TagsOutlined />,
+                    label: "Blog Tag",
+                    permission: "tag_read"
+                },
+                {
+                    key: "blog",
+                    icon: <ProfileOutlined />,
+                    label: "Blog",
+                    permission: "blog_read"
+                }
+            ]
         }
     ];
 

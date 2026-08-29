@@ -9,6 +9,9 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
+import AddBlogCategory from "../pages/blog/blog-category/AddBlogCategory";
+import BlogCategory from "../pages/blog/blog-category/BlogCategory";
+import EditBlogCategory from "../pages/blog/blog-category/EditBlogCategory";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGateway";
@@ -313,6 +316,26 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* Order Menu */}
+
+                        {/* Blog Menu */}
+                        <Route path="/blog-category" element={
+                            <PermissionRoute permission="blog_category_read">
+                                <BlogCategory/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/create/blog-category" element={
+                            <PermissionRoute permission="blog_category_create">
+                                <AddBlogCategory/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/blog-category/:id" element={
+                            <PermissionRoute permission="blog_category_update">
+                                <EditBlogCategory/>
+                            </PermissionRoute>
+                        }/>
+                        {/* Blog Menu */}
                     </Route>
 
                 </Route>
