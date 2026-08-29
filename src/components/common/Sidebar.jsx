@@ -142,7 +142,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "delivery_gateway_read"
                 },
                 {
-                    key: "orders/payment-gateway",
+                    key: "payment-gateway",
                     icon: <CreditCardOutlined />,
                     label: "Payment Gateway",
                     permission: "payment_gateway_read"

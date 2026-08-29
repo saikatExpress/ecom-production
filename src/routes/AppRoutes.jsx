@@ -17,6 +17,9 @@ import EditDeliveryGateway from "../pages/order/delivery-gateway/EditDeliveryGat
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
 import OrderSource from "../pages/order/order-source/OrderSource";
+import AddPaymentGateway from "../pages/order/payment-gateway/AddPaymentGateway";
+import EditPaymentGateway from "../pages/order/payment-gateway/EditPaymentGateway";
+import PaymentGateway from "../pages/order/payment-gateway/PaymentGateway";
 import AddProduct from "../pages/products/AddProduct";
 import AttributeValue from "../pages/products/attribute-value/AttributeValue";
 import Attribute from "../pages/products/attribute/Attribute";
@@ -289,6 +292,24 @@ export default function AppRoutes() {
                         <Route path="/edit/delivery-gateway/:id" element={
                             <PermissionRoute permission="delivery_gateway_update">
                                 <EditDeliveryGateway/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/payment-gateway" element={
+                            <PermissionRoute permission="payment_gateway_read">
+                                <PaymentGateway/>
+                            </PermissionRoute>
+                        }/>
+                        
+                        <Route path="/create/payment-gateway" element={
+                            <PermissionRoute permission="payment_gateway_create">
+                                <AddPaymentGateway/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/payment-gateway/:id" element={
+                            <PermissionRoute permission="payment_gateway_update">
+                                <EditPaymentGateway/>
                             </PermissionRoute>
                         }/>
                         {/* Order Menu */}
