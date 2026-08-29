@@ -14,6 +14,8 @@ import Blog from "../pages/blog/Blog";
 import AddBlogCategory from "../pages/blog/blog-category/AddBlogCategory";
 import BlogCategory from "../pages/blog/blog-category/BlogCategory";
 import EditBlogCategory from "../pages/blog/blog-category/EditBlogCategory";
+import BlogTrash from "../pages/blog/BlogTrash";
+import EditBlog from "../pages/blog/EditBlog";
 import Tag from "../pages/blog/tag/Tag";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import CustomerType from "../pages/order/customer-type/CustomerType";
@@ -354,6 +356,18 @@ export default function AppRoutes() {
                         <Route path="/create/blog" element={
                             <PermissionRoute permission="blog_create">
                                 <AddBlog/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/blog/:id" element={
+                            <PermissionRoute permission="blog_update">
+                                <EditBlog/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/trash/blog" element={
+                            <PermissionRoute permission="blog_delete">
+                                <BlogTrash/>
                             </PermissionRoute>
                         }/>
                         {/* Blog Menu */}

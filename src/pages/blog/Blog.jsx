@@ -249,13 +249,18 @@ export default function Blog() {
                         <Title level={3} style={{ margin: 0 }}>
                             Blog List
                         </Title>
-                        {hasPermission('blog_create') && (
-                            <Space>
+                        <Space>
+                            {hasPermission('blog_delete') && (
+                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/trash/blog')}>
+                                    Trash
+                                </Button>
+                            )}
+                            {hasPermission('blog_create') && (
                                 <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blog')}>
                                     Add Blog
                                 </Button>
-                            </Space>
-                        )}
+                            )}
+                        </Space>
                     </Flex>
                 }
             >
