@@ -9,6 +9,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
+import Blog from "../pages/blog/Blog";
 import AddBlogCategory from "../pages/blog/blog-category/AddBlogCategory";
 import BlogCategory from "../pages/blog/blog-category/BlogCategory";
 import EditBlogCategory from "../pages/blog/blog-category/EditBlogCategory";
@@ -340,6 +341,12 @@ export default function AppRoutes() {
                         <Route path="/blog-tag" element={
                             <PermissionRoute permission="tag_read">
                                 <Tag/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/blog" element={
+                            <PermissionRoute permission="blog_read">
+                                <Blog/>
                             </PermissionRoute>
                         }/>
                         {/* Blog Menu */}
