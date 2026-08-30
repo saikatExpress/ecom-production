@@ -17,6 +17,10 @@ import EditBlogCategory from "../pages/blog/blog-category/EditBlogCategory";
 import BlogTrash from "../pages/blog/BlogTrash";
 import EditBlog from "../pages/blog/EditBlog";
 import Tag from "../pages/blog/tag/Tag";
+import AddSlider from "../pages/cms/slider/AddSlider";
+import EditSlider from "../pages/cms/slider/EditSlider";
+import Slider from "../pages/cms/slider/Slider";
+import SliderTrash from "../pages/cms/slider/SliderTrash";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGateway";
@@ -371,6 +375,32 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* Blog Menu */}
+
+                        {/* CMS Menu */}
+                        <Route path="/slider" element={
+                            <PermissionRoute permission="slider_read">
+                                <Slider/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/create/slider" element={
+                            <PermissionRoute permission="slider_create">
+                                <AddSlider/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/slider/:id" element={
+                            <PermissionRoute permission="slider_update">
+                                <EditSlider/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/trash/slider" element={
+                            <PermissionRoute permission="slider_delete">
+                                <SliderTrash/>
+                            </PermissionRoute>
+                        }/>
+                        {/* CMS Menu */}
                     </Route>
 
                 </Route>
