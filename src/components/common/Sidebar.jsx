@@ -223,6 +223,49 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "blog_read"
                 }
             ]
+        },
+        {
+            key: "cms-menu",
+            icon: <ProfileOutlined />,
+            label: "CMS",
+            children: [
+                {
+                    key: "about-us",
+                    icon: <UnorderedListOutlined />,
+                    label: "About Us",
+                    permission: "page_read"
+                },
+                {
+                    key: "contact-us",
+                    icon: <UnorderedListOutlined />,
+                    label: "Contact Us",
+                    permission: "page_read"
+                },
+                {
+                    key: "cms/faq",
+                    icon: <UnorderedListOutlined />,
+                    label: "Faq",
+                    permission: "page_read"
+                },
+                {
+                    key: "cms/privacy-policy",
+                    icon: <UnorderedListOutlined />,
+                    label: "Privacy Policy",
+                    permission: "page_read"
+                },
+                {
+                    key: "cms/shipping-delivery-policy",
+                    icon: <UnorderedListOutlined />,
+                    label: "Shipping & Delivery Policy",
+                    permission: "page_read"
+                },
+                {
+                    key: "cms/return-refund-policy",
+                    icon: <UnorderedListOutlined />,
+                    label: "Return & Refund Policy",
+                    permission: "page_read"
+                }
+            ]
         }
     ];
 

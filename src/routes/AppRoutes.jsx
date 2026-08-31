@@ -17,6 +17,8 @@ import EditBlogCategory from "../pages/blog/blog-category/EditBlogCategory";
 import BlogTrash from "../pages/blog/BlogTrash";
 import EditBlog from "../pages/blog/EditBlog";
 import Tag from "../pages/blog/tag/Tag";
+import AboutUs from "../pages/cms/about/AboutUs";
+import ContactUs from "../pages/cms/contact/ContactUs";
 import AddSlider from "../pages/cms/slider/AddSlider";
 import EditSlider from "../pages/cms/slider/EditSlider";
 import Slider from "../pages/cms/slider/Slider";
@@ -428,6 +430,18 @@ export default function AppRoutes() {
                         <Route path="/trash/slider" element={
                             <PermissionRoute permission="slider_delete">
                                 <SliderTrash/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/about-us" element={
+                            <PermissionRoute permission="page_read">
+                                <AboutUs/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/contact-us" element={
+                            <PermissionRoute permission="page_read">
+                                <ContactUs/>
                             </PermissionRoute>
                         }/>
                         {/* CMS Menu */}
