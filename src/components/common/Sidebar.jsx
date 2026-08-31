@@ -272,6 +272,33 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "page_read"
                 }
             ]
+        },
+        {
+            key: "report-menu",
+            icon: <UnorderedListOutlined />,
+            label: "Report",
+            children: [
+                {
+                    key: "report/order",
+                    icon: <UnorderedListOutlined />,
+                    label: "Order Report"
+                },
+                {
+                    key: "report/product",
+                    icon: <UnorderedListOutlined />,
+                    label: "Product Report"
+                },
+                {
+                    key: "report/customer",
+                    icon: <UnorderedListOutlined />,
+                    label: "Customer Report"
+                },
+                {
+                    key: "report/courier",
+                    icon: <UnorderedListOutlined />,
+                    label: "Courier Report"
+                }
+            ]
         }
     ];
 
