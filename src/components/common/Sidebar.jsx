@@ -155,7 +155,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Courier",
             children: [
                 {
-                    key: "courier/all",
+                    key: "courier",
                     icon: <UnorderedListOutlined />,
                     label: "All Courier",
                     permission: "courier_read"

@@ -21,6 +21,10 @@ import AddSlider from "../pages/cms/slider/AddSlider";
 import EditSlider from "../pages/cms/slider/EditSlider";
 import Slider from "../pages/cms/slider/Slider";
 import SliderTrash from "../pages/cms/slider/SliderTrash";
+import AddCourier from "../pages/courier/AddCourier";
+import Courier from "../pages/courier/Courier";
+import CourierTrash from "../pages/courier/CourierTrash";
+import EditCourier from "../pages/courier/EditCourier";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGateway";
@@ -375,6 +379,32 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* Blog Menu */}
+
+                        {/* Courier Menu */}
+                        <Route path="/courier" element={
+                            <PermissionRoute permission="courier_read">
+                                <Courier/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/create/courier" element={
+                            <PermissionRoute permission="courier_create">
+                                <AddCourier/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/courier/:id" element={
+                            <PermissionRoute permission="courier_update">
+                                <EditCourier/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/trash/courier" element={
+                            <PermissionRoute permission="courier_delete">
+                                <CourierTrash/>
+                            </PermissionRoute>
+                        }/>
+                        {/* Courier Menu */}
 
                         {/* CMS Menu */}
                         <Route path="/slider" element={
