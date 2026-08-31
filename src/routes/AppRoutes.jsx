@@ -22,6 +22,8 @@ import ContactUs from "../pages/cms/contact/ContactUs";
 import Faq from "../pages/cms/faq/Faq";
 import PrivacyPolicy from "../pages/cms/privacy-policy/PrivacyPolicy";
 import ReturnRefundPolicy from "../pages/cms/return-refund/ReturnRefundPolicy";
+import AddSection from "../pages/cms/section/AddSection";
+import Section from "../pages/cms/section/Section";
 import ShippingPolicy from "../pages/cms/shipping-policy/ShippingPolicy";
 import AddSlider from "../pages/cms/slider/AddSlider";
 import EditSlider from "../pages/cms/slider/EditSlider";
@@ -416,6 +418,19 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* Courier Menu */}
+
+                        {/* Section & Banner Menu */}
+                        <Route path="/section" element={
+                            <PermissionRoute permission="section_read">
+                                <Section/>
+                            </PermissionRoute>
+                        }/>
+                        <Route path="/create/section" element={
+                            <PermissionRoute permission="section_create">
+                                <AddSection/>
+                            </PermissionRoute>
+                        }/>
+                        {/* Section & Banner Menu */}
 
                         {/* CMS Menu */}
                         <Route path="/slider" element={
