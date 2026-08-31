@@ -248,19 +248,25 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "page_read"
                 },
                 {
-                    key: "cms/privacy-policy",
+                    key: "privacy-policy",
                     icon: <UnorderedListOutlined />,
                     label: "Privacy Policy",
                     permission: "page_read"
                 },
                 {
-                    key: "cms/shipping-delivery-policy",
+                    key: "terms-condition",
+                    icon: <UnorderedListOutlined />,
+                    label: "Terms & Condition",
+                    permission: "page_read"
+                },
+                {
+                    key: "shipping-delivery-policy",
                     icon: <UnorderedListOutlined />,
                     label: "Shipping & Delivery Policy",
                     permission: "page_read"
                 },
                 {
-                    key: "cms/return-refund-policy",
+                    key: "return-refund-policy",
                     icon: <UnorderedListOutlined />,
                     label: "Return & Refund Policy",
                     permission: "page_read"

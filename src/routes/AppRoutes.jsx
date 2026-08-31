@@ -19,10 +19,14 @@ import EditBlog from "../pages/blog/EditBlog";
 import Tag from "../pages/blog/tag/Tag";
 import AboutUs from "../pages/cms/about/AboutUs";
 import ContactUs from "../pages/cms/contact/ContactUs";
+import PrivacyPolicy from "../pages/cms/privacy-policy/PrivacyPolicy";
+import ReturnRefundPolicy from "../pages/cms/return-refund/ReturnRefundPolicy";
+import ShippingPolicy from "../pages/cms/shipping-policy/ShippingPolicy";
 import AddSlider from "../pages/cms/slider/AddSlider";
 import EditSlider from "../pages/cms/slider/EditSlider";
 import Slider from "../pages/cms/slider/Slider";
 import SliderTrash from "../pages/cms/slider/SliderTrash";
+import TermsCondition from "../pages/cms/termsCondition/TermsCondition";
 import AddCourier from "../pages/courier/AddCourier";
 import Courier from "../pages/courier/Courier";
 import CourierTrash from "../pages/courier/CourierTrash";
@@ -442,6 +446,30 @@ export default function AppRoutes() {
                         <Route path="/contact-us" element={
                             <PermissionRoute permission="page_read">
                                 <ContactUs/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/privacy-policy" element={
+                            <PermissionRoute permission="page_read">
+                                <PrivacyPolicy/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/terms-condition" element={
+                            <PermissionRoute permission="page_read">
+                                <TermsCondition/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/shipping-delivery-policy" element={
+                            <PermissionRoute permission="page_read">
+                                <ShippingPolicy/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/return-refund-policy" element={
+                            <PermissionRoute permission="page_read">
+                                <ReturnRefundPolicy/>
                             </PermissionRoute>
                         }/>
                         {/* CMS Menu */}
