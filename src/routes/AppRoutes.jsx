@@ -19,6 +19,7 @@ import EditBlog from "../pages/blog/EditBlog";
 import Tag from "../pages/blog/tag/Tag";
 import AboutUs from "../pages/cms/about/AboutUs";
 import ContactUs from "../pages/cms/contact/ContactUs";
+import Faq from "../pages/cms/faq/Faq";
 import PrivacyPolicy from "../pages/cms/privacy-policy/PrivacyPolicy";
 import ReturnRefundPolicy from "../pages/cms/return-refund/ReturnRefundPolicy";
 import ShippingPolicy from "../pages/cms/shipping-policy/ShippingPolicy";
@@ -452,6 +453,12 @@ export default function AppRoutes() {
                         <Route path="/privacy-policy" element={
                             <PermissionRoute permission="page_read">
                                 <PrivacyPolicy/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/faq" element={
+                            <PermissionRoute permission="page_read">
+                                <Faq/>
                             </PermissionRoute>
                         }/>
 

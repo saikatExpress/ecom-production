@@ -242,7 +242,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "page_read"
                 },
                 {
-                    key: "cms/faq",
+                    key: "faq",
                     icon: <UnorderedListOutlined />,
                     label: "Faq",
                     permission: "page_read"
