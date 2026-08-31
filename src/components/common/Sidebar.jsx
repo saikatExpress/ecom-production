@@ -281,22 +281,26 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                 {
                     key: "report/order",
                     icon: <UnorderedListOutlined />,
-                    label: "Order Report"
+                    label: "Order Report",
+                    permission: "report_read"
                 },
                 {
                     key: "report/product",
                     icon: <UnorderedListOutlined />,
-                    label: "Product Report"
+                    label: "Product Report",
+                    permission: "report_read"
                 },
                 {
                     key: "report/customer",
                     icon: <UnorderedListOutlined />,
-                    label: "Customer Report"
+                    label: "Customer Report",
+                    permission: "report_read"
                 },
                 {
                     key: "report/courier",
                     icon: <UnorderedListOutlined />,
-                    label: "Courier Report"
+                    label: "Courier Report",
+                    permission: "report_read"
                 }
             ]
         }
@@ -341,7 +345,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                 defaultOpenKeys={["dashboard"]}
                 items={items}
                 onClick={handleClick}
-                style={{ border: 'none' }}
+                style={{ 
+                    border: 'none',
+                    padding: '10px 8px',
+                    fontWeight: '600'
+                }}
             />
         </>
     );

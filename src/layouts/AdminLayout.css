@@ -26,6 +26,21 @@
     letter-spacing: 1px;
 }
 
+/* Sidebar Menu Specific Styles */
+.sidebar .ant-menu,
+.ant-drawer-body .ant-menu {
+    font-weight: 600;
+}
+
+.sidebar .ant-menu-item, 
+.sidebar .ant-menu-submenu-title,
+.ant-drawer-body .ant-menu-item, 
+.ant-drawer-body .ant-menu-submenu-title {
+    font-weight: 600 !important;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
 /* ── Main ── */
 .admin-main {
     flex: 1;

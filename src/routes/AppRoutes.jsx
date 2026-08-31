@@ -60,6 +60,10 @@ import AddSubCategory from "../pages/products/sub-category/AddSubCategory";
 import EditSubCategory from "../pages/products/sub-category/EditSubCategory";
 import SubCategory from "../pages/products/sub-category/SubCategory";
 import SubCategoryTrash from "../pages/products/sub-category/SubCategoryTrash";
+import CourierReport from "../pages/report/CourierReport";
+import CustomerReport from "../pages/report/CustomerReport";
+import OrderReport from "../pages/report/OrderReport";
+import ProductReport from "../pages/report/ProductReport";
 import AddEmployee from "../pages/user/employee/AddEmployee";
 import EditEmployee from "../pages/user/employee/EditEmployee";
 import Employee from "../pages/user/employee/Employee";
@@ -480,6 +484,32 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* CMS Menu */}
+
+                        {/* Report Menu */}
+                        <Route path="/report/order" element={
+                            <PermissionRoute permission="report_read">
+                                <OrderReport/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/report/product" element={
+                            <PermissionRoute permission="report_read">
+                                <ProductReport/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/report/customer" element={
+                            <PermissionRoute permission="report_read">
+                                <CustomerReport/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/report/courier" element={
+                            <PermissionRoute permission="report_read">
+                                <CourierReport/>
+                            </PermissionRoute>
+                        }/>
+                        {/* Report Menu */}
                     </Route>
 
                 </Route>
