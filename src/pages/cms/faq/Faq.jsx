@@ -1,14 +1,38 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
+import usePermissions from '../../../hooks/usePermissions';
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
+const ExpandableText = ({ text, maxLength = 50, strong = false }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    
+    const plainText = typeof text === 'string'  ? new DOMParser().parseFromString(text, 'text/html').body.textContent || "" : text || "";
+
+    if (!plainText) return null;
+    if (plainText.length <= maxLength) return <Text strong={strong}>{plainText}</Text>;
+
+    return (
+        <Text strong={strong}>
+            {isExpanded ? plainText : `${plainText.substring(0, maxLength)}...`}
+            <Button type="link" size="small" onClick={() => setIsExpanded(!isExpanded)} style={{ padding: 0, marginLeft: 8, fontWeight: 'normal' }}>
+                {isExpanded ? 'See less' : 'See more'}
+            </Button>
+        </Text>
+    );
+};
+
 export default function Faq() {
     // Hook
     useTitle("FAQ List");
+
+    // Variable
+    const {hasPermission} = usePermissions();
 
     // States
     const [faqs, setFaqs]               = useState([]);
@@ -24,7 +48,7 @@ export default function Faq() {
         try {
             const response = await getDatas("/admin/faq");
             if (response?.success && response?.data) {
-                // If it's directly an array
+                
                 setFaqs(Array.isArray(response.data) ? response.data : response.data?.items || []);
             } else {
                 setFaqs([]);
@@ -110,7 +134,8 @@ export default function Faq() {
         }
     };
 
-    const columns = [
+    const columns = 
+    [
         {
             title: "SL",
             key: "sl",
@@ -121,13 +146,15 @@ export default function Faq() {
             title: "Question",
             dataIndex: "question",
             key: "question",
-            render: (text) => <Text strong>{text}</Text>,
+            width: 300,
+            render: (text) => <ExpandableText text={text} maxLength={70} strong />,
         },
         {
             title: "Answer",
             dataIndex: "answer",
             key: "answer",
-            ellipsis: true, // Answers could be long
+            width: 400,
+            render: (text) => <ExpandableText text={text} maxLength={100} />,
         },
         {
             title: "Position",
@@ -155,21 +182,25 @@ export default function Faq() {
             width: 140,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-                        Edit
-                    </Button>
-
-                    <Popconfirm 
-                        title="Delete FAQ" 
-                        description="Are you sure you want to delete this FAQ?" 
-                        okText="Yes" 
-                        cancelText="No" 
-                        onConfirm={() => handleDelete(record.id)}
-                    >
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                            Delete
+                    {hasPermission('page_update') && (
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+                            Edit
                         </Button>
-                    </Popconfirm>
+                    )}
+
+                    {hasPermission('page_delete') && (
+                        <Popconfirm 
+                            title="Delete FAQ" 
+                            description="Are you sure you want to delete this FAQ?" 
+                            okText="Yes" 
+                            cancelText="No" 
+                            onConfirm={() => handleDelete(record.id)}
+                        >
+                            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+                                Delete
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -196,9 +227,11 @@ export default function Faq() {
                             <Button icon={<ReloadOutlined />} onClick={fetchFaqs} loading={loading}>
                                 Refresh
                             </Button>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                                Add FAQ
-                            </Button>
+                            {hasPermission('page_create') && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                                    Add FAQ
+                                </Button>
+                            )}
                         </Space>
                     </Flex>
                 }
@@ -213,46 +246,23 @@ export default function Faq() {
                 />
             </Card>
 
-            <Modal
-                title={editingFaq ? "Edit FAQ" : "Add FAQ"}
-                open={isModalVisible}
-                onOk={handleModalOk}
-                onCancel={() => setIsModalVisible(false)}
-                confirmLoading={submitLoading}
-                destroyOnClose
+            <Modal title={editingFaq ? "Edit FAQ" : "Add FAQ"} open={isModalVisible} onOk={handleModalOk} onCancel={() => setIsModalVisible(false)}
+                confirmLoading={submitLoading} destroyOnClose width={800}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item
-                        name="question"
-                        label="Question"
-                        rules={[{ required: true, message: "Please enter the question" }]}
-                    >
+                    <Form.Item name="question" label="Question" rules={[{ required: true, message: "Please enter the question" }]}>
                         <Input placeholder="Enter question" />
                     </Form.Item>
 
-                    <Form.Item
-                        name="answer"
-                        label="Answer"
-                        rules={[{ required: true, message: "Please enter the answer" }]}
-                    >
-                        <Input.TextArea rows={4} placeholder="Enter answer" />
+                    <Form.Item name="answer" label="Answer" rules={[{ required: true, message: "Please enter the answer" }]}>
+                        <ReactQuill theme="snow" placeholder="Enter answer" style={{ height: 200, marginBottom: 40 }} />
                     </Form.Item>
 
-                    <Form.Item
-                        name="position"
-                        label="Position"
-                        rules={[{ required: true, message: "Please enter position" }]}
-                        initialValue={1}
-                    >
+                    <Form.Item name="position" label="Position" rules={[{ required: true, message: "Please enter position" }]} initialValue={1}>
                         <InputNumber min={1} style={{ width: '100%' }} placeholder="E.g., 1, 2, 3" />
                     </Form.Item>
 
-                    <Form.Item
-                        name="status"
-                        label="Status"
-                        rules={[{ required: true, message: "Please select a status" }]}
-                        initialValue="active"
-                    >
+                    <Form.Item name="status" label="Status" rules={[{ required: true, message: "Please select a status" }]} initialValue="active">
                         <Select>
                             <Select.Option value="active">Active</Select.Option>
                             <Select.Option value="inactive">Inactive</Select.Option>

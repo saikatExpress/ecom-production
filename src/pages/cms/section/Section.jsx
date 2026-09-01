@@ -1,12 +1,55 @@
-import { DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, HolderOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Space, Table, Tag, Typography, message } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import usePermissions from '../../../hooks/usePermissions';
 import useTitle from '../../../hooks/useTitle';
-import { deleteData, getDatas } from '../../../services/request';
+import { deleteData, getDatas, postData } from '../../../services/request';
 
 const { Title, Text } = Typography;
+
+const DragHandleContext = createContext(null);
+
+const DragHandle = () => {
+    const { setActivatorNodeRef, listeners } = useContext(DragHandleContext) || {};
+    if (!listeners) return <HolderOutlined style={{ color: '#999' }} />;
+    return <HolderOutlined ref={setActivatorNodeRef} style={{ cursor: 'grab', color: '#999' }} {...listeners} />;
+};
+
+const SortableRow = ({ children, ...props }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        setActivatorNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: props['data-row-key'],
+    });
+
+    const style = {
+        ...props.style,
+        transform: CSS.Translate.toString(transform),
+        transition,
+        ...(isDragging ? { position: 'relative', zIndex: 9999, background: '#fafafa' } : {}),
+    };
+
+    const contextValue = { setActivatorNodeRef, listeners };
+
+    return (
+        <DragHandleContext.Provider value={contextValue}>
+            <tr {...props} ref={setNodeRef} style={style} {...attributes}>
+                {children}
+            </tr>
+        </DragHandleContext.Provider>
+    );
+};
 
 const Section = () => {
     // Hook
@@ -21,6 +64,37 @@ const Section = () => {
     const [loading, setLoading] = useState(false);
     const [searchKey, setSearchKey] = useState("");
     const [pagination, setPagination] = useState({current: 1, pageSize: 25, total: 0});
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 1,
+            },
+        })
+    );
+
+    const onDragEnd = async ({ active, over }) => {
+        if (active.id !== over?.id) {
+            setSections((prev) => {
+                const activeIndex = prev.findIndex((i) => i.id === active.id);
+                const overIndex = prev.findIndex((i) => i.id === over?.id);
+                const newSections = arrayMove(prev, activeIndex, overIndex);
+                
+                const section_ids = newSections.map(s => s.id);
+                postData("admin/section/reorder", { section_ids }).then(res => {
+                    if (res?.success) {
+                        message.success(res.message || "Sections reordered successfully");
+                    } else {
+                        message.error(res?.message || "Failed to reorder sections");
+                    }
+                }).catch(err => {
+                    message.error(err?.response?.data?.message || "Failed to reorder sections");
+                });
+
+                return newSections;
+            });
+        }
+    };
 
     const fetchSections = useCallback(async (page = 1, pageSize = 25, search = "") => {
         setLoading(true);
@@ -91,6 +165,12 @@ const Section = () => {
     const columns = 
     [
         {
+            key: "sort",
+            width: 50,
+            align: 'center',
+            render: () => <DragHandle />,
+        },
+        {
             title: "SL",
             key: "sl",
             width: 70,
@@ -103,7 +183,7 @@ const Section = () => {
             width: 90,
             render: (image, record) =>
                 image ? (
-                    <Image src={image} alt={record.name} width={40} height={40} style={{ objectFit: "cover", borderRadius: 4 }}/>
+                    <Image src={image} alt="Image" width={40} height={40} style={{ objectFit: "cover", borderRadius: 4 }}/>
                 ) : (
                     <Avatar shape="square" icon={<PictureOutlined />} size={40} />
                 ),
@@ -150,10 +230,9 @@ const Section = () => {
             render: (products) => <Tag color="cyan">{products?.length || 0} Items</Tag>,
         },
         {
-            title: "Created By",
-            dataIndex: ["created_by", "username"],
-            key: "created_by",
-            render: (username) => username || "-",
+            title: "Position",
+            dataIndex: "position",
+            key: "position"
         },
         {
             title: "Action",
@@ -223,22 +302,31 @@ const Section = () => {
                     </Button>
                 </Flex>
 
-                <Table
-                    columns={columns}
-                    dataSource={sections}
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{
-                        current: pagination.current,
-                        pageSize: pagination.pageSize,
-                        total: pagination.total,
-                        showSizeChanger: true,
-                        pageSizeOptions: ["10", "25", "50", "100"],
-                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-                    }}
-                    onChange={handleTableChange}
-                    scroll={{ x: 'max-content' }}
-                />
+                <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+                    <SortableContext items={sections.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                        <Table
+                            components={{
+                                body: {
+                                    row: SortableRow,
+                                },
+                            }}
+                            columns={columns}
+                            dataSource={sections}
+                            rowKey="id"
+                            loading={loading}
+                            pagination={{
+                                current: pagination.current,
+                                pageSize: pagination.pageSize,
+                                total: pagination.total,
+                                showSizeChanger: true,
+                                pageSizeOptions: ["10", "25", "50", "100"],
+                                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                            }}
+                            onChange={handleTableChange}
+                            scroll={{ x: 'max-content' }}
+                        />
+                    </SortableContext>
+                </DndContext>
             </Card>
         </div>
     );
