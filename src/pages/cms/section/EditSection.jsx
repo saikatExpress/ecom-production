@@ -1,24 +1,26 @@
 import { ArrowLeftOutlined, DeleteOutlined, PlusOutlined, SearchOutlined, UploadOutlined } from "@ant-design/icons";
 import { Avatar, Breadcrumb, Button, Card, Col, Empty, Form, Input, InputNumber, List, message, Radio, Row, Select, Space, Spin, Tag, Tooltip, Typography, Upload } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getDatas, postData } from "../../../services/request";
 
 const { Title, Text } = Typography;
 
-const AddSection = () => {
+const EditSection = () => {
     // Hook
-    useTitle("Add Section");
+    useTitle("Edit Section");
 
     // Variable
+    const { id }        = useParams();
     const navigate      = useNavigate();
     const [form]        = Form.useForm();
     const selectionType = Form.useWatch('selection_type', form);
 
     // States
-    const [loading, setLoading]   = useState(false);
-    const [fileList, setFileList] = useState([]);
+    const [loading, setLoading]           = useState(false);
+    const [fetchingData, setFetchingData] = useState(true);
+    const [fileList, setFileList]         = useState([]);
     
     // Categories state
     const [categories, setCategories]                 = useState([]);
@@ -31,6 +33,53 @@ const AddSection = () => {
     const [searchQuery, setSearchQuery]           = useState("");
     
     const debounceTimer = useRef(null);
+
+    // Fetch initial data
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                const response = await getDatas(`/admin/section/${id}`);
+                if (response?.success && response?.data) {
+                    const data = response.data;
+                    form.setFieldsValue({
+                        name          : data.name,
+                        link          : data.link,
+                        is_slider     : data.is_slider,
+                        position      : data.position,
+                        status        : data.status,
+                        selection_type: 'product',
+                        product_ids   : data.products?.map(p => p.id) || []
+                    });
+                    
+                    if (data.image) {
+                        setFileList([{
+                            uid: '-1',
+                            name: 'image.jpg',
+                            status: 'done',
+                            url: data.image
+                        }]);
+                    }
+                    
+                    if (data.products) {
+                        setSelectedProducts(data.products);
+                    }
+                } else {
+                    message.error("Failed to load section data");
+                    navigate("/section");
+                }
+            } catch (error) {
+                console.error("Error loading section:", error);
+                message.error("Failed to load section data");
+                navigate("/section");
+            } finally {
+                setFetchingData(false);
+            }
+        };
+
+        if (id) {
+            fetchInitialData();
+        }
+    }, [id, form, navigate]);
 
     const fetchCategories = async () => {
         setFetchingCategories(true);
@@ -100,6 +149,7 @@ const AddSection = () => {
         setLoading(true);
         try {
             const formData = new FormData();
+            formData.append("_method", "PUT"); // Laravel method spoofing for PUT with FormData
             formData.append("name", values.name);
             if (values.link) formData.append("link", values.link);
             formData.append("is_slider", values.is_slider);
@@ -108,26 +158,29 @@ const AddSection = () => {
                 formData.append("position", values.position);
             }
 
-            if (fileList.length > 0) {
+            if (fileList.length > 0 && fileList[0].originFileObj) {
                 formData.append("image", fileList[0].originFileObj);
             }
 
-            if (values.selection_type === 'category' && values.category_ids) {
-                values.category_ids.forEach(id => formData.append("category_ids[]", id));
-            } else if (values.selection_type === 'product' && values.product_ids) {
-                values.product_ids.forEach(id => formData.append("product_ids[]", id));
+            const currentProductIds = form.getFieldValue("product_ids") || [];
+            if (currentProductIds.length > 0) {
+                currentProductIds.forEach(pid => formData.append("product_ids[]", pid));
             }
 
-            const response = await postData("/admin/section", formData);
+            if (values.selection_type === 'category' && values.category_ids) {
+                values.category_ids.forEach(cid => formData.append("category_ids[]", cid));
+            }
+
+            const response = await postData(`/admin/section/${id}`, formData);
 
             if (response?.success !== false) {
-                message.success(response?.message || "Section added successfully");
+                message.success(response?.message || "Section updated successfully");
                 navigate("/section");
             } else {
-                message.error(response?.message || "Failed to add section");
+                message.error(response?.message || "Failed to update section");
             }
         } catch (error) {
-            console.error("Failed to add section:", error);
+            console.error("Failed to update section:", error);
             message.error(error?.response?.data?.message || "An error occurred");
         } finally {
             setLoading(false);
@@ -147,8 +200,16 @@ const AddSection = () => {
         if (!isLt2M) {
             message.error('Image must smaller than 2MB!');
         }
-        return false; // Prevent automatic upload
+        return false;
     };
+
+    if (fetchingData) {
+        return (
+            <div style={{ textAlign: 'center', padding: '50px 0' }}>
+                <Spin size="large" />
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -156,7 +217,7 @@ const AddSection = () => {
                 items={[
                     { title: "CMS" },
                     { title: "Section" },
-                    { title: "Add Section" },
+                    { title: "Edit Section" },
                 ]}
                 style={{ marginBottom: 16 }}
             />
@@ -165,18 +226,11 @@ const AddSection = () => {
                 title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                         <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
-                        <Title level={4} style={{ margin: 0 }}>Add New Section</Title>
+                        <Title level={4} style={{ margin: 0 }}>Edit Section</Title>
                     </div>
                 }
             >
-                <Form form={form} layout="vertical" onFinish={onFinish} 
-                    initialValues={{ 
-                        status        : "active",
-                        is_slider     : 0,
-                        selection_type: 'category',
-                        position      : 1
-                    }}
-                >
+                <Form form={form} layout="vertical" onFinish={onFinish}>
                     <Row gutter={24}>
                         <Col span={24} md={16}>
                             <Card type="inner" title="Basic Information" style={{ marginBottom: 16 }}>
@@ -226,7 +280,7 @@ const AddSection = () => {
                                     <Form.Item label="Categories" name="category_ids" rules={[{ required: true, message: 'Please select at least one category' }]}>
                                         <Select
                                             mode="multiple"
-                                            placeholder="Select categories"
+                                            placeholder="Select categories to append to this section"
                                             loading={fetchingCategories}
                                             options={categories.map(cat => ({
                                                 label: cat.name,
@@ -242,7 +296,7 @@ const AddSection = () => {
 
                                 {selectionType === 'product' && (
                                     <>
-                                        <Form.Item name="product_ids" rules={[{ required: true, message: 'Please select at least one product' }]} noStyle>
+                                        <Form.Item name="product_ids" noStyle>
                                             <Select mode="multiple" style={{ display: 'none' }} />
                                         </Form.Item>
                                         
@@ -266,7 +320,7 @@ const AddSection = () => {
                                                                 <List.Item
                                                                     key={item.id}
                                                                     actions={[
-                                                                        <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => handleAddProduct(item)}disabled={selectedProducts.some(p => p.id === item.id)}>
+                                                                        <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => handleAddProduct(item)} disabled={selectedProducts.some(p => p.id === item.id)}>
                                                                             Add
                                                                         </Button>
                                                                     ]}
@@ -276,7 +330,9 @@ const AddSection = () => {
                                                                         title={item.name}
                                                                         description={
                                                                             <Space size="small" wrap>
-                                                                                <Text strong type="success">৳{item.offer_price || item.sell_price}</Text>
+                                                                                <Text type="secondary">SKU: {item.sku}</Text>
+                                                                                <Text type="secondary">|</Text>
+                                                                                <Text strong type="success">${item.offer_price || item.sell_price}</Text>
                                                                                 {item.category && <Tag color="blue">{item.category.name}</Tag>}
                                                                                 <Tag color="orange">Stock: {item.current_stock}</Tag>
                                                                             </Space>
@@ -310,7 +366,7 @@ const AddSection = () => {
                                                             >
                                                                 <Card.Meta 
                                                                     title={<span style={{ fontSize: 13, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.2' }}>{item.name}</span>}
-                                                                    description={<Text strong type="success">৳{item.offer_price || item.sell_price}</Text>} 
+                                                                    description={<Text strong type="success">${item.offer_price || item.sell_price}</Text>} 
                                                                 />
                                                             </Card>
                                                         ))}
@@ -351,7 +407,7 @@ const AddSection = () => {
                             Cancel
                         </Button>
                         <Button type="primary" htmlType="submit" loading={loading}>
-                            Save Section
+                            Update Section
                         </Button>
                     </div>
                 </Form>
@@ -360,4 +416,4 @@ const AddSection = () => {
     );
 };
 
-export default AddSection;
+export default EditSection;

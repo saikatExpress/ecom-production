@@ -23,7 +23,9 @@ import Faq from "../pages/cms/faq/Faq";
 import PrivacyPolicy from "../pages/cms/privacy-policy/PrivacyPolicy";
 import ReturnRefundPolicy from "../pages/cms/return-refund/ReturnRefundPolicy";
 import AddSection from "../pages/cms/section/AddSection";
+import EditSection from "../pages/cms/section/EditSection";
 import Section from "../pages/cms/section/Section";
+import SectionTrash from "../pages/cms/section/SectionTrash";
 import ShippingPolicy from "../pages/cms/shipping-policy/ShippingPolicy";
 import AddSlider from "../pages/cms/slider/AddSlider";
 import EditSlider from "../pages/cms/slider/EditSlider";
@@ -425,9 +427,22 @@ export default function AppRoutes() {
                                 <Section/>
                             </PermissionRoute>
                         }/>
+
+                        <Route path="/trash/section" element={
+                            <PermissionRoute permission="section_delete">
+                                <SectionTrash/>
+                            </PermissionRoute>
+                        }/>
+
                         <Route path="/create/section" element={
                             <PermissionRoute permission="section_create">
                                 <AddSection/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/section/:id" element={
+                            <PermissionRoute permission="section_update">
+                                <EditSection/>
                             </PermissionRoute>
                         }/>
                         {/* Section & Banner Menu */}
