@@ -1,4 +1,4 @@
-import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
+import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
 
 import { Drawer, Menu } from "antd";
 import { useEffect, useState } from "react";
@@ -124,6 +124,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "order_source_read"
                 },
                 {
+                    key: "status",
+                    icon: <GlobalOutlined />,
+                    label: "Status",
+                    permission: "status_read"
+                },
+                {
                     key: "customer-type",
                     icon: <TeamOutlined />,
                     label: "Customer Type",
@@ -146,6 +152,28 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     icon: <CreditCardOutlined />,
                     label: "Payment Gateway",
                     permission: "payment_gateway_read"
+                }
+            ]
+        },
+        {
+            key: "fake-order-solutions",
+            icon: <WarningOutlined />,
+            label: "Fake Order Solutions",
+            children: [
+                {
+                    key: "fake-order-solutions/block-customers",
+                    icon: <StopOutlined />,
+                    label: "Block Customers",
+                },
+                {
+                    key: "fake-order-solutions/order-guard",
+                    icon: <SafetyOutlined />,
+                    label: "Order Guard",
+                },
+                {
+                    key: "fake-order-solutions/fraud-checker",
+                    icon: <WarningOutlined />,
+                    label: "Fraud Checker",
                 }
             ]
         },

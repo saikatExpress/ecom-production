@@ -51,6 +51,9 @@ import OrderSource from "../pages/order/order-source/OrderSource";
 import AddPaymentGateway from "../pages/order/payment-gateway/AddPaymentGateway";
 import EditPaymentGateway from "../pages/order/payment-gateway/EditPaymentGateway";
 import PaymentGateway from "../pages/order/payment-gateway/PaymentGateway";
+import AddStatus from "../pages/order/status/AddStatus";
+import EditStatus from "../pages/order/status/EditStatus";
+import StatusTrash from "../pages/order/status/StatusTrash";
 import AddProduct from "../pages/products/AddProduct";
 import AttributeValue from "../pages/products/attribute-value/AttributeValue";
 import Attribute from "../pages/products/attribute/Attribute";
@@ -83,6 +86,7 @@ import ManagementTrash from "../pages/user/management/ManagementTrash";
 import AddRole from "../pages/user/Role/AddRole";
 import EditRole from "../pages/user/Role/EditRole";
 import Role from "../pages/user/Role/Role";
+import Status from './../pages/order/status/Status';
 import Customer from './../pages/user/Customer';
 
 export default function AppRoutes() {
@@ -297,6 +301,30 @@ export default function AppRoutes() {
                         <Route path="/edit/order-source/:id" element={
                             <PermissionRoute permission="order_source_update">
                                 <EditOrderSource/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/status" element={
+                            <PermissionRoute permission="status_read">
+                                <Status/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/create/status" element={
+                            <PermissionRoute permission="status_create">
+                                <AddStatus/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/status/:id" element={
+                            <PermissionRoute permission="status_update">
+                                <EditStatus/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/trash/status" element={
+                            <PermissionRoute permission="status_delete">
+                                <StatusTrash/>
                             </PermissionRoute>
                         }/>
 
