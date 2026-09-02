@@ -18,6 +18,10 @@ import BlogTrash from "../pages/blog/BlogTrash";
 import EditBlog from "../pages/blog/EditBlog";
 import Tag from "../pages/blog/tag/Tag";
 import AboutUs from "../pages/cms/about/AboutUs";
+import AddBanner from "../pages/cms/banner/AddBanner";
+import Banner from "../pages/cms/banner/Banner";
+import BannerTrash from "../pages/cms/banner/BannerTrash";
+import EditBanner from "../pages/cms/banner/EditBanner";
 import ContactUs from "../pages/cms/contact/ContactUs";
 import Faq from "../pages/cms/faq/Faq";
 import PrivacyPolicy from "../pages/cms/privacy-policy/PrivacyPolicy";
@@ -443,6 +447,30 @@ export default function AppRoutes() {
                         <Route path="/edit/section/:id" element={
                             <PermissionRoute permission="section_update">
                                 <EditSection/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/banner" element={
+                            <PermissionRoute permission="banner_read">
+                                <Banner/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/trash/banner" element={
+                            <PermissionRoute permission="banner_delete">
+                                <BannerTrash/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/create/banner" element={
+                            <PermissionRoute permission="banner_create">
+                                <AddBanner/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/edit/banner/:id" element={
+                            <PermissionRoute permission="banner_update">
+                                <EditBanner/>
                             </PermissionRoute>
                         }/>
                         {/* Section & Banner Menu */}

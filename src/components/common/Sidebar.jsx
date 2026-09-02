@@ -186,7 +186,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "section_read"
                 },
                 {
-                    key: "section-banner",
+                    key: "banner",
                     icon: <PictureOutlined />,
                     label: "Section Banner",
                     permission: "banner_read"
