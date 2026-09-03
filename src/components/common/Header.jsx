@@ -1,5 +1,6 @@
-import { BellOutlined, LogoutOutlined, MenuOutlined, MoonOutlined, ProfileOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Badge, Button, Dropdown, Input, List, Space, Typography, message } from "antd";
+import { BellOutlined, ClearOutlined, LogoutOutlined, MenuOutlined, MoonOutlined, ProfileOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Badge, Button, Dropdown, Input, List, message, Modal, Space, Tooltip, Typography } from "antd";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
 import { postData } from "../../services/request";
@@ -10,6 +11,33 @@ const { Text } = Typography;
 export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
+
+    const [cacheModalVisible, setCacheModalVisible] = useState(false);
+    const [cacheData, setCacheData] = useState("");
+    const [cacheLoading, setCacheLoading] = useState(false);
+
+    const handleClearCache = async () => {
+        setCacheLoading(true);
+        try {
+            const res = await postData("admin/cache-clear");
+            if (res?.success) {
+                setCacheData(res.data);
+                setCacheModalVisible(true);
+            } else {
+                message.error(res?.message || "Failed to clear cache");
+            }
+        } catch (error) {
+            console.error(error);
+            message.error("An error occurred while clearing cache");
+        } finally {
+            setCacheLoading(false);
+        }
+    };
+
+    const handleCacheModalClose = () => {
+        setCacheModalVisible(false);
+        window.location.reload();
+    };
 
     const handleMenuClick = async (e) => {
         if (e.key === 'logout') {
@@ -122,6 +150,17 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
                         className="header-icon-btn"
                     />
 
+                    <Tooltip title="Clear Cache">
+                        <Button
+                            type="text"
+                            shape="circle"
+                            icon={<ClearOutlined style={{ fontSize: '18px' }} />}
+                            onClick={handleClearCache}
+                            loading={cacheLoading}
+                            className="header-icon-btn"
+                        />
+                    </Tooltip>
+
                     <Dropdown
                         dropdownRender={() => notificationContent}
                         trigger={['click']}
@@ -157,6 +196,45 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
                     </Dropdown>
                 </Space>
             </div>
+
+            <Modal
+                title={
+                    <Space>
+                        <ClearOutlined style={{ color: '#52c41a' }} />
+                        <Typography.Text strong style={{ fontSize: '18px' }}>Cache Cleared Successfully</Typography.Text>
+                    </Space>
+                }
+                open={cacheModalVisible}
+                onOk={handleCacheModalClose}
+                onCancel={handleCacheModalClose}
+                okText="Reload Application"
+                cancelText="Close"
+                width={700}
+                centered
+            >
+                <div style={{ marginTop: '16px' }}>
+                    <Typography.Paragraph type="secondary" style={{ marginBottom: '16px' }}>
+                        All application caches have been successfully flushed. Below is the system log output:
+                    </Typography.Paragraph>
+                    <div 
+                        style={{ 
+                            backgroundColor: '#1e1e1e', 
+                            color: '#4af626', 
+                            padding: '16px', 
+                            borderRadius: '8px', 
+                            fontFamily: "'Fira Code', 'Courier New', Courier, monospace", 
+                            whiteSpace: 'pre-wrap', 
+                            maxHeight: '400px', 
+                            overflowY: 'auto',
+                            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)',
+                            fontSize: '13px',
+                            lineHeight: '1.6'
+                        }}
+                    >
+                        {cacheData}
+                    </div>
+                </div>
+            </Modal>
         </header>
     );
-}
+}
