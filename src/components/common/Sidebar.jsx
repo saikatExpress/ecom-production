@@ -32,27 +32,27 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Users",
             children: [
                 {
-                    key: "management/list",
-                    icon: <UnorderedListOutlined />,
-                    label: "Management",
+                    key       : "management/list",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Management",
                     permission: "user_read"
                 },
                 {
-                    key: "employee/list",
-                    icon: <UnorderedListOutlined />,
-                    label: "Employee",
+                    key       : "employee/list",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Employee",
                     permission: "user_read"
                 },
                 {
-                    key: "customers",
-                    icon: <UserOutlined />,
-                    label: "Customers",
+                    key       : "customers",
+                    icon      : <UserOutlined />,
+                    label     : "Customers",
                     permission: "user_read"
                 },
                 {
-                    key: "users/role-permission",
-                    icon: <ControlOutlined />,
-                    label: "Role Permission",
+                    key       : "users/role-permission",
+                    icon      : <ControlOutlined />,
+                    label     : "Role Permission",
                     permission: "role_read"
                 }
             ]
@@ -63,39 +63,39 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Product",
             children: [
                 {
-                    key: "products",
-                    icon: <UnorderedListOutlined />,
-                    label: "Product List",
+                    key       : "products",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Product List",
                     permission: "product_read"
                 },
                 {
-                    key: "categories",
-                    icon: <AppstoreOutlined />,
-                    label: "Category",
+                    key       : "categories",
+                    icon      : <AppstoreOutlined />,
+                    label     : "Category",
                     permission: "category_read"
                 },
                 {
-                    key: "sub-categories",
-                    icon: <BranchesOutlined />,
-                    label: "Sub Category",
+                    key       : "sub-categories",
+                    icon      : <BranchesOutlined />,
+                    label     : "Sub Category",
                     permission: "sub_category_read"
                 },
                 {
-                    key: "brands",
-                    icon: <TagsOutlined />,
-                    label: "Brand",
+                    key       : "brands",
+                    icon      : <TagsOutlined />,
+                    label     : "Brand",
                     permission: "brand_read"
                 },
                 {
-                    key: "attributes",
-                    icon: <ControlOutlined />,
-                    label: "Attribute",
+                    key       : "attributes",
+                    icon      : <ControlOutlined />,
+                    label     : "Attribute",
                     permission: "attribute_read"
                 },
                 {
-                    key: "attribute-values",
-                    icon: <SlidersOutlined />,
-                    label: "Attribute Values",
+                    key       : "attribute-values",
+                    icon      : <SlidersOutlined />,
+                    label     : "Attribute Values",
                     permission: "attribute_value_read"
                 }
             ]
@@ -106,51 +106,51 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Orders",
             children: [
                 {
-                    key: "orders/list",
-                    icon: <ProfileOutlined />,
-                    label: "Order List",
+                    key       : "orders/list",
+                    icon      : <ProfileOutlined />,
+                    label     : "Order List",
                     permission: "order_read"
                 },
                 {
-                    key: "add/orders",
-                    icon: <PlusCircleOutlined />,
-                    label: "Add Order",
+                    key       : "add/orders",
+                    icon      : <PlusCircleOutlined />,
+                    label     : "Add Order",
                     permission: "order_create"
                 },
                 {
-                    key: "order/source",
-                    icon: <GlobalOutlined />,
-                    label: "Order Source",
+                    key       : "order/source",
+                    icon      : <GlobalOutlined />,
+                    label     : "Order Source",
                     permission: "order_source_read"
                 },
                 {
-                    key: "status",
-                    icon: <GlobalOutlined />,
-                    label: "Status",
+                    key       : "status",
+                    icon      : <GlobalOutlined />,
+                    label     : "Status",
                     permission: "status_read"
                 },
                 {
-                    key: "customer-type",
-                    icon: <TeamOutlined />,
-                    label: "Customer Type",
+                    key       : "customer-type",
+                    icon      : <TeamOutlined />,
+                    label     : "Customer Type",
                     permission: "customer_type_read"
                 },
                 {
-                    key: "cancel-reason",
-                    icon: <StopOutlined />,
-                    label: "Cancel Reason",
+                    key       : "cancel-reason",
+                    icon      : <StopOutlined />,
+                    label     : "Cancel Reason",
                     permission: "cancel_reason_read"
                 },
                 {
-                    key: "delivery-gateway",
-                    icon: <TruckOutlined />,
-                    label: "Delivery Gateway",
+                    key       : "delivery-gateway",
+                    icon      : <TruckOutlined />,
+                    label     : "Delivery Gateway",
                     permission: "delivery_gateway_read"
                 },
                 {
-                    key: "payment-gateway",
-                    icon: <CreditCardOutlined />,
-                    label: "Payment Gateway",
+                    key       : "payment-gateway",
+                    icon      : <CreditCardOutlined />,
+                    label     : "Payment Gateway",
                     permission: "payment_gateway_read"
                 }
             ]
@@ -166,9 +166,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     label: "Block Customers",
                 },
                 {
-                    key: "fake-order-solutions/order-guard",
-                    icon: <SafetyOutlined />,
-                    label: "Order Guard",
+                    key       : "order-guard",
+                    icon      : <SafetyOutlined />,
+                    label     : "Order Guard",
+                    permission: "order_guard_settings_read"
                 },
                 {
                     key: "fake-order-solutions/fraud-checker",
@@ -183,21 +184,21 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Courier",
             children: [
                 {
-                    key: "courier",
-                    icon: <UnorderedListOutlined />,
-                    label: "All Courier",
+                    key       : "courier",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "All Courier",
                     permission: "courier_read"
                 },
                 {
-                    key: "courier/settings",
-                    icon: <SettingOutlined />,
-                    label: "Courier Settings",
+                    key       : "courier/settings",
+                    icon      : <SettingOutlined />,
+                    label     : "Courier Settings",
                     permission: "courier_settings_read"
                 },
                 {
-                    key: "courier/integration",
-                    icon: <ApiOutlined />,
-                    label: "Courier Integration",
+                    key       : "courier/integration",
+                    icon      : <ApiOutlined />,
+                    label     : "Courier Integration",
                     permission: "courier_settings_read"
                 }
             ]
@@ -208,21 +209,21 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Section & Banner",
             children: [
                 {
-                    key: "section",
-                    icon: <UnorderedListOutlined />,
-                    label: "Section",
+                    key       : "section",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Section",
                     permission: "section_read"
                 },
                 {
-                    key: "banner",
-                    icon: <PictureOutlined />,
-                    label: "Section Banner",
+                    key       : "banner",
+                    icon      : <PictureOutlined />,
+                    label     : "Section Banner",
                     permission: "banner_read"
                 },
                 {
-                    key: "slider",
-                    icon: <SlidersOutlined />,
-                    label: "Slider",
+                    key       : "slider",
+                    icon      : <SlidersOutlined />,
+                    label     : "Slider",
                     permission: "slider_read"
                 }
             ]
@@ -233,21 +234,21 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Blog Menu",
             children: [
                 {
-                    key: "blog-category",
-                    icon: <AppstoreOutlined />,
-                    label: "Blog Category",
+                    key       : "blog-category",
+                    icon      : <AppstoreOutlined />,
+                    label     : "Blog Category",
                     permission: "blog_category_read"
                 },
                 {
-                    key: "blog-tag",
-                    icon: <TagsOutlined />,
-                    label: "Blog Tag",
+                    key       : "blog-tag",
+                    icon      : <TagsOutlined />,
+                    label     : "Blog Tag",
                     permission: "tag_read"
                 },
                 {
-                    key: "blog",
-                    icon: <ProfileOutlined />,
-                    label: "Blog",
+                    key       : "blog",
+                    icon      : <ProfileOutlined />,
+                    label     : "Blog",
                     permission: "blog_read"
                 }
             ]
@@ -258,45 +259,45 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "CMS",
             children: [
                 {
-                    key: "about-us",
-                    icon: <UnorderedListOutlined />,
-                    label: "About Us",
+                    key       : "about-us",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "About Us",
                     permission: "page_read"
                 },
                 {
-                    key: "contact-us",
-                    icon: <UnorderedListOutlined />,
-                    label: "Contact Us",
+                    key       : "contact-us",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Contact Us",
                     permission: "page_read"
                 },
                 {
-                    key: "faq",
-                    icon: <UnorderedListOutlined />,
-                    label: "Faq",
+                    key       : "faq",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Faq",
                     permission: "page_read"
                 },
                 {
-                    key: "privacy-policy",
-                    icon: <UnorderedListOutlined />,
-                    label: "Privacy Policy",
+                    key       : "privacy-policy",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Privacy Policy",
                     permission: "page_read"
                 },
                 {
-                    key: "terms-condition",
-                    icon: <UnorderedListOutlined />,
-                    label: "Terms & Condition",
+                    key       : "terms-condition",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Terms & Condition",
                     permission: "page_read"
                 },
                 {
-                    key: "shipping-delivery-policy",
-                    icon: <UnorderedListOutlined />,
-                    label: "Shipping & Delivery Policy",
+                    key       : "shipping-delivery-policy",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Shipping & Delivery Policy",
                     permission: "page_read"
                 },
                 {
-                    key: "return-refund-policy",
-                    icon: <UnorderedListOutlined />,
-                    label: "Return & Refund Policy",
+                    key       : "return-refund-policy",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Return & Refund Policy",
                     permission: "page_read"
                 }
             ]
@@ -307,27 +308,27 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: "Report",
             children: [
                 {
-                    key: "report/order",
-                    icon: <UnorderedListOutlined />,
-                    label: "Order Report",
+                    key       : "report/order",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Order Report",
                     permission: "report_read"
                 },
                 {
-                    key: "report/product",
-                    icon: <UnorderedListOutlined />,
-                    label: "Product Report",
+                    key       : "report/product",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Product Report",
                     permission: "report_read"
                 },
                 {
-                    key: "report/customer",
-                    icon: <UnorderedListOutlined />,
-                    label: "Customer Report",
+                    key       : "report/customer",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Customer Report",
                     permission: "report_read"
                 },
                 {
-                    key: "report/courier",
-                    icon: <UnorderedListOutlined />,
-                    label: "Courier Report",
+                    key       : "report/courier",
+                    icon      : <UnorderedListOutlined />,
+                    label     : "Courier Report",
                     permission: "report_read"
                 }
             ]

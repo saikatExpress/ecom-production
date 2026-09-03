@@ -45,6 +45,7 @@ import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGateway";
 import DeliveryGateway from "../pages/order/delivery-gateway/DeliveryGateway";
 import EditDeliveryGateway from "../pages/order/delivery-gateway/EditDeliveryGateway";
+import OrderGuard from "../pages/order/order-guard/OrderGuard";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
 import OrderSource from "../pages/order/order-source/OrderSource";
@@ -376,6 +377,14 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* Order Menu */}
+
+                        {/* Fake Order Menu */}
+                        <Route path="/order-guard" element={
+                            <PermissionRoute permission="order_guard_settings_read">
+                                <OrderGuard/>
+                            </PermissionRoute>
+                        }/>
+                        {/* Fake Order Menu */}
 
                         {/* Blog Menu */}
                         <Route path="/blog-category" element={
