@@ -1,11 +1,11 @@
-import { CheckCircleOutlined, DeleteOutlined, DesktopOutlined, EditOutlined, HistoryOutlined, MobileOutlined, PlusOutlined, ReloadOutlined, StopOutlined, UserOutlined, WarningOutlined } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Input, message, Modal, Row, Select, Space, Spin, Statistic, Table, Tag, Tooltip, Typography } from "antd";
+import { CheckCircleOutlined, DeleteOutlined, DesktopOutlined, EditOutlined, HistoryOutlined, KeyOutlined, MobileOutlined, PlusOutlined, ReloadOutlined, StopOutlined, UserOutlined, WarningOutlined } from '@ant-design/icons';
+import { Avatar, Button, Card, Col, Form, Input, message, Modal, Row, Select, Space, Spin, Statistic, Table, Tag, Tooltip, Typography } from "antd";
 import dayjs from 'dayjs';
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import usePermissions from '../../../hooks/usePermissions';
 import useTitle from "../../../hooks/useTitle";
-import { deleteData, getData, getDatas } from "../../../services/request";
+import { deleteData, getData, getDatas, postData } from "../../../services/request";
 
 export default function Management() {
     // Hook
@@ -16,15 +16,64 @@ export default function Management() {
     const {hasPermission} = usePermissions();
 
     // States
-    const [management, setManagement]                   = useState([]);
-    const [loading, setLoading]                         = useState(false);
-    const [pagination, setPagination]                   = useState({current: 1,pageSize: 25,total: 0});
-    const [filters, setFilters]                         = useState({search_key: '',status: 'active'});
-    const [activeCount, setActiveCount]                 = useState(0);
-    const [inactiveCount, setInactiveCount]             = useState(0);
-    const [historyModalVisible, setHistoryModalVisible] = useState(false);
-    const [historyLoading, setHistoryLoading]           = useState(false);
-    const [selectedUser, setSelectedUser]               = useState(null);
+    const [management, setManagement]                     = useState([]);
+    const [loading, setLoading]                           = useState(false);
+    const [pagination, setPagination]                     = useState({current: 1,pageSize: 25,total: 0});
+    const [filters, setFilters]                           = useState({search_key: '',status: 'active'});
+    const [activeCount, setActiveCount]                   = useState(0);
+    const [inactiveCount, setInactiveCount]               = useState(0);
+    const [historyModalVisible, setHistoryModalVisible]   = useState(false);
+    const [historyLoading, setHistoryLoading]             = useState(false);
+    const [selectedUser, setSelectedUser]                 = useState(null);
+    const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+    const [passwordLoading, setPasswordLoading]           = useState(false);
+    const [selectedPasswordUser, setSelectedPasswordUser] = useState(null);
+    const [passwordForm]                                  = Form.useForm();
+
+    const handleShowPasswordModal = (record) => {
+        setSelectedPasswordUser(record);
+        setPasswordModalVisible(true);
+        passwordForm.resetFields();
+    };
+
+    const handlePasswordSubmit = async (values) => {
+        try {
+            setPasswordLoading(true);
+            const res = await postData(`/auth/${selectedPasswordUser.id}`, {
+                new_password: values.new_password,
+                new_password_confirmation: values.new_password_confirmation
+            });
+            if (res?.success) {
+                message.success(res?.message || 'Password changed successfully');
+                setPasswordModalVisible(false);
+                passwordForm.resetFields();
+            } else {
+                if (res?.errors) {
+                    const formErrors = Object.keys(res.errors).map(key => ({
+                        name: key,
+                        errors: res.errors[key]
+                    }));
+                    passwordForm.setFields(formErrors);
+                }
+                message.error(res?.message || 'Failed to change password');
+            }
+        } catch (error) {
+            console.error(error);
+            if (error?.response?.data?.errors) {
+                const resErrors = error.response.data.errors;
+                const formErrors = Object.keys(resErrors).map(key => ({
+                    name: key,
+                    errors: resErrors[key]
+                }));
+                passwordForm.setFields(formErrors);
+                message.error(error?.response?.data?.message || 'Validation failed');
+            } else {
+                message.error('An error occurred while changing password');
+            }
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
 
     const handleShowHistory = async (record) => {
         setHistoryModalVisible(true);
@@ -213,6 +262,11 @@ export default function Management() {
                     <Button icon={<HistoryOutlined />} size="small" onClick={() => handleShowHistory(record)}>
                         History
                     </Button>
+                    {hasPermission('user_update') && (
+                        <Button icon={<KeyOutlined />} size="small" onClick={() => handleShowPasswordModal(record)}>
+                            Password
+                        </Button>
+                    )}
                     {hasPermission('user_update') && (
                         <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => navigate(`/edit/management/${record.id}`)}>
                             Edit
@@ -440,6 +494,75 @@ export default function Management() {
                         <Typography.Text type="secondary">No history found</Typography.Text>
                     </div>
                 )}
+            </Modal>
+
+            <Modal
+                title={
+                    <Space>
+                        <KeyOutlined style={{ color: '#faad14' }} />
+                        <Typography.Text strong style={{ fontSize: '18px' }}>Change Password</Typography.Text>
+                    </Space>
+                }
+                open={passwordModalVisible}
+                onCancel={() => setPasswordModalVisible(false)}
+                footer={null}
+                width={500}
+                centered
+                destroyOnClose
+            >
+                <div style={{ marginTop: '16px' }}>
+                    <Typography.Paragraph type="secondary" style={{ marginBottom: '24px' }}>
+                        Change password for <Typography.Text strong>{selectedPasswordUser?.username}</Typography.Text>
+                    </Typography.Paragraph>
+
+                    <Form
+                        form={passwordForm}
+                        layout="vertical"
+                        onFinish={handlePasswordSubmit}
+                        requiredMark={false}
+                    >
+                        <Form.Item
+                            name="new_password"
+                            label="New Password"
+                            rules={[
+                                { required: true, message: 'Please input the new password!' },
+                                { min: 6, message: 'Password must be at least 6 characters!' }
+                            ]}
+                        >
+                            <Input.Password placeholder="Enter new password" size="large" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="new_password_confirmation"
+                            label="Confirm Password"
+                            dependencies={['new_password']}
+                            rules={[
+                                { required: true, message: 'Please confirm your password!' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue('new_password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('The two passwords do not match!'));
+                                    },
+                                }),
+                            ]}
+                        >
+                            <Input.Password placeholder="Confirm new password" size="large" />
+                        </Form.Item>
+
+                        <Form.Item style={{ marginBottom: 0, marginTop: '32px', textAlign: 'right' }}>
+                            <Space>
+                                <Button onClick={() => setPasswordModalVisible(false)}>
+                                    Cancel
+                                </Button>
+                                <Button type="primary" htmlType="submit" loading={passwordLoading}>
+                                    Change Password
+                                </Button>
+                            </Space>
+                        </Form.Item>
+                    </Form>
+                </div>
             </Modal>
         </Space>
     );
