@@ -1,27 +1,52 @@
-import { CheckCircleOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, StopOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Input, Modal, Row, Select, Space, Statistic, Table, Tag, message } from "antd";
+import { CheckCircleOutlined, DeleteOutlined, DesktopOutlined, EditOutlined, HistoryOutlined, MobileOutlined, PlusOutlined, ReloadOutlined, StopOutlined, UserOutlined, WarningOutlined } from '@ant-design/icons';
+import { Avatar, Button, Card, Col, Input, message, Modal, Row, Select, Space, Spin, Statistic, Table, Tag, Tooltip, Typography } from "antd";
 import dayjs from 'dayjs';
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import usePermissions from '../../../hooks/usePermissions';
 import useTitle from "../../../hooks/useTitle";
-import { deleteData, getDatas } from "../../../services/request";
+import { deleteData, getData, getDatas } from "../../../services/request";
 
 export default function Management() {
     // Hook
     useTitle('Management List');
 
     // Variable
-    const navigate = useNavigate();
+    const navigate        = useNavigate();
     const {hasPermission} = usePermissions();
 
     // States
-    const [management, setManagement]       = useState([]);
-    const [loading, setLoading]             = useState(false);
-    const [pagination, setPagination]       = useState({current: 1,pageSize: 25,total: 0});
-    const [filters, setFilters]             = useState({search_key: '',status: 'active'});
-    const [activeCount, setActiveCount]     = useState(0);
-    const [inactiveCount, setInactiveCount] = useState(0);
+    const [management, setManagement]                   = useState([]);
+    const [loading, setLoading]                         = useState(false);
+    const [pagination, setPagination]                   = useState({current: 1,pageSize: 25,total: 0});
+    const [filters, setFilters]                         = useState({search_key: '',status: 'active'});
+    const [activeCount, setActiveCount]                 = useState(0);
+    const [inactiveCount, setInactiveCount]             = useState(0);
+    const [historyModalVisible, setHistoryModalVisible] = useState(false);
+    const [historyLoading, setHistoryLoading]           = useState(false);
+    const [selectedUser, setSelectedUser]               = useState(null);
+
+    const handleShowHistory = async (record) => {
+        setHistoryModalVisible(true);
+        setHistoryLoading(true);
+        setSelectedUser(null);
+        try {
+            const res = await getData(`/admin/user/${record.id}`);
+            if (res?.success) {
+                setSelectedUser(res.data);
+            } else {
+                message.error(res?.message || 'Failed to fetch user history');
+                setHistoryModalVisible(false);
+            }
+        } catch (error) {
+            console.error(error);
+            message.error('An error occurred while fetching history');
+            setHistoryModalVisible(false);
+        } finally {
+            setHistoryLoading(false);
+        }
+    };
+
 
     const getManagement = async (page = 1, paginate_size = 25, search_key = filters.search_key, status = filters.status) => {
         try {
@@ -185,6 +210,9 @@ export default function Management() {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
+                    <Button icon={<HistoryOutlined />} size="small" onClick={() => handleShowHistory(record)}>
+                        History
+                    </Button>
                     {hasPermission('user_update') && (
                         <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => navigate(`/edit/management/${record.id}`)}>
                             Edit
@@ -198,6 +226,60 @@ export default function Management() {
                 </Space>
             ),
         }
+    ];
+
+    const historyColumns = 
+    [
+        {
+            title: 'Login Time',
+            dataIndex: 'login_at',
+            key: 'login_at',
+            render: (date) => dayjs(date).format('DD MMM, YYYY hh:mm A'),
+            width: 180,
+        },
+        {
+            title: 'IP Address',
+            dataIndex: 'ip_address',
+            key: 'ip_address',
+            render: (ip) => <Tag color="blue">{ip}</Tag>,
+            width: 140,
+        },
+        {
+            title: 'System & Browser',
+            key: 'system',
+            render: (_, record) => (
+                <Space direction="vertical" size="small">
+                    <Typography.Text>
+                        {record.device === 'Mobile' ? <MobileOutlined /> : <DesktopOutlined />} {record.platform} {record.platform_version && `(${record.platform_version})`}
+                    </Typography.Text>
+                    <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                        {record.browser}
+                    </Typography.Text>
+                </Space>
+            ),
+            width: 200,
+        },
+        {
+            title: 'Status',
+            key: 'status',
+            render: (_, record) => (
+                record.success ? (
+                    <Tag icon={<CheckCircleOutlined />} color="success">Success</Tag>
+                ) : (
+                    <Tooltip title={record.failure_reason}>
+                        <Tag icon={<WarningOutlined />} color="error">Failed</Tag>
+                    </Tooltip>
+                )
+            ),
+            width: 120,
+        },
+        {
+            title: 'Logout Time',
+            dataIndex: 'logout_at',
+            key: 'logout_at',
+            render: (date) => date ? dayjs(date).format('DD MMM, YYYY hh:mm A') : <Tag color="default">Active</Tag>,
+            width: 180,
+        },
     ];
 
     const renderHeader = () => (
@@ -297,6 +379,68 @@ export default function Management() {
                     onChange={handleTableChange}
                 />
             </Card>
+
+            <Modal
+                title={
+                    <Space>
+                        <HistoryOutlined style={{ color: '#1890ff' }} />
+                        <Typography.Text strong style={{ fontSize: '18px' }}>User Login History</Typography.Text>
+                    </Space>
+                }
+                open={historyModalVisible}
+                onCancel={() => setHistoryModalVisible(false)}
+                footer={null}
+                width={1000}
+                centered
+                destroyOnClose
+            >
+                {historyLoading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+                        <Spin size="large" tip="Loading history..." />
+                    </div>
+                ) : selectedUser ? (
+                    <Space direction="vertical" size="large" style={{ width: '100%', marginTop: '16px' }}>
+                        <Card bordered={false} style={{ background: '#f8fafc', borderRadius: '12px' }}>
+                            <Row gutter={[24, 24]} align="middle">
+                                <Col>
+                                    <Avatar
+                                        src={selectedUser.image ? selectedUser.image : `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.username)}&background=random`}
+                                        size={80}
+                                        icon={!selectedUser.image && <UserOutlined />}
+                                    />
+                                </Col>
+                                <Col flex="auto">
+                                    <Typography.Title level={4} style={{ margin: 0 }}>
+                                        {selectedUser.username}
+                                    </Typography.Title>
+                                    <Space wrap size="middle" style={{ marginTop: '8px' }}>
+                                        <Typography.Text type="secondary">{selectedUser.email}</Typography.Text>
+                                        <Typography.Text type="secondary">{selectedUser.phone_number}</Typography.Text>
+                                        <Tag color={selectedUser.status === 'active' ? 'green' : 'red'}>
+                                            {selectedUser.status?.toUpperCase()}
+                                        </Tag>
+                                    </Space>
+                                </Col>
+                            </Row>
+                        </Card>
+
+                        <Typography.Title level={5}>Authentication Logs</Typography.Title>
+                        <Table 
+                            columns={historyColumns} 
+                            dataSource={selectedUser.loginHistories} 
+                            rowKey="id"
+                            pagination={{ pageSize: 10 }}
+                            scroll={{ y: 400 }}
+                            size="middle"
+                            bordered={false}
+                        />
+                    </Space>
+                ) : (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+                        <Typography.Text type="secondary">No history found</Typography.Text>
+                    </div>
+                )}
+            </Modal>
         </Space>
     );
 }
