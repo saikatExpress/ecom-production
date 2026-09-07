@@ -1,10 +1,5 @@
 import api from "./api";
 
-/*
-|--------------------------------------------------------------------------
-| GET Multiple Data
-|--------------------------------------------------------------------------
-*/
 export const getDatas = async (url, params = {}) => {
 
     const response = await api.get(url, {
@@ -14,11 +9,6 @@ export const getDatas = async (url, params = {}) => {
     return response.data;
 };
 
-/*
-|--------------------------------------------------------------------------
-| GET Single Data
-|--------------------------------------------------------------------------
-*/
 export const getData = async (url, params = {}) => {
 
     const response = await api.get(url, {
@@ -28,11 +18,6 @@ export const getData = async (url, params = {}) => {
     return response.data;
 };
 
-/*
-|--------------------------------------------------------------------------
-| POST
-|--------------------------------------------------------------------------
-*/
 export const postData = async (url, data = {}) => {
 
     const response = await api.post(url, data);
@@ -40,11 +25,6 @@ export const postData = async (url, data = {}) => {
     return response.data;
 };
 
-/*
-|--------------------------------------------------------------------------
-| PUT
-|--------------------------------------------------------------------------
-*/
 export const putData = async (url, data = {}) => {
 
     const response = await api.put(url, data);
@@ -52,22 +32,12 @@ export const putData = async (url, data = {}) => {
     return response.data;
 };
 
-/**
- * |--------------------------------------------------------------------------|
- * | PATCH
- * |--------------------------------------------------------------------------|
- */
 export const patchData = async (url, data = {}) => {
     const response = await api.patch(url, data);
 
     return response.data;
 };
 
-/*
-|--------------------------------------------------------------------------
-| DELETE
-|--------------------------------------------------------------------------
-*/
 export const deleteData = async (url, data = {}) => {
 
     const response = await api.delete(url, data);

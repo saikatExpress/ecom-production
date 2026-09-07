@@ -3,10 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 
 export default function GuestRoute() {
 
-    const {
-        isAuthenticated,
-        authChecked,
-    } = useSelector(state => state.auth);
+    const {isAuthenticated, authChecked} = useSelector(state => state.auth);
 
 
     if (!authChecked) {
@@ -14,8 +11,6 @@ export default function GuestRoute() {
     }
 
 
-    return isAuthenticated
-        ? <Navigate to="/dashboard" replace />
-        : <Outlet />;
+    return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Outlet />;
 
 }
