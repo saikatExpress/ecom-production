@@ -41,6 +41,10 @@ import Courier from "../pages/courier/Courier";
 import CourierTrash from "../pages/courier/CourierTrash";
 import EditCourier from "../pages/courier/EditCourier";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
+import AddCoupon from "../pages/order/coupon/AddCoupon";
+import Coupon from "../pages/order/coupon/Coupon";
+import CouponTrash from "../pages/order/coupon/CouponTrash";
+import EditCoupon from "../pages/order/coupon/EditCoupon";
 import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGateway";
 import DeliveryGateway from "../pages/order/delivery-gateway/DeliveryGateway";
@@ -374,6 +378,30 @@ export default function AppRoutes() {
                         <Route path="/edit/payment-gateway/:id" element={
                             <PermissionRoute permission="payment_gateway_update">
                                 <EditPaymentGateway/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/coupons" element={
+                            <PermissionRoute permission="coupon_read">
+                                <Coupon/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/coupon/trash" element={
+                            <PermissionRoute permission="coupon_delete">
+                                <CouponTrash/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/coupon/add" element={
+                            <PermissionRoute permission="coupon_create">
+                                <AddCoupon/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/coupon/edit/:id" element={
+                            <PermissionRoute permission="coupon_update">
+                                <EditCoupon/>
                             </PermissionRoute>
                         }/>
                         {/* Order Menu */}

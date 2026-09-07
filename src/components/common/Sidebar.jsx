@@ -152,6 +152,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     icon      : <CreditCardOutlined />,
                     label     : "Payment Gateway",
                     permission: "payment_gateway_read"
+                },
+                {
+                    key       : "coupons",
+                    icon      : <TagsOutlined />,
+                    label     : "Coupon",
+                    permission: "coupon_read"
                 }
             ]
         },
