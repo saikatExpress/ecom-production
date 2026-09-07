@@ -36,7 +36,6 @@ export const KNOWN_ROUTES = [
     { path: '/coupons',                label: 'Coupon List' },
     { path: '/coupon/trash',           label: 'Coupon Trash' },
     { path: '/coupon/add',             label: 'Add Coupon' },
-    { path: '/coupon/edit/:id',        label: 'Edit Coupon' },
     { path: '/courier',                label: 'Courier List' },
     { path: '/create/courier',         label: 'Add Courier' },
     { path: '/trash/courier',           label: 'Courier Trash' },
