@@ -1,19 +1,12 @@
+import { ApiOutlined, CloseOutlined, CopyOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Tooltip } from 'antd';
-import {
-    CloseOutlined,
-    ApiOutlined,
-    CopyOutlined,
-    ReloadOutlined,
-} from '@ant-design/icons';
 import { useApiError } from '../../context/ApiErrorContext';
 import { classifyStatus } from '../../hooks/useApiErrorInterceptor';
 
-// ─── Config ───────────────────────────────────────────────────────────────────
 const DEVELOPER_WHATSAPP = '8801600012582';
 
-// ─── Build WhatsApp message ───────────────────────────────────────────────────
 function buildWhatsAppUrl(ev) {
     const { status, method, endpoint, message, pagePath, pageLabel, timestamp } = ev;
     const { label: statusLabel } = classifyStatus(status);
@@ -48,7 +41,6 @@ function buildWhatsAppUrl(ev) {
     return `https://wa.me/${DEVELOPER_WHATSAPP}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
 
-// ─── WhatsApp SVG ─────────────────────────────────────────────────────────────
 const WhatsAppIcon = ({ size = 18 }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
         width={size} height={size} fill="currentColor" style={{ flexShrink: 0 }}>
@@ -56,7 +48,6 @@ const WhatsAppIcon = ({ size = 18 }) => (
     </svg>
 );
 
-// ─── Keyframes ────────────────────────────────────────────────────────────────
 const STYLES = `
   @keyframes aeo-slide-in {
     from { opacity: 0; transform: translateY(-100%); }
@@ -101,23 +92,18 @@ const STYLES = `
   }
 `;
 
-// ─── Auto-dismiss timer in seconds ───────────────────────────────────────────
 const AUTO_DISMISS_SEC = 20;
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function ApiErrorOverlay() {
     const { errorEvent, dismissApiError } = useApiError();
     const timerRef = useRef(null);
     const barRef   = useRef(null);
 
-    // Auto-dismiss after N seconds
     useEffect(() => {
         if (!errorEvent) return;
 
-        // Start CSS bar animation
         if (barRef.current) {
             barRef.current.style.animation = 'none';
-            // force reflow
             void barRef.current.offsetWidth;
             barRef.current.style.animation = `aeo-bar ${AUTO_DISMISS_SEC}s linear forwards`;
         }
@@ -133,7 +119,6 @@ export default function ApiErrorOverlay() {
     const whatsAppUrl = buildWhatsAppUrl(errorEvent);
     const errorId     = Date.now().toString(36).toUpperCase();
 
-    // Copy endpoint to clipboard
     const handleCopy = () => {
         navigator.clipboard?.writeText(endpoint).catch(() => {});
     };
@@ -142,7 +127,6 @@ export default function ApiErrorOverlay() {
         <>
             <style>{STYLES}</style>
 
-            {/* ── Backdrop ── */}
             <div
                 onClick={dismissApiError}
                 style={{
@@ -156,7 +140,6 @@ export default function ApiErrorOverlay() {
                 }}
             />
 
-            {/* ── Panel (slides down from top) ── */}
             <div style={{
                 position        : 'fixed',
                 top             : 0,
@@ -168,7 +151,6 @@ export default function ApiErrorOverlay() {
                 overflow        : 'hidden',
                 borderRadius    : '0 0 20px 20px',
             }}>
-                {/* Progress bar (auto-dismiss countdown) */}
                 <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', position: 'relative' }}>
                     <div
                         ref={barRef}
@@ -184,7 +166,6 @@ export default function ApiErrorOverlay() {
                     />
                 </div>
 
-                {/* ── Glass panel body ── */}
                 <div style={{
                     background          : 'rgba(15, 12, 41, 0.96)',
                     backdropFilter      : 'blur(24px)',
@@ -196,7 +177,6 @@ export default function ApiErrorOverlay() {
                     overflow            : 'hidden',
                 }}>
 
-                    {/* ── Background orbs ── */}
                     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
                         <div style={{
                             position    : 'absolute', top: '-40%', right: '-5%',
@@ -210,7 +190,6 @@ export default function ApiErrorOverlay() {
                             background  : 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)',
                             animation   : 'aeo-orb2 13s ease-in-out infinite',
                         }} />
-                        {/* Grid */}
                         <div style={{
                             position        : 'absolute', inset: 0,
                             backgroundImage : 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg,rgba(255,255,255,0.02) 1px, transparent 1px)',
@@ -218,13 +197,10 @@ export default function ApiErrorOverlay() {
                         }} />
                     </div>
 
-                    {/* ── Content (above orbs) ── */}
                     <div style={{ position: 'relative', zIndex: 1 }}>
 
-                        {/* ── Header row ── */}
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
 
-                            {/* Icon */}
                             <div style={{
                                 width           : 44, height: 44, flexShrink: 0,
                                 borderRadius    : '50%',
@@ -236,7 +212,6 @@ export default function ApiErrorOverlay() {
                                 <ApiOutlined style={{ color: '#fff', fontSize: 20 }} />
                             </div>
 
-                            {/* Title + subtitle */}
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: 16 }}>{emoji}</span>
@@ -248,7 +223,6 @@ export default function ApiErrorOverlay() {
                                     }}>
                                         API Error Detected
                                     </span>
-                                    {/* Status badge */}
                                     <span style={{
                                         background      : `${statusColor}22`,
                                         border          : `1px solid ${statusColor}55`,
@@ -271,7 +245,6 @@ export default function ApiErrorOverlay() {
                                 </p>
                             </div>
 
-                            {/* Close button */}
                             <button
                                 onClick={dismissApiError}
                                 style={{
@@ -289,14 +262,12 @@ export default function ApiErrorOverlay() {
                             </button>
                         </div>
 
-                        {/* ── Divider ── */}
                         <div style={{
                             height      : 1,
                             background  : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
                             marginBottom: 16,
                         }} />
 
-                        {/* ── Failed request info ── */}
                         <div style={{
                             background      : 'rgba(0,0,0,0.3)',
                             border          : `1px solid ${statusColor}22`,
@@ -304,7 +275,6 @@ export default function ApiErrorOverlay() {
                             padding         : '12px 14px',
                             marginBottom    : 14,
                         }}>
-                            {/* Method + Endpoint */}
                             <div style={{
                                 display         : 'flex',
                                 alignItems      : 'center',
@@ -312,7 +282,6 @@ export default function ApiErrorOverlay() {
                                 marginBottom    : 8,
                                 flexWrap        : 'wrap',
                             }}>
-                                {/* HTTP method badge */}
                                 <span style={{
                                     background      : method === 'GET' ? 'rgba(34,197,94,0.15)' : 'rgba(249,115,22,0.15)',
                                     border          : `1px solid ${method === 'GET' ? 'rgba(34,197,94,0.4)' : 'rgba(249,115,22,0.4)'}`,
@@ -323,7 +292,6 @@ export default function ApiErrorOverlay() {
                                     {method}
                                 </span>
 
-                                {/* Endpoint URL */}
                                 <code style={{
                                     color           : 'rgba(255,255,255,0.75)',
                                     fontSize        : 12,
@@ -335,7 +303,6 @@ export default function ApiErrorOverlay() {
                                     {endpoint}
                                 </code>
 
-                                {/* Copy button */}
                                 <Tooltip title="Copy endpoint" color="#1a1a3e">
                                     <button
                                         className="aeo-copy-btn"
@@ -352,7 +319,6 @@ export default function ApiErrorOverlay() {
                                 </Tooltip>
                             </div>
 
-                            {/* Server message */}
                             {message && (
                                 <p style={{
                                     color       : `${statusColor}cc`,
@@ -366,7 +332,6 @@ export default function ApiErrorOverlay() {
                             )}
                         </div>
 
-                        {/* ── Meta row: page + time ── */}
                         <div
                             className="aeo-meta-row"
                             style={{
@@ -376,7 +341,6 @@ export default function ApiErrorOverlay() {
                                 flexWrap        : 'wrap',
                             }}
                         >
-                            {/* Page */}
                             <div style={{
                                 flex            : 1,
                                 background      : 'rgba(99,102,241,0.08)',
@@ -395,7 +359,6 @@ export default function ApiErrorOverlay() {
                                 </p>
                             </div>
 
-                            {/* Error ID + time */}
                             <div style={{
                                 background      : 'rgba(255,255,255,0.04)',
                                 border          : '1px solid rgba(255,255,255,0.08)',
@@ -411,12 +374,7 @@ export default function ApiErrorOverlay() {
                             </div>
                         </div>
 
-                        {/* ── Action buttons ── */}
-                        <div
-                            className="aeo-actions"
-                            style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}
-                        >
-                            {/* Reload page */}
+                        <div className="aeo-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <button
                                 className="aeo-btn-reload"
                                 onClick={() => window.location.reload()}
@@ -437,7 +395,6 @@ export default function ApiErrorOverlay() {
                                 Reload
                             </button>
 
-                            {/* Dismiss */}
                             <button
                                 className="aeo-btn-dismiss"
                                 onClick={dismissApiError}
@@ -457,10 +414,8 @@ export default function ApiErrorOverlay() {
                                 Dismiss
                             </button>
 
-                            {/* Spacer */}
                             <div style={{ flex: 1 }} />
 
-                            {/* Contact Developer via WhatsApp */}
                             <a
                                 className="aeo-btn-wa"
                                 href={whatsAppUrl}
@@ -487,7 +442,6 @@ export default function ApiErrorOverlay() {
                             </a>
                         </div>
 
-                        {/* ── Auto-dismiss hint ── */}
                         <p style={{
                             color       : 'rgba(255,255,255,0.18)',
                             fontSize    : 10,

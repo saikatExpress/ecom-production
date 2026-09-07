@@ -71,7 +71,6 @@ function buildWhatsAppUrl({ pathname, locationState }) {
     return `https://wa.me/${DEVELOPER_WHATSAPP}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
 
-// ─── WhatsApp SVG ─────────────────────────────────────────────────────────────
 const WhatsAppIcon = ({ size = 18 }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
         width={size} height={size} fill="currentColor"
@@ -80,7 +79,6 @@ const WhatsAppIcon = ({ size = 18 }) => (
     </svg>
 );
 
-// ─── Keyframe injection ───────────────────────────────────────────────────────
 const STYLES = `
   @keyframes nf-float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }

@@ -215,7 +215,9 @@ export default function Blog() {
             render: (_, record) => (
                 <Space size="small">
                     {hasPermission('blog_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/blog/${record.id}`)}>
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/blog/${record.id}`, {
+                            state: {fromPage: 'Blog List Page', fromAction: 'Click "Edit" Button'}
+                        })}>
                             Edit
                         </Button>
                     )}
@@ -251,12 +253,14 @@ export default function Blog() {
                         </Title>
                         <Space>
                             {hasPermission('blog_delete') && (
-                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/trash/blog')}>
+                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/trash/blog', {
+                                    state: {fromPage: 'Blog List Page', fromAction: 'Click "Trash" Button'}
+                                })}>
                                     Trash
                                 </Button>
                             )}
                             {hasPermission('blog_create') && (
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blo', {
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blog', {
                                     state: {fromPage: 'Blog List Page', fromAction: 'Click "Add Blog" Button'}
                                 })}>
                                     Add Blog

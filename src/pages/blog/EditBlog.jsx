@@ -6,6 +6,7 @@ import "react-quill-new/dist/quill.snow.css";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getData, getDatas, postData } from "../../services/request";
+import { handleFormErrors } from "../../utils/formUtils";
 
 export default function EditBlog() {
     // Hook
@@ -110,6 +111,7 @@ export default function EditBlog() {
         } catch (error) {
             console.error("Failed to update blog:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -142,7 +144,9 @@ export default function EditBlog() {
                 title={
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>Edit Blog</span>
-                        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/blog")}>
+                        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/blog", {
+                            state: {fromPage: 'Edit Blog Page', fromAction: 'Click "Back to Logs" Button'}
+                        })}>
                             Back to Blogs
                         </Button>
                     </div>

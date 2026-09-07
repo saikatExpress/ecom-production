@@ -56,8 +56,9 @@ export const KNOWN_ROUTES = [
 
     // Blog
     { path: '/blog',                   label: 'Blog List' },
-    { path: '/blog/add',               label: 'Add Blog' },
-    { path: '/blog/trash',             label: 'Blog Trash' },
+    { path: '/create/blog',            label: 'Add Blog' },
+    { path: '/edit/blog/:id',          label: 'Edit Blog' },
+    { path: '/trash/blog',             label: 'Blog Trash' },
     { path: '/blog-category',          label: 'Blog Category' },
     { path: '/create/blog-category',   label: 'Add Blog Category' },
     { path: '/edit/blog-category/:id', label: 'Edit Blog Category' },
@@ -97,7 +98,6 @@ export const KNOWN_ROUTES = [
     { path: '/forgot-password',        label: 'Forgot Password' },
 ];
 
-// ─── Levenshtein distance ─────────────────────────────────────────────────────
 function levenshtein(a, b) {
     const m = a.length, n = b.length;
     const dp = Array.from({ length: m + 1 }, (_, i) =>
@@ -113,9 +113,7 @@ function levenshtein(a, b) {
     return dp[m][n];
 }
 
-// ─── Find best matching route ─────────────────────────────────────────────────
 export function findNearestRoute(wrongPath) {
-    // Normalize path
     const normalize = (p) =>
         p.replace(/\/:[^/]+/g, '').replace(/\/\d+/g, '').toLowerCase();
 
@@ -127,20 +125,17 @@ export function findNearestRoute(wrongPath) {
     for (const route of KNOWN_ROUTES) {
         const candidate = normalize(route.path);
         
-        // Calculate base Levenshtein distance
         let dist = levenshtein(target, candidate);
         
-        // ── Keyword Boost ──
         if (target.includes('subcategory') && candidate.includes('sub-categor')) {
             dist -= 10; 
         } else if (target.includes('coupon') && candidate.includes('coupon')) {
             if (candidate === '/coupons') {
-                dist -= 20; // Strongly boost the list page
+                dist -= 20;
             } else {
                 dist -= 10;
             }
         } else if (target.includes('sourc') && candidate.includes('source')) {
-            // Boost 'Order Source' list page specifically over 'Add' if it's an edit URL
             if (target.includes('edit') && candidate === '/order/source') {
                 dist -= 20; 
             } else {
@@ -148,19 +143,18 @@ export function findNearestRoute(wrongPath) {
             }
         } else if (target.includes('statu') && candidate.includes('status')) {
             if (candidate === '/status') {
-                dist -= 20; // Strongly boost the list page
+                dist -= 20;
             } else {
                 dist -= 10;
             }
-        } else if (target.includes('blog') && candidate.includes('blog')) {
+        } else if (target.includes('blo') && candidate.includes('blog')) {
             if (candidate === '/blog-category' || candidate === '/blog') {
-                dist -= 20; // Strongly boost list pages
+                dist -= 20;
             } else {
                 dist -= 10;
             }
         }
 
-        // Do not suggest routes with dynamic parameters (like :id) as they cannot be clicked directly
         if (route.path.includes(':')) {
             continue;
         }
@@ -171,7 +165,6 @@ export function findNearestRoute(wrongPath) {
         }
     }
 
-    // Only suggest if reasonably close (score threshold)
     const threshold = Math.max(4, Math.floor(target.length * 0.6));
     if (bestScore <= threshold) return bestMatch;
     return null;

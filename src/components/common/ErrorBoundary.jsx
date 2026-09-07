@@ -1,14 +1,11 @@
-import React from 'react';
-import { BugOutlined, ReloadOutlined, HomeOutlined } from '@ant-design/icons';
+import { BugOutlined, HomeOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
+import React from 'react';
 
-// ─── Config ───────────────────────────────────────────────────────────────────
 const DEVELOPER_WHATSAPP = '8801600012582';
 
-// ─── Parse component name from React's componentStack ────────────────────────
 function extractComponentName(componentStack) {
     if (!componentStack) return 'Unknown Component';
-    // componentStack lines look like: "\n    at ComponentName (http://...)"
     const lines = componentStack.trim().split('\n');
     for (const line of lines) {
         const match = line.match(/at\s+([A-Z][A-Za-z0-9_.]+)\s*[\(@]/);
@@ -17,14 +14,12 @@ function extractComponentName(componentStack) {
     return 'Unknown Component';
 }
 
-// ─── Build WhatsApp message ───────────────────────────────────────────────────
 function buildWhatsAppUrl(error, errorInfo) {
     const time          = new Date().toLocaleString('en-BD', { timeZone: 'Asia/Dhaka' });
     const pageUrl       = window.location.href;
     const browser       = navigator.userAgent;
     const compName      = extractComponentName(errorInfo?.componentStack);
 
-    // Pull first 3 relevant lines from the stack (skip React internals)
     const stackLines    = (error?.stack || '')
         .split('\n')
         .filter(l => l.includes('src/') || l.includes('.jsx') || l.includes('.js'))
@@ -63,7 +58,6 @@ function buildWhatsAppUrl(error, errorInfo) {
     return `https://wa.me/${DEVELOPER_WHATSAPP}?text=${encodeURIComponent(msg)}`;
 }
 
-// ─── CSS keyframes (injected once) ───────────────────────────────────────────
 const STYLES = `
   @keyframes eb-float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -114,7 +108,6 @@ const STYLES = `
   }
 `;
 
-// ─── WhatsApp Icon ────────────────────────────────────────────────────────────
 const WhatsAppIcon = ({ size = 18 }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
         width={size} height={size} fill="currentColor" style={{ flexShrink: 0 }}>
@@ -122,7 +115,6 @@ const WhatsAppIcon = ({ size = 18 }) => (
     </svg>
 );
 
-// ─── ErrorBoundary Class Component ───────────────────────────────────────────
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
@@ -157,7 +149,6 @@ class ErrorBoundary extends React.Component {
         const errorId    = Date.now().toString(36).toUpperCase();
         const time       = new Date().toLocaleTimeString('en-BD', { timeZone: 'Asia/Dhaka' });
 
-        // First 6 src-only stack lines for display
         const displayStack = (error?.stack || '')
             .split('\n')
             .slice(0, 10)
@@ -179,7 +170,6 @@ class ErrorBoundary extends React.Component {
                     background          : 'linear-gradient(135deg, #1a0000 0%, #2d0a0a 40%, #1c1c2e 100%)',
                 }}>
 
-                    {/* ── Background orbs ── */}
                     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
                         <div style={{
                             position    : 'absolute', top: '-15%', left: '-10%',
@@ -195,7 +185,6 @@ class ErrorBoundary extends React.Component {
                             background  : 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)',
                             animation   : 'eb-orb2 15s ease-in-out infinite',
                         }} />
-                        {/* Grid overlay */}
                         <div style={{
                             position        : 'absolute', inset: 0,
                             backgroundImage : 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
@@ -203,7 +192,6 @@ class ErrorBoundary extends React.Component {
                         }} />
                     </div>
 
-                    {/* ── Content ── */}
                     <div style={{
                         position    : 'relative',
                         zIndex      : 1,
@@ -211,7 +199,6 @@ class ErrorBoundary extends React.Component {
                         maxWidth    : 660,
                         animation   : 'eb-fade-in 0.4s ease both',
                     }}>
-                        {/* ── Glass card ── */}
                         <div className="eb-card" style={{
                             background          : 'rgba(255,255,255,0.04)',
                             backdropFilter      : 'blur(20px)',
@@ -223,7 +210,6 @@ class ErrorBoundary extends React.Component {
                             textAlign           : 'center',
                         }}>
 
-                            {/* ── Floating bug icon ── */}
                             <div style={{
                                 position    : 'relative',
                                 display     : 'inline-block',
@@ -251,7 +237,6 @@ class ErrorBoundary extends React.Component {
                                 </div>
                             </div>
 
-                            {/* ── 500 number ── */}
                             <div className="eb-500-text" style={{
                                 fontSize            : 'clamp(100px, 18vw, 150px)',
                                 fontWeight          : 900,
@@ -270,7 +255,6 @@ class ErrorBoundary extends React.Component {
                                 500
                             </div>
 
-                            {/* ── Title ── */}
                             <h1 className="eb-title" style={{
                                 color       : '#fff',
                                 fontSize    : 'clamp(18px, 3vw, 24px)',
@@ -291,7 +275,6 @@ class ErrorBoundary extends React.Component {
                                 data is safe. You can refresh or go back home.
                             </p>
 
-                            {/* ── Error message pill ── */}
                             <div style={{
                                 display         : 'inline-flex',
                                 alignItems      : 'center',
@@ -321,7 +304,6 @@ class ErrorBoundary extends React.Component {
                                 </code>
                             </div>
 
-                            {/* ── Component info card ── */}
                             <div className="eb-card eb-card-d1" style={{
                                 background  : 'rgba(239,68,68,0.08)',
                                 border      : '1px solid rgba(239,68,68,0.2)',
@@ -355,7 +337,6 @@ class ErrorBoundary extends React.Component {
                                 </div>
                             </div>
 
-                            {/* ── Collapsible stack trace ── */}
                             <div className="eb-card eb-card-d2" style={{
                                 background  : 'rgba(0,0,0,0.25)',
                                 border      : '1px solid rgba(255,255,255,0.08)',
@@ -413,14 +394,12 @@ class ErrorBoundary extends React.Component {
                                 )}
                             </div>
 
-                            {/* ── Divider ── */}
                             <div style={{
                                 height      : 1,
                                 background  : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
                                 marginBottom: 22,
                             }} />
 
-                            {/* ── Action buttons ── */}
                             <div className="eb-btns" style={{
                                 display         : 'flex',
                                 gap             : 10,
@@ -428,7 +407,6 @@ class ErrorBoundary extends React.Component {
                                 flexWrap        : 'wrap',
                             }}>
 
-                                {/* Reload page */}
                                 <button
                                     className="eb-btn-primary"
                                     onClick={() => window.location.reload()}
@@ -447,7 +425,6 @@ class ErrorBoundary extends React.Component {
                                     Reload Page
                                 </button>
 
-                                {/* Back Home */}
                                 <button
                                     className="eb-btn-ghost"
                                     onClick={() => { window.location.href = '/'; }}
@@ -468,7 +445,6 @@ class ErrorBoundary extends React.Component {
                                     Back Home
                                 </button>
 
-                                {/* Contact Developer via WhatsApp */}
                                 <Tooltip title="Opens WhatsApp with full error details pre-filled" color="#1d0a0a">
                                     <a
                                         className="eb-btn-wa"
@@ -493,7 +469,6 @@ class ErrorBoundary extends React.Component {
                                 </Tooltip>
                             </div>
 
-                            {/* ── Footer ── */}
                             <p style={{
                                 color       : 'rgba(255,255,255,0.2)',
                                 fontSize    : 11,
@@ -508,7 +483,6 @@ class ErrorBoundary extends React.Component {
 
                         </div>
 
-                        {/* ── Bottom shine ── */}
                         <div style={{
                             height      : 2,
                             background  : 'linear-gradient(90deg, transparent, rgba(220,38,38,0.8), rgba(168,85,247,0.8), transparent)',

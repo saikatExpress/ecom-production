@@ -6,6 +6,7 @@ import "react-quill-new/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
+import { handleFormErrors } from './../../utils/formUtils';
 
 export default function AddBlog() {
     // Hook
@@ -76,6 +77,7 @@ export default function AddBlog() {
         } catch (error) {
             console.error("Failed to add blog:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -100,7 +102,9 @@ export default function AddBlog() {
                 title={
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>Add New Blog</span>
-                        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/blog")}>
+                        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/blog", {
+                            state: {fromPage: "Add Blog Page", fromAction: 'Click "Back to Blogs" Button'}
+                        })}>
                             Back to Blogs
                         </Button>
                     </div>

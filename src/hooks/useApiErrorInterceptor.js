@@ -1,7 +1,3 @@
-/**
- * classifyStatus — maps an HTTP status code to a human-readable label,
- * a theme colour, and an emoji. Used by ApiErrorOverlay.
- */
 export function classifyStatus(status) {
     if (!status) return { label: 'Network Error',                  color: '#6b7280', emoji: '🌐' };
     if (status === 404) return { label: '404 — API Endpoint Not Found',  color: '#ef4444', emoji: '🔍' };

@@ -152,7 +152,8 @@ export default function BlogTrash() {
         });
     };
 
-    const columns = [
+    const columns = 
+    [
         {
             title: "SL",
             key: "sl",
@@ -166,7 +167,7 @@ export default function BlogTrash() {
             width: 80,
             render: (image, record) =>
                 image ? (
-                    <Image src={image} alt={record.title} width={40} height={40} style={{ objectFit: "cover", borderRadius: 4 }}/>
+                    <Image src={image} alt="Image" width={40} height={40} style={{ objectFit: "cover", borderRadius: 4 }}/>
                 ) : (
                     <Avatar shape="square" icon={<PictureOutlined />} size={40} />
                 ),
@@ -247,7 +248,9 @@ export default function BlogTrash() {
                             Blog Trash List
                         </Title>
                         <Space>
-                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/blog')}>
+                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/blog', {
+                                state: {fromPage: 'Blog Trash List Page', fromAction: 'Click "Back to Blog List" Button'}
+                            })}>
                                 Back to Blog List
                             </Button>
                         </Space>

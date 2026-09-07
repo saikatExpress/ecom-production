@@ -1,23 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { registerApiErrorReporter, unregisterApiErrorReporter } from '../services/api';
 import { KNOWN_ROUTES } from '../hooks/useNearestRoute';
+import { registerApiErrorReporter, unregisterApiErrorReporter } from '../services/api';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 function resolvePageLabel(pathname) {
     const match = KNOWN_ROUTES.find(r => r.path === pathname);
     return match ? match.label : pathname;
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
 export const ApiErrorContext = createContext(null);
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
 export function ApiErrorProvider({ children }) {
     const [errorEvent, setErrorEvent] = useState(null);
     const suppressedRef = useRef(new Set());
 
     const reportApiError = useCallback((info) => {
-        // Skip 401 (handled via redirect) and 422 (validation errors handled in forms)
         if (info.status === 401 || info.status === 422) return;
         const endpointKey = info.endpoint?.split('?')[0] || info.endpoint || '';
 
@@ -41,7 +37,6 @@ export function ApiErrorProvider({ children }) {
 
     const clearApiError = useCallback(() => setErrorEvent(null), []);
 
-    // ── Register our reporter into the axios interceptor on mount ──
     useEffect(() => {
         registerApiErrorReporter(reportApiError);
         return () => unregisterApiErrorReporter();
@@ -54,7 +49,6 @@ export function ApiErrorProvider({ children }) {
     );
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 export function useApiError() {
     const ctx = useContext(ApiErrorContext);
     if (!ctx) throw new Error('useApiError must be used inside <ApiErrorProvider>');
