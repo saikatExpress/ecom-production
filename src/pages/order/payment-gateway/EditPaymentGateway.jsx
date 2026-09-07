@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, postData } from "../../../services/request";
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const EditPaymentGateway = () => {
     // Hook
@@ -104,6 +105,7 @@ const EditPaymentGateway = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -124,7 +126,9 @@ const EditPaymentGateway = () => {
                     title="Edit Payment Gateway" 
                     extra={
                         <Space>
-                            <Button icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<CloseOutlined />} onClick={() => navigate('/payment-gateway', {
+                                state: {fromPage: 'Edit Payment Gateway Page', fromAction: 'Click "Cancel" Button'}
+                            })}>
                                 Cancel
                             </Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>

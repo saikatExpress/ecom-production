@@ -239,7 +239,9 @@ const Coupon = () => {
                     )}
 
                     {hasPermission('coupon_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/coupon/edit/${record.id}`)}>
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/coupon/edi/${record.id}`, {
+                            state: {fromPage: 'Edit Status Page', fromAction: 'Click "Edit" Button'}
+                        })}>
                             Edit
                         </Button>
                     )}
@@ -277,7 +279,9 @@ const Coupon = () => {
                         </Title>
                         <Space>
                             {hasPermission('coupon_create') && (
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/coupon/add')}>
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/coupon/add', {
+                                    state: {fromPage: 'Coupon List Page', fromAction: 'Click "Add Coupon" Button'}
+                                })}>
                                     Add Coupon
                                 </Button>
                             )}

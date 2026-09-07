@@ -135,7 +135,9 @@ const PaymentGateway = () => {
             render: (_, record) => (
                 <Space size="small">
                     {hasPermission('payment_gateway_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/payment-gateway/${record.id}`)}>
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/payment-gateway/${record.id}`, {
+                            state: {fromPage: 'Payment Gateway List Page', fromAction: 'Click "Edit" Button'}
+                        })}>
                             Edit
                         </Button>
                     )}
@@ -171,7 +173,7 @@ const PaymentGateway = () => {
                         </Title>
 
                         {hasPermission('payment_gateway_create') && (
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/payment-gatewa', {
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/payment-gateway', {
                                 state: {fromPage: 'Payment Gateway List Page', fromAction: 'Click "Add Gateway" Button'}
                             })}>
                                 Add Gateway

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 const AddPaymentGateway = () => {
     // Hook
@@ -54,6 +55,7 @@ const AddPaymentGateway = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -66,7 +68,9 @@ const AddPaymentGateway = () => {
                     title="Add New Payment Gateway" 
                     extra={
                         <Space>
-                            <Button icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<CloseOutlined />} onClick={() => navigate('/payment-gateway', {
+                                state: {fromPage: 'Add Payment Gateway Page', fromAction: 'Click "Cancel" Button'}
+                            })}>
                                 Cancel
                             </Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>

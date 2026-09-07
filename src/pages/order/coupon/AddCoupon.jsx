@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getDatas, postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 const { Title, Text } = Typography;
 
@@ -118,6 +119,7 @@ const AddCoupon = () => {
         } catch (error) {
             console.error("Failed to add coupon:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -138,7 +140,9 @@ const AddCoupon = () => {
             <Card
                 title={
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
+                        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/coupons', {
+                            state: {fromPage: 'Add Coupon Page', fromAction: 'Click "Back Icon" in this form'}
+                        })} />
                         <Title level={4} style={{ margin: 0 }}>Add New Coupon</Title>
                     </div>
                 }
@@ -162,7 +166,7 @@ const AddCoupon = () => {
 
                                 <Row gutter={16}>
                                     <Col span={12}>
-                                        <Form.Item label="Discount Type" name="discount_type" rules={[{ required: true }]}>
+                                        <Form.Item label="Discount Type" name="discount_type">
                                             <Select>
                                                 <Select.Option value="percentage">Percentage (%)</Select.Option>
                                                 <Select.Option value="fixed">Fixed Amount</Select.Option>
