@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, getDatas, putData } from "../../../services/request";
+import { handleFormErrors } from "../../../utils/formUtils";
 
 const { Title, Text } = Typography;
 
@@ -171,6 +172,7 @@ const EditCoupon = () => {
         } catch (error) {
             console.error("Failed to update coupon:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, 'message.error');
         } finally {
             setLoading(false);
         }
@@ -199,7 +201,9 @@ const EditCoupon = () => {
             <Card
                 title={
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
+                        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/coupons', {
+                            state: {fromPage: 'Edit Coupon Page', fromAction: 'Click "Back Icon" of the page'}
+                        })} />
                         <Title level={4} style={{ margin: 0 }}>Edit Coupon: {form.getFieldValue('code')}</Title>
                     </div>
                 }
@@ -388,7 +392,9 @@ const EditCoupon = () => {
                     </Row>
 
                     <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end", gap: 12 }}>
-                        <Button onClick={() => navigate(-1)}>Cancel</Button>
+                        <Button onClick={() => navigate('/coupons', {
+                            state: {fromPage: 'Edit Coupon Page', fromAction: 'Click "Cancel" Button in this Form'}
+                        })}>Cancel</Button>
                         <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
                             Update Coupon
                         </Button>

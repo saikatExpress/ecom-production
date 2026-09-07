@@ -183,7 +183,9 @@ export default function BlogCategory() {
                         </Title>
                         {hasPermission('blog_category_create') && (
                             <Space>
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blog-category')}>
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blog-categor', {
+                                    state: {fromPage: 'Blog Category List Page', fromAction: 'Click "Add Category" Button'}
+                                })}>
                                     Add Category
                                 </Button>
                             </Space>

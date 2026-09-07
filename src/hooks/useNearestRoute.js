@@ -36,6 +36,7 @@ export const KNOWN_ROUTES = [
     { path: '/coupons',                label: 'Coupon List' },
     { path: '/coupon/trash',           label: 'Coupon Trash' },
     { path: '/coupon/add',             label: 'Add Coupon' },
+    { path: '/coupon/edit/:id',        label: 'Edit Coupon' },
     { path: '/courier',                label: 'Courier List' },
     { path: '/create/courier',         label: 'Add Courier' },
     { path: '/trash/courier',           label: 'Courier Trash' },
@@ -131,7 +132,11 @@ export function findNearestRoute(wrongPath) {
         if (target.includes('subcategory') && candidate.includes('sub-categor')) {
             dist -= 10; 
         } else if (target.includes('coupon') && candidate.includes('coupon')) {
-            dist -= 10;
+            if (candidate === '/coupons') {
+                dist -= 20; // Strongly boost the list page
+            } else {
+                dist -= 10;
+            }
         } else if (target.includes('sourc') && candidate.includes('source')) {
             // Boost 'Order Source' list page specifically over 'Add' if it's an edit URL
             if (target.includes('edit') && candidate === '/order/source') {

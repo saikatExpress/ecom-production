@@ -247,7 +247,7 @@ const CouponTrash = () => {
                     { title: "Dashboard" },
                     { title: "Order" },
                     { title: <a onClick={() => navigate('/coupons', {
-                        state: { fromPage: 'Coupon Trash', fromAction: 'Breadcrumb "Coupon" link click' }
+                        state: { fromPage: 'Coupon Trash', fromAction: 'Click "Back Icon" in this Page'}
                     })}>Coupon</a> },
                     { title: "Trash" },
                 ]}
@@ -309,7 +309,7 @@ const CouponTrash = () => {
                     <Flex justify="space-between" align="center" wrap="wrap" gap="small" style={{ padding: '8px 0' }}>
                         <Space>
                             <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/coupons', {
-                                state: { fromPage: 'Coupon Trash', fromAction: '← Back button (top-left of Coupon Trash page)' }
+                                state: { fromPage: 'Coupon Trash', fromAction: 'Click "Cancel Icon" of this page' }
                             })}/>
                             <Title level={4} style={{ margin: 0 }}>Coupon Trash List</Title>
                         </Space>

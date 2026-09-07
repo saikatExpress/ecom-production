@@ -239,8 +239,8 @@ const Coupon = () => {
                     )}
 
                     {hasPermission('coupon_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/coupon/edi/${record.id}`, {
-                            state: {fromPage: 'Edit Status Page', fromAction: 'Click "Edit" Button'}
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/coupon/edit/${record.id}`, {
+                            state: {fromPage: 'Coupon List', fromAction: 'Click "Edit" Button'}
                         })}>
                             Edit
                         </Button>
@@ -287,7 +287,9 @@ const Coupon = () => {
                             )}
 
                             {hasPermission('coupon_delete') && (
-                                <Button type="primary" danger icon={<DeleteOutlined />} onClick={() => navigate('/coupon/trash')}>
+                                <Button type="primary" danger icon={<DeleteOutlined />} onClick={() => navigate('/coupon/trash', {
+                                    state: {fromPage: 'Coupon List Page', fromAction: 'Click "Trash" Button'}
+                                })}>
                                     Trash
                                 </Button>
                             )}
