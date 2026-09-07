@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 const AddDeliveryGateway = () => {
     // Hook
@@ -28,6 +29,7 @@ const AddDeliveryGateway = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -36,7 +38,9 @@ const AddDeliveryGateway = () => {
     return (
         <Card title="Create Delivery Gateway" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/delivery-gateway', {
+                    state: {fromPage: 'Add Delivery Gateway Page', fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, getDatas, postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 export default function EditManagement() {
     // Hook
@@ -105,6 +106,7 @@ export default function EditManagement() {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -151,7 +153,9 @@ export default function EditManagement() {
         <Card 
             title="Edit Management User" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list', {
+                    state: {fromPage: 'Edit Management', fromAction: 'Click "Back To List" Button'}
+                })}>
                     Back to List
                 </Button>
             }
@@ -244,7 +248,9 @@ export default function EditManagement() {
                         <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
                             Update Management
                         </Button>
-                        <Button htmlType="button" onClick={() => navigate('/users/list')}>
+                        <Button htmlType="button" onClick={() => navigate('/management/list', {
+                            state: {fromPage : 'Edit Management', fromAction: 'Click "Cancel" Button'}
+                        })}>
                             Cancel
                         </Button>
                     </Space>

@@ -5,7 +5,8 @@ import PageLoader from "./components/common/PageLoader";
 import { authInitialized } from "./features/auth/authSlice";
 import { getMe } from "./features/auth/meThunk";
 import AppRoutes from "./routes/AppRoutes";
-
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import { ApiErrorProvider } from "./context/ApiErrorContext";
 
 function App() {
 
@@ -33,7 +34,13 @@ function App() {
     }
 
 
-    return <AppRoutes />;
+    return (
+        <ApiErrorProvider>
+            <ErrorBoundary>
+                <AppRoutes />
+            </ErrorBoundary>
+        </ApiErrorProvider>
+    );
 }
 
 export default App;

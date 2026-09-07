@@ -93,6 +93,7 @@ import EditRole from "../pages/user/Role/EditRole";
 import Role from "../pages/user/Role/Role";
 import Status from './../pages/order/status/Status';
 import Customer from './../pages/user/Customer';
+import NotFound from "../pages/error/NotFound";
 
 export default function AppRoutes() {
     return (
@@ -637,6 +638,7 @@ export default function AppRoutes() {
 
                 </Route>
 
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     );

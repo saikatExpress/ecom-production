@@ -239,13 +239,17 @@ const Status = () => {
                             </Button>
                             
                             {hasPermission('status_delete') && (
-                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate("/trash/status")} shape="round">
+                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate("/trash/status", {
+                                    state: {fromPage: 'Status List Page', fromAction: 'Click "Trash" Button'}
+                                })} shape="round">
                                     Trash
                                 </Button>
                             )}
 
                             {hasPermission('status_create') && (
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/create/status")} shape="round">
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/create/status", {
+                                    state: {fromPage: 'Status List Page', fromAction: 'Click "Add New Status" Button'}
+                                })} shape="round">
                                     Add New Status
                                 </Button>
                             )}

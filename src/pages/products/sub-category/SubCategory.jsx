@@ -2,6 +2,7 @@ import { ClearOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutli
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas } from "../../../services/request";
 
@@ -13,6 +14,7 @@ export default function SubCategory() {
 
     // Variable
     const navigate = useNavigate();
+    const {hasPermission} = usePermissions();
 
     // States
     const [subCategories, setSubCategories] = useState([]);
@@ -217,10 +219,13 @@ export default function SubCategory() {
                             <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/subcategory/trash')}>
                                 Trash
                             </Button>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/subcategory')}>
-                                Add Sub Category
-                            </Button>
-                        </Space>
+                            {hasPermission('sub_category_create') && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/subcategory', {
+                                    state: { fromPage: 'Sub-Category List', fromAction: 'Breadcrumb "Sub-Category List' }
+                                })}>
+                                    Add New Sub-Category
+                                </Button>
+                            )}</Space>
                     </Flex>
                 }
             >

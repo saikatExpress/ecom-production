@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTitle from '../../../hooks/useTitle';
 import { postData } from '../../../services/request';
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const { Title, Text } = Typography;
 
@@ -47,6 +48,7 @@ const AddStatus = () => {
         } catch (error) {
             console.error("Submit error:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -68,7 +70,9 @@ const AddStatus = () => {
                 title={
                     <Flex justify="space-between" align="center" style={{ padding: '8px 0' }}>
                         <Space>
-                            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/status')}/>
+                            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/status', {
+                                state: {fromPage: 'Add Status Page', fromAction: 'Click "Add New Status" Button'}
+                            })}/>
                             <Title level={4} style={{ margin: 0 }}>Add New Status</Title>
                         </Space>
                     </Flex>
@@ -134,7 +138,9 @@ const AddStatus = () => {
                             
                             <Form.Item style={{ marginTop: 24 }}>
                                 <Space>
-                                    <Button onClick={() => navigate('/status')}>
+                                    <Button onClick={() => navigate('/status', {
+                                        state: {fromPage: 'Add Status Page', fromAction: 'Click "Cancel" Button'}
+                                    })}>
                                         Cancel
                                     </Button>
                                     <Button type="primary" htmlType="submit" loading={submitting} icon={<SaveOutlined />}>

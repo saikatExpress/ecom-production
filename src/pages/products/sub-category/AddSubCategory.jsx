@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, postData } from "../../../services/request";
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const AddSubCategory = () => {
     // Hook
@@ -69,6 +70,7 @@ const AddSubCategory = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -81,7 +83,9 @@ const AddSubCategory = () => {
                     title="Create New SubCategory" 
                     extra={
                         <Space>
-                            <Button icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<CloseOutlined />} onClick={() => navigate('/sub-categories', {
+                                state: {formPage:"Add Sub-Category" , fromAction: 'Breadcrumb "Sub-Category List'}
+                            })}>
                                 Cancel
                             </Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>

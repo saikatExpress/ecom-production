@@ -212,7 +212,9 @@ const EmployeeTrash = () => {
                 <Button icon={<ReloadOutlined />} onClick={() => getEmployeeTrash(pagination.current, pagination.pageSize, filters.search_key, filters.status)}>
                     Refresh
                 </Button>
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/employee/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/employee/list', {
+                    state: {fromAction: "Employee Trash Page", fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             </Space>

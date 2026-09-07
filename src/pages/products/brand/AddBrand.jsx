@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 const AddBrand = () => {
     // Hook
@@ -47,6 +48,7 @@ const AddBrand = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -59,7 +61,9 @@ const AddBrand = () => {
                     title="Add New Brand" 
                     extra={
                         <Space>
-                            <Button icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<CloseOutlined />} onClick={() => navigate('/brands', {
+                                state: {fromPage: 'Add Brand', fromAction: 'Click "Cancel" Button'}
+                            })}>
                                 Cancel
                             </Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>

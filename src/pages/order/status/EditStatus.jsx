@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useTitle from '../../../hooks/useTitle';
 import { getDatas, putData } from '../../../services/request';
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const { Title, Text } = Typography;
 
@@ -79,6 +80,7 @@ const EditStatus = () => {
         } catch (error) {
             console.error("Submit error:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -100,7 +102,9 @@ const EditStatus = () => {
                 title={
                     <Flex justify="space-between" align="center" style={{ padding: '8px 0' }}>
                         <Space>
-                            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/status')}/>
+                            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/status', {
+                                state: {fromPage: 'Edit Status Page', fromAction: 'Click "Edit Status" Form Button'}
+                            })}/>
                             <Title level={4} style={{ margin: 0 }}>Edit Status</Title>
                         </Space>
                     </Flex>
@@ -122,20 +126,12 @@ const EditStatus = () => {
 
                                 <Row gutter={16}>
                                     <Col span={12}>
-                                        <Form.Item 
-                                            name="bg_color" 
-                                            label="Background Color"
-                                            getValueFromEvent={(color) => typeof color === 'string' ? color : color?.toHexString()}
-                                        >
+                                        <Form.Item  name="bg_color"  label="Background Color" getValueFromEvent={(color) => typeof color === 'string' ? color : color?.toHexString()}>
                                             <ColorPicker format="hex" showText />
                                         </Form.Item>
                                     </Col>
                                     <Col span={12}>
-                                        <Form.Item 
-                                            name="text_color" 
-                                            label="Text Color"
-                                            getValueFromEvent={(color) => typeof color === 'string' ? color : color?.toHexString()}
-                                        >
+                                        <Form.Item name="text_color" label="Text Color" getValueFromEvent={(color) => typeof color === 'string' ? color : color?.toHexString()}>
                                             <ColorPicker format="hex" showText />
                                         </Form.Item>
                                     </Col>
@@ -163,7 +159,9 @@ const EditStatus = () => {
                                 
                                 <Form.Item style={{ marginTop: 24 }}>
                                     <Space>
-                                        <Button onClick={() => navigate('/status')}>
+                                        <Button onClick={() => navigate('/status', {
+                                            state: {fromPage: 'Status Edit Page', fromAction: 'Click "Cancel" Button'}
+                                        })}>
                                             Cancel
                                         </Button>
                                         <Button type="primary" htmlType="submit" loading={submitting} icon={<SaveOutlined />}>

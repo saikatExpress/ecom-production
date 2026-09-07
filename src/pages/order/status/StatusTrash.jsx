@@ -190,7 +190,9 @@ const StatusTrash = () => {
                 title={
                     <Flex justify="space-between" align="center" wrap="wrap" gap="small" style={{ padding: '8px 0' }}>
                         <Space>
-                            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/status')}/>
+                            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/status', {
+                                state: {fromPage: 'Status Trash List Page', fromAction: 'Click "Back Icon in the" Form'}
+                            })}/>
                             
                             <Title level={4} style={{ margin: 0 }}>Status Trash List</Title>
                         </Space>

@@ -171,7 +171,9 @@ const PaymentGateway = () => {
                         </Title>
 
                         {hasPermission('payment_gateway_create') && (
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/payment-gateway')}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/payment-gatewa', {
+                                state: {fromPage: 'Payment Gateway List Page', fromAction: 'Click "Add Gateway" Button'}
+                            })}>
                                 Add Gateway
                             </Button>
                         )}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 const EditCategory = () => {
     // Hook
@@ -94,6 +95,7 @@ const EditCategory = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -134,8 +136,8 @@ const EditCategory = () => {
                         <Col xs={24} md={12}>
                             <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status' }]}>
                                 <Select>
-                                    <Select.Option value={1}>Active</Select.Option>
-                                    <Select.Option value={0}>Inactive</Select.Option>
+                                    <Select.Option value="active">Active</Select.Option>
+                                    <Select.Option value="inactive">Inactive</Select.Option>
                                 </Select>
                             </Form.Item>
                         </Col>

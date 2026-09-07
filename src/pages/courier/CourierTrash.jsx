@@ -223,7 +223,9 @@ const CourierTrash = () => {
                             Courier Trash List
                         </Title>
                         <Space>
-                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/courier', {
+                                state: {fromPage: 'Courier Trash', fromAction: 'Click "Back To Couriers" Button'}
+                            })}>
                                 Back to Couriers
                             </Button>
                         </Space>

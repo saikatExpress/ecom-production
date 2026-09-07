@@ -125,7 +125,9 @@ const OrderSource = () => {
             render: (_, record) => (
                 <Space size="small">
                     {hasPermission('order_source_read') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/order-source/${record.id}`)}>
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/order-source/${record.id}`, {
+                            state: {fromPage: 'Order Source List Page', fromAction: 'Click "Edit" Button'}
+                        })}>
                             Edit
                         </Button>
                     )}
@@ -160,7 +162,9 @@ const OrderSource = () => {
                             Order Source List
                         </Title>
                         {hasPermission('order_source_create') && (
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/order-source')}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/order-source', {
+                                state: {fromPage: 'Order Source List Page', fromAction: 'Click "Add Source" Button'}
+                            })}>
                                 Add Source
                             </Button>
                         )}

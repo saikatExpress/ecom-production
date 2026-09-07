@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getDatas, postData } from "../../../services/request";
+import { handleFormErrors } from '../../../utils/formUtils';
 
 export default function AddManagement() {
     // Hook
@@ -76,6 +77,7 @@ export default function AddManagement() {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -109,7 +111,9 @@ export default function AddManagement() {
     return (
         <Card title="Create Management User" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list', {
+                    state: {fromPage: 'Add Management', fromAction: 'Click "Back To List" Button'}
+                })}>
                     Back to List
                 </Button>
             }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, putData } from "../../../services/request";
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const EditOrderSource = () => {
     // Hook
@@ -73,6 +74,7 @@ const EditOrderSource = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -89,7 +91,9 @@ const EditOrderSource = () => {
     return (
         <Card title="Edit Order Source" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/order/source', {
+                    state: {fromPage: 'Edit Order Source Page', fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             }

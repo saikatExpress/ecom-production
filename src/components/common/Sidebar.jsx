@@ -366,6 +366,36 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
     const items = filterMenuItems(allItems);
 
+    // ─── Find parent key for current route to auto-open submenu ───────────────
+    const getParentKey = (key, menuItems) => {
+        for (const item of menuItems) {
+            if (item.children) {
+                if (item.children.some(child => child.key === key)) {
+                    return item.key;
+                }
+                const nested = getParentKey(key, item.children);
+                if (nested) return item.key;
+            }
+        }
+        return null;
+    };
+
+    const initialParentKey = getParentKey(currentKey, allItems);
+    const [openKeys, setOpenKeys] = useState(initialParentKey ? [initialParentKey] : []);
+
+    // Sync openKeys if URL changes externally
+    useEffect(() => {
+        const pKey = getParentKey(currentKey, allItems);
+        if (pKey && !openKeys.includes(pKey)) {
+            setOpenKeys(prev => [...prev, pKey]);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentKey]);
+
+    const onOpenChange = (keys) => {
+        setOpenKeys(keys);
+    };
+
     const handleClick = ({ key }) => {
         navigate(`/${key}`);
         if (isMobile) setSidebarOpen(false);
@@ -377,7 +407,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             <Menu
                 mode="inline"
                 selectedKeys={[currentKey]}
-                defaultOpenKeys={["dashboard"]}
+                openKeys={openKeys}
+                onOpenChange={onOpenChange}
                 items={items}
                 onClick={handleClick}
                 style={{ 

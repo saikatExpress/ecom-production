@@ -212,7 +212,9 @@ export default function ManagementTrash() {
                 <Button icon={<ReloadOutlined />} onClick={() => getManagementTrash(pagination.current, pagination.pageSize, filters.search_key, filters.status)}>
                     Refresh
                 </Button>
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/management/list', {
+                    state: {fromPage: 'Management Trash List', fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             </Space>

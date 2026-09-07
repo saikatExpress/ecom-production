@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, getDatas, postData } from "../../../services/request";
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const EditEmployee = () => {
     // Hook
@@ -106,6 +107,7 @@ const EditEmployee = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -152,7 +154,9 @@ const EditEmployee = () => {
         <Card 
             title="Edit Employee" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/employee/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/employee/list', {
+                    state: {fromPage: 'Edit Employee Pgae', fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             }

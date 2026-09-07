@@ -183,7 +183,9 @@ export default function Brand() {
                             <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/brand/trash')}>
                                 Trash
                             </Button>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/brand')}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/brand', {
+                                    state: { fromPage: 'Brand List', fromAction: 'Click "Add Brand" Button' }
+                                })}>
                                 Add Brand
                             </Button>
                         </Space>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getDatas, postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 export default function AddEmployee() {
     // Hook
@@ -77,6 +78,7 @@ export default function AddEmployee() {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -110,7 +112,9 @@ export default function AddEmployee() {
     return (
         <Card title="Create Employee" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/employee/list')}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/employee/list', {
+                    state: {fromPage: 'Add Employee Page', fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             }

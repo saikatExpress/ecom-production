@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
+import { handleFormErrors } from "../../utils/formUtils";
 
 const { Title } = Typography;
 
@@ -81,6 +82,7 @@ const EditCourier = () => {
         } catch (error) {
             console.error("Failed to update courier:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }

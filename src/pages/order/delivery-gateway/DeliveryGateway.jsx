@@ -157,7 +157,9 @@ const DeliveryGateway = () => {
                             Delivery Gateway List
                         </Title>
                         {hasPermission('delivery_gateway_create') && (
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/delivery-gateway')}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/delivery-gateway', {
+                                state: {fromPage: 'Delivery Gateway List Page', fromAction: 'Click "Add Gateway" Button'}
+                            })}>
                                 Add Gateway
                             </Button>
                         )}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, putData } from "../../../services/request";
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const EditDeliveryGateway = () => {
     // Hook
@@ -63,6 +64,7 @@ const EditDeliveryGateway = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -79,7 +81,9 @@ const EditDeliveryGateway = () => {
     return (
         <Card title="Edit Delivery Gateway" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/delivery-gateway', {
+                    state: {fromPage: 'Edit Delivery Gateway Page', fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             }

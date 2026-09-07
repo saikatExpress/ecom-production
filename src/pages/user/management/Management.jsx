@@ -353,13 +353,17 @@ export default function Management() {
                 </Button>
                 
                 {hasPermission('user_delete') && (
-                    <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/management/trash')}>
+                    <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/management/trash', {
+                        state: {fromPage: 'Management List', fromAction: 'Click "Trash" Button'}
+                    })}>
                         Trash
                     </Button>
                 )}
 
                 {hasPermission('user_create') && (
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/management')}>
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/management', {
+                        state: {fromPage: "Management", fromAction: 'Click "Add Admin" Button'}
+                    })}>
                         Add Admin
                     </Button>
                 )}

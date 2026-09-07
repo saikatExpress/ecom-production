@@ -267,7 +267,9 @@ export default function Employee() {
                         </Button>
                     )}
                     {hasPermission('user_update') && (
-                        <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => navigate(`/edit/employee/${record.id}`)}>
+                        <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => navigate(`/edit/employee/${record.id}`, {
+                            state: {fromPage: 'Employee List Page', fromAction: 'Click "Edit" Button'}
+                        })}>
                             Edit
                         </Button>
                     )}
@@ -352,13 +354,17 @@ export default function Employee() {
                 </Button>
                 
                 {hasPermission('user_delete') && (
-                    <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/employee/trash')}>
+                    <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/employee/trash', {
+                        state: {fromPage: 'Employee List Page', fromAction: 'Click "Trash" Button'}
+                    })}>
                         Trash
                     </Button>
                 )}
 
                 {hasPermission('user_create') && (
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/employee')}>
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/employee', {
+                        state: {fromPage: 'Employee List', fromAction: 'Click "Add Employe" Button'}
+                    })}>
                         Add Employee
                     </Button>
                 )}

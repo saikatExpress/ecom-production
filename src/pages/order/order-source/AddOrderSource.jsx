@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 const AddOrderSource = () => {
     // Hook
@@ -39,6 +40,7 @@ const AddOrderSource = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || 'An error occurred');
+            handleFormErrors(error, form, 'message.error');
         } finally {
             setLoading(false);
         }
@@ -47,7 +49,9 @@ const AddOrderSource = () => {
     return (
         <Card title="Create Order Source" 
             extra={
-                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/order/source', {
+                    state: {fromPage: 'Add Order Source Page', fromAction: 'Click "Back to List" Button'}
+                })}>
                     Back to List
                 </Button>
             }

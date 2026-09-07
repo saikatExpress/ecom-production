@@ -189,7 +189,9 @@ const Courier = () => {
                                 </Button>
                             )}
                             {hasPermission('courier_create') && (
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/courier')}>
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/courier', {
+                                    state: {fromPage: 'Courier List', fromAction: 'Click "Add Courier" Button'}
+                                })}>
                                     Add Courier
                                 </Button>
                             )}

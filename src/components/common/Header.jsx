@@ -211,6 +211,12 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
                 cancelText="Close"
                 width={700}
                 centered
+                zIndex={10050}
+                getContainer={() => document.body}
+                styles={{
+                    mask   : { zIndex: 10040 },
+                    wrapper: { zIndex: 10050 },
+                }}
             >
                 <div style={{ marginTop: '16px' }}>
                     <Typography.Paragraph type="secondary" style={{ marginBottom: '16px' }}>

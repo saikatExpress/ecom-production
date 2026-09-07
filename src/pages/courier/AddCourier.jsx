@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { postData } from "../../services/request";
+import { handleFormErrors } from "../../utils/formUtils";
 
 const { Title } = Typography;
 
@@ -40,6 +41,7 @@ const AddCourier = () => {
         } catch (error) {
             console.error("Failed to add courier:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setLoading(false);
         }
@@ -121,7 +123,9 @@ const AddCourier = () => {
                     </Row>
 
                     <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-                        <Button onClick={() => navigate(-1)}>
+                        <Button onClick={() => navigate('/courier', {
+                            state: {fromPage : 'Add Courier', fromAction: 'Click "Cancel" Button'}
+                        })}>
                             Cancel
                         </Button>
                         <Button type="primary" htmlType="submit" loading={loading}>
