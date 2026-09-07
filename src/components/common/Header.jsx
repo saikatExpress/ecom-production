@@ -166,7 +166,7 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
                         trigger={['click']}
                         placement="bottomRight"
                     >
-                        <Badge count={3} size="small" style={{ cursor: 'pointer' }}>
+                        <Badge count={3} size="small" offset={[-6, 6]} style={{ cursor: 'pointer' }}>
                             <Button
                                 type="text"
                                 shape="circle"
