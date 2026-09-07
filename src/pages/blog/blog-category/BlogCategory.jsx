@@ -147,7 +147,9 @@ export default function BlogCategory() {
             render: (_, record) => (
                 <Space size="small">
                     {hasPermission('blog_category_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/blog-category/${record.id}`)}>
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/blog-category/${record.id}`, {
+                            state: {fromPage: 'Blog Category List Page', fromAction: 'Click "Edit" Button'}
+                        })}>
                             Edit
                         </Button>
                     )}
@@ -183,7 +185,7 @@ export default function BlogCategory() {
                         </Title>
                         {hasPermission('blog_category_create') && (
                             <Space>
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blog-categor', {
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blog-category', {
                                     state: {fromPage: 'Blog Category List Page', fromAction: 'Click "Add Category" Button'}
                                 })}>
                                     Add Category

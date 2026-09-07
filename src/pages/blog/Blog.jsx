@@ -256,7 +256,9 @@ export default function Blog() {
                                 </Button>
                             )}
                             {hasPermission('blog_create') && (
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blog')}>
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/blo', {
+                                    state: {fromPage: 'Blog List Page', fromAction: 'Click "Add Blog" Button'}
+                                })}>
                                     Add Blog
                                 </Button>
                             )}

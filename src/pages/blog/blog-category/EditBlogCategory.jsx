@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, postData } from "../../../services/request";
+import { handleFormErrors } from '../../../utils/formUtils';
 
 const EditBlogCategory = () => {
     // Hook
@@ -62,6 +63,7 @@ const EditBlogCategory = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -82,7 +84,9 @@ const EditBlogCategory = () => {
                     title="Edit Blog Category" 
                     extra={
                         <Space>
-                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/blog-category', {
+                                state: {fromPage: 'Edit Blog Category Page', fromAction: 'Click "Back to List" Button'}
+                            })}>
                                 Back to List
                             </Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { postData } from "../../../services/request";
+import { handleFormErrors } from './../../../utils/formUtils';
 
 const AddBlogCategory = () => {
     // Hook
@@ -30,6 +31,7 @@ const AddBlogCategory = () => {
         } catch (error) {
             console.error(error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
@@ -42,7 +44,9 @@ const AddBlogCategory = () => {
                     title="Add New Blog Category" 
                     extra={
                         <Space>
-                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/blog-category', {
+                                state: {fromPage: 'Add Blog Category Page', fromAction: 'Click "Back to List" Button'}
+                            })}>
                                 Back to List
                             </Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>

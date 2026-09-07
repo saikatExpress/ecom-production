@@ -59,6 +59,8 @@ export const KNOWN_ROUTES = [
     { path: '/blog/add',               label: 'Add Blog' },
     { path: '/blog/trash',             label: 'Blog Trash' },
     { path: '/blog-category',          label: 'Blog Category' },
+    { path: '/create/blog-category',   label: 'Add Blog Category' },
+    { path: '/edit/blog-category/:id', label: 'Edit Blog Category' },
     { path: '/blog-tag',               label: 'Blog Tag' },
 
     // CMS
@@ -147,6 +149,12 @@ export function findNearestRoute(wrongPath) {
         } else if (target.includes('statu') && candidate.includes('status')) {
             if (candidate === '/status') {
                 dist -= 20; // Strongly boost the list page
+            } else {
+                dist -= 10;
+            }
+        } else if (target.includes('blog') && candidate.includes('blog')) {
+            if (candidate === '/blog-category' || candidate === '/blog') {
+                dist -= 20; // Strongly boost list pages
             } else {
                 dist -= 10;
             }
