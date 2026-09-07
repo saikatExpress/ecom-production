@@ -1,7 +1,8 @@
-import { BellOutlined, ClearOutlined, LogoutOutlined, MenuOutlined, MoonOutlined, ProfileOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, BellOutlined, ClearOutlined, FullscreenExitOutlined, FullscreenOutlined, GlobalOutlined, LogoutOutlined, MenuOutlined, MessageOutlined, MoonOutlined, ProfileOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Badge, Button, Dropdown, Input, List, message, Modal, Space, Tooltip, Typography } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { logout } from "../../features/auth/authSlice";
 import { postData } from "../../services/request";
 import "./Header.css";
@@ -9,8 +10,11 @@ import "./Header.css";
 const { Text } = Typography;
 
 export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
+    const { t, i18n } = useTranslation();
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
+
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     const [cacheModalVisible, setCacheModalVisible] = useState(false);
     const [cacheData, setCacheData] = useState("");
@@ -56,21 +60,41 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
         setIsDarkMode(!isDarkMode);
     };
 
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                message.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+            setIsFullscreen(true);
+        } else {
+            document.exitFullscreen();
+            setIsFullscreen(false);
+        }
+    };
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
     const profileItems = [
         {
             key: "account",
             icon: <ProfileOutlined />,
-            label: "Account",
+            label: t("Account"),
         },
         {
             key: "setting",
             icon: <SettingOutlined />,
-            label: "Settings",
+            label: t("Settings"),
         },
         {
             key: "support",
             icon: <QuestionCircleOutlined />,
-            label: "Support",
+            label: t("Support"),
         },
         {
             type: "divider",
@@ -78,7 +102,7 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
         {
             key: "logout",
             icon: <LogoutOutlined />,
-            label: "Logout",
+            label: t("Logout"),
             danger: true,
         },
     ];
@@ -92,7 +116,7 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
     const notificationContent = (
         <div className="notification-dropdown">
             <div className="notification-header">
-                <Text strong>Notifications</Text>
+                <Text strong>{t("Notifications")}</Text>
                 <Badge count={demoOrders.length} className="notification-badge" />
             </div>
             <List
@@ -115,10 +139,61 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
                 )}
             />
             <div className="notification-footer">
-                <Button type="link" block>View All Notifications</Button>
+                <Button type="link" block>{t("View All Notifications")}</Button>
             </div>
         </div>
     );
+    const demoMessages = [
+        { id: 1, title: "Support Team", desc: "Your ticket has been resolved.", time: "10 mins ago" },
+        { id: 2, title: "Supplier A", desc: "Can we schedule a call tomorrow?", time: "1 hour ago" },
+    ];
+
+    const messageContent = (
+        <div className="notification-dropdown">
+            <div className="notification-header">
+                <Text strong>{t("Messages")}</Text>
+                <Badge count={demoMessages.length} className="notification-badge" style={{ backgroundColor: '#52c41a' }} />
+            </div>
+            <List
+                itemLayout="horizontal"
+                dataSource={demoMessages}
+                renderItem={(item) => (
+                    <List.Item className="notification-item">
+                        <List.Item.Meta
+                            avatar={<Avatar style={{ backgroundColor: '#52c41a' }} icon={<MessageOutlined />} />}
+                            title={<a href="#">{item.title}</a>}
+                            description={
+                                <div>
+                                    <Text type="secondary" style={{ fontSize: '12px' }}>{item.desc}</Text>
+                                    <br />
+                                    <Text type="secondary" style={{ fontSize: '10px' }}>{item.time}</Text>
+                                </div>
+                            }
+                        />
+                    </List.Item>
+                )}
+            />
+            <div className="notification-footer">
+                <Button type="link" block>{t("View All Messages")}</Button>
+            </div>
+        </div>
+    );
+
+    const handleLangChange = (e) => {
+        i18n.changeLanguage(e.key);
+    };
+
+    const langItems = [
+        { key: 'en', label: '🇺🇸 English' },
+        { key: 'bn', label: '🇧🇩 Bengali' },
+    ];
+
+    const appItems = [
+        { key: 'pos', label: 'POS System' },
+        { key: 'analytics', label: 'Analytics' },
+        { key: 'file-manager', label: 'File Manager' },
+        { key: 'calendar', label: 'Calendar' },
+    ];
 
     return (
         <header className="header-container">
@@ -142,6 +217,32 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
 
             <div className="header-right">
                 <Space size="middle" align="center">
+                    <Dropdown menu={{ items: appItems }} trigger={['click']} placement="bottomRight">
+                        <Button
+                            type="text"
+                            shape="circle"
+                            icon={<AppstoreOutlined style={{ fontSize: '18px' }} />}
+                            className="header-icon-btn hide-on-mobile"
+                        />
+                    </Dropdown>
+
+                    <Button
+                        type="text"
+                        shape="circle"
+                        icon={isFullscreen ? <FullscreenExitOutlined style={{ fontSize: '18px' }} /> : <FullscreenOutlined style={{ fontSize: '18px' }} />}
+                        onClick={toggleFullscreen}
+                        className="header-icon-btn hide-on-mobile"
+                    />
+
+                    <Dropdown menu={{ items: langItems, onClick: handleLangChange }} trigger={['click']} placement="bottomRight">
+                        <Button
+                            type="text"
+                            shape="circle"
+                            icon={<GlobalOutlined style={{ fontSize: '18px' }} />}
+                            className="header-icon-btn hide-on-mobile"
+                        />
+                    </Dropdown>
+
                     <Button
                         type="text"
                         shape="circle"
@@ -160,6 +261,21 @@ export default function Header({ isDarkMode, setIsDarkMode, setSidebarOpen }) {
                             className="header-icon-btn"
                         />
                     </Tooltip>
+
+                    <Dropdown
+                        dropdownRender={() => messageContent}
+                        trigger={['click']}
+                        placement="bottomRight"
+                    >
+                        <Badge count={2} size="small" offset={[-6, 6]} style={{ cursor: 'pointer', backgroundColor: '#52c41a' }}>
+                            <Button
+                                type="text"
+                                shape="circle"
+                                icon={<MessageOutlined style={{ fontSize: '18px' }} />}
+                                className="header-icon-btn"
+                            />
+                        </Badge>
+                    </Dropdown>
 
                     <Dropdown
                         dropdownRender={() => notificationContent}

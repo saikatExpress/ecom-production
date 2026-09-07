@@ -184,10 +184,11 @@
     }
 }
 
-/* ── Small screens: hide search ── */
+/* 👉 Small screens: hide search and extra icons 👈 */
 @media (max-width: 575px) {
-    .header-search {
-        display: none;
+    .header-search,
+    .hide-on-mobile {
+        display: none !important;
     }
     .user-info {
         display: none;
