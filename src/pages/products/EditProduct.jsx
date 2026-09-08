@@ -1,33 +1,35 @@
 import { AppstoreOutlined, ArrowLeftOutlined, DeleteOutlined, DollarOutlined, FileTextOutlined, GlobalOutlined, InboxOutlined, PictureOutlined, PlusOutlined, SaveOutlined, TagsOutlined, UploadOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, Flex, Form, Input, InputNumber, message, Radio, Row, Select, Space, Switch, Typography, Upload } from "antd";
+import { Breadcrumb, Button, Card, Col, Flex, Form, Input, InputNumber, message, Radio, Row, Select, Space, Spin, Switch, Typography, Upload } from "antd";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
-import { getDatas, postData } from "../../services/request";
+import { getData, getDatas, postData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-export default function AddProduct() {
+export default function EditProduct() {
     // Hook
-    useTitle("Add Product");
+    useTitle("Edit Product");
 
     // Variable
+    const { id }   = useParams();
     const navigate = useNavigate();
     const [form]   = Form.useForm();
 
-    // States
-    const [submitting, setSubmitting]       = useState(false);
-    const [categories, setCategories]       = useState([]);
-    const [subCategories, setSubCategories] = useState([]);
-    const [brands, setBrands]               = useState([]);
-    const [attributes, setAttributes]       = useState([]);
-    const [mainFileList, setMainFileList]   = useState([]);
-    const [fileList, setFileList]           = useState([]);
-    const [hasVariants, setHasVariants]     = useState(false);
+    const [loading, setLoading]                     = useState(true);
+    const [submitting, setSubmitting]               = useState(false);
+    const [categories, setCategories]               = useState([]);
+    const [subCategories, setSubCategories]         = useState([]);
+    const [brands, setBrands]                       = useState([]);
+    const [attributes, setAttributes]               = useState([]);
+    const [mainFileList, setMainFileList]           = useState([]);
+    const [fileList, setFileList]                   = useState([]);
+    const [deletedGalleryIds, setDeletedGalleryIds] = useState([]);
+    const [hasVariants, setHasVariants]             = useState(false);
 
     useEffect(() => {
         const fetchDropdowns = async () => {
@@ -56,13 +58,87 @@ export default function AddProduct() {
         fetchDropdowns();
     }, []);
 
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const res = await getData(`/admin/product/${id}`);
+                if (res?.success) {
+                    const data = res.data;
+                    
+                    form.setFieldsValue({
+                        name               : data.name,
+                        sku                : data.sku,
+                        category_id        : data.category?.id,
+                        sub_category_id    : data.subCategory?.id,
+                        brand_id           : data.brand?.id,
+                        mrp                : data.mrp,
+                        sell_price         : data.sell_price,
+                        buy_price          : data.buy_price,
+                        current_stock      : data.current_stock,
+                        total_sell_quantity: data.total_sell_quantity,
+                        free_shipping      : data.free_shipping === 1,
+                        discount_type      : "fixed",
+                        discount_amount    : data.discount_amount,
+                        offer_price        : data.offer_price,
+                        status             : data.status,
+                        short_description  : data.short_description,
+                        description        : data.description,
+                        video_url          : data.video_url,
+                        meta_title         : data.meta_title,
+                        meta_keywords      : data.meta_keywords,
+                        meta_description   : data.meta_description,
+                    });
+
+                    if (data.image) {
+                        setMainFileList([{ uid: '-1', url: data.image, name: 'Main Image', status: 'done' }]);
+                    }
+
+                    if (data.gallery_images && data.gallery_images.length > 0) {
+                        const galleries = data.gallery_images.map(g => ({
+                            uid: g.id.toString(),
+                            url: g.image,
+                            name: `Gallery Image ${g.id}`,
+                            status: 'done',
+                            dbId: g.id
+                        }));
+                        setFileList(galleries);
+                    }
+
+                    if (data.variants && data.variants.length > 0) {
+                        setHasVariants(true);
+                        const formattedVariants = data.variants.map(v => ({
+                            id               : v.id,
+                            sku              : v.sku,
+                            mrp              : v.mrp,
+                            sell_price       : v.sell_price,
+                            buy_price        : v.buy_price,
+                            current_stock    : v.current_stock,
+                            status           : v.status || 'active',
+                            is_default       : v.is_default === 1,
+                            short_description: v.short_description,
+                            description      : v.description,
+                            attribute_values : (v.attributeValues || v.attribute_values || []).map(av => av.id),
+                            image            : v.img_path || v.image ? [{ uid: v.id.toString(), url: v.img_path || v.image, name: 'Variant Image', status: 'done' }]: []
+                        }));
+                        form.setFieldsValue({ variants: formattedVariants });
+                    }
+                }
+            } catch (err) {
+                console.log(err);
+                message.error("Failed to fetch product data.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchProduct();
+        }
+    }, [id, form]);
+
     const selectedCategoryId = Form.useWatch("category_id", form);
 
-    // Fetch subcategories when category changes
     useEffect(() => {
-        // Clear the previously selected subcategory
-        form.setFieldsValue({ sub_category_id: undefined });
-
         if (!selectedCategoryId) {
             setSubCategories([]);
             return;
@@ -78,18 +154,16 @@ export default function AddProduct() {
         };
 
         fetchSubCategories();
-    }, [selectedCategoryId, form]);
+    }, [selectedCategoryId]);
 
-    // Use fetched subcategories directly
     const filteredSubCategories = subCategories;
 
-    // Handle form submit
     const handleSubmit = async (values) => {
         setSubmitting(true);
         try {
             const formData = new FormData();
+            formData.append('_method', 'PUT');
 
-            // Append basic form fields
             Object.keys(values).forEach((key) => {
                 if (key === "gallery_images" || key === "variants" || key === "image") return;
                 if (values[key] !== undefined && values[key] !== null) {
@@ -105,13 +179,18 @@ export default function AddProduct() {
                 formData.append("image", mainFileList[0].originFileObj);
             }
 
+            if (deletedGalleryIds.length > 0) {
+                deletedGalleryIds.forEach((deletedId) => {
+                    formData.append("gallery_deleted_image_ids[]", deletedId);
+                });
+            }
+
             fileList.forEach((file) => {
                 if (file.originFileObj) {
                     formData.append("gallery_images[]", file.originFileObj);
                 }
             });
 
-            // Append variants if enabled
             if (hasVariants && values.variants && values.variants.length > 0) {
                 values.variants.forEach((variant, index) => {
                     Object.keys(variant).forEach((vKey) => {
@@ -134,18 +213,18 @@ export default function AddProduct() {
                 });
             }
 
-            const response = await postData("admin/product", formData);
+            const response = await postData(`admin/product/${id}`, formData);
 
             if (response?.success || response?.id) {
-                message.success("Product created successfully!");
+                message.success("Product updated successfully!");
                 navigate("/products");
             } else {
-                message.success("Product created!");
+                message.success("Product updated!");
                 navigate("/products");
             }
         } catch (error) {
-            console.error("Failed to create product:", error);
-            message.error(error?.response?.data?.message || "Failed to create product.");
+            console.error("Failed to update product:", error);
+            message.error(error?.response?.data?.message || "Failed to update product.");
             handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
@@ -160,13 +239,21 @@ export default function AddProduct() {
         }))
     );
 
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                <Spin size="large" />
+            </div>
+        );
+    }
+
     return (
-        <div className="add-product-page">
+        <div className="edit-product-page">
             <Breadcrumb
                 items={[
                     { title: "Dashboard" },
                     { title: "Product", href: "/products" },
-                    { title: "Add Product" },
+                    { title: "Edit Product" },
                 ]}
                 style={{ marginBottom: 16 }}
             />
@@ -174,13 +261,6 @@ export default function AddProduct() {
             <Form
                 form={form}
                 layout="vertical"
-                initialValues={{
-                    status: "active",
-                    discount_type: "fixed",
-                    discount_amount: 0,
-                    current_stock: 0,
-                    free_shipping: false,
-                }}
                 onFinish={handleSubmit}
             >
                 {/* Header Action Bar */}
@@ -191,13 +271,13 @@ export default function AddProduct() {
                                 Back
                             </Button>
                             <Title level={3} style={{ margin: 0 }}>
-                                Create New Product
+                                Edit Product
                             </Title>
                         </Space>
                         <Space>
                             <Button onClick={() => navigate("/products")}>Cancel</Button>
                             <Button type="primary" icon={<SaveOutlined />} loading={submitting} htmlType="submit">
-                                Save Product
+                                Update Product
                             </Button>
                         </Space>
                     </Flex>
@@ -236,6 +316,9 @@ export default function AddProduct() {
                                             showSearch
                                             optionFilterProp="label"
                                             options={categories.map((c) => ({ label: c.name, value: c.id }))}
+                                            onChange={() => {
+                                                form.setFieldsValue({ sub_category_id: undefined });
+                                            }}
                                         />
                                     </Form.Item>
                                 </Col>
@@ -405,7 +488,7 @@ export default function AddProduct() {
                             }
                             style={{ marginBottom: 24 }}
                         >
-                            <Form.Item label="Main Image" required tooltip="This is the primary image of the product.">
+                            <Form.Item label="Main Image" tooltip="This is the primary image of the product.">
                                 <Upload
                                     listType="picture-card"
                                     maxCount={1}
@@ -429,6 +512,11 @@ export default function AddProduct() {
                                     fileList={fileList}
                                     onChange={({ fileList }) => setFileList(fileList)}
                                     beforeUpload={() => false}
+                                    onRemove={(file) => {
+                                        if (file.dbId) {
+                                            setDeletedGalleryIds(prev => [...prev, file.dbId]);
+                                        }
+                                    }}
                                 >
                                     <p className="ant-upload-drag-icon">
                                         <InboxOutlined style={{ fontSize: 36, color: "#1677ff" }} />
@@ -484,6 +572,11 @@ export default function AddProduct() {
                                                     }
                                                     style={{ marginBottom: 16 }}
                                                 >
+                                                    {/* Hidden ID Field for existing variants */}
+                                                    <Form.Item {...restField} name={[name, "id"]} hidden>
+                                                        <Input />
+                                                    </Form.Item>
+
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={12}>
                                                             <Form.Item

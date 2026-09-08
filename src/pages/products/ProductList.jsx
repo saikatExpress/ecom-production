@@ -3,10 +3,17 @@ import { Badge, Breadcrumb, Button, Card, Flex, Input, Popconfirm, Select, Space
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDatas } from "../../services/request";
+import usePermissions from './../../hooks/usePermissions';
+import useTitle from './../../hooks/useTitle';
 
 const { Title, Text } = Typography;
 
 export default function ProductList() {
+    // Hook
+    useTitle('Product List');
+
+    const {hasPermission} = usePermissions();
+
     const navigate                    = useNavigate();
     const [products, setProducts]     = useState([]);
     const [categories, setCategories] = useState([]);
@@ -64,22 +71,21 @@ export default function ProductList() {
         }
     }, [search, categoryId, brandId, status]);
 
-    // Fetch Categories and Brands for select dropdowns
     useEffect(() => {
         const fetchDropdownData = async () => {
             try {
-                const catRes = await getDatas("/admin/category", { paginate_size: 100 });
-                if (catRes?.data?.items) {
-                    setCategories(catRes.data.items);
+                const catRes = await getDatas("/admin/category/list");
+                if (catRes?.data) {
+                    setCategories(catRes.data);
                 }
             } catch (err) {
                 console.log("Could not load categories for filter:", err);
             }
 
             try {
-                const brandRes = await getDatas("/admin/brand", { paginate_size: 100 });
-                if (brandRes?.data?.items) {
-                    setBrands(brandRes.data.items);
+                const brandRes = await getDatas("/admin/brand/list");
+                if (brandRes?.data) {
+                    setBrands(brandRes.data);
                 }
             } catch (err) {
                 console.log("Could not load brands for filter:", err);
@@ -89,7 +95,6 @@ export default function ProductList() {
         fetchDropdownData();
     }, []);
 
-    // Trigger product fetch when filters or page changes
     useEffect(() => {
         fetchProducts(pagination.current, pagination.pageSize);
     }, [fetchProducts, pagination.current, pagination.pageSize]);
@@ -119,7 +124,8 @@ export default function ProductList() {
         fetchProducts(pagination.current, pagination.pageSize);
     };
 
-    const columns = [
+    const columns = 
+    [
         {
             title: "ID",
             dataIndex: "id",
@@ -216,35 +222,38 @@ export default function ProductList() {
             },
         },
         {
-            title: "Created At",
-            dataIndex: "created_at",
-            key: "created_at",
-            width: 160,
-            render: (date) => (date ? new Date(date).toLocaleString() : "-"),
-        },
-        {
             title: "Action",
             key: "action",
             width: 140,
             fixed: "right",
             render: (_, record) => (
                 <Space size="small">
-                    <Tooltip title="View Details">
-                        <Button type="text" size="small" icon={<EyeOutlined />} />
-                    </Tooltip>
-                    <Tooltip title="Edit Product">
-                        <Button type="text" size="small" icon={<EditOutlined style={{ color: "#1677ff" }} />} />
-                    </Tooltip>
-                    <Popconfirm
-                        title="Delete Product"
-                        description={`Delete "${record.name}"?`}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <Tooltip title="Delete Product">
-                            <Button type="text" danger size="small" icon={<DeleteOutlined />} />
+                    {hasPermission('product_read') && (
+                        <Tooltip title="View Details">
+                            <Button type="text" size="small" icon={<EyeOutlined />} />
                         </Tooltip>
-                    </Popconfirm>
+                    )}
+
+                    {hasPermission('product_update') && (
+                        <Tooltip title="Edit Product">
+                            <Button type="text" size="small" icon={<EditOutlined style={{ color: "#1677ff" }} />} onClick={() => navigate(`/edit/product/${record.id}`, {
+                                state: {fromPage: 'Product List Page', fromAction: 'Click "Edit" Button'}
+                            })}/>
+                        </Tooltip>
+                    )}
+
+                    {hasPermission('product_delete') && (
+                        <Popconfirm
+                            title="Delete Product"
+                            description={`Delete "${record.name}"?`}
+                            okText="Yes"
+                            cancelText="No"
+                        >
+                            <Tooltip title="Delete Product">
+                                <Button type="text" danger size="small" icon={<DeleteOutlined />} />
+                            </Tooltip>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -268,12 +277,19 @@ export default function ProductList() {
                             Product List
                         </Title>
                         <Space>
-                            <Button danger icon={<DeleteOutlined />}>
-                                Trash
-                            </Button>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/products/create")}>
-                                Add Product
-                            </Button>
+                            {hasPermission('product_delete') && (
+                                <Button danger icon={<DeleteOutlined />}>
+                                    Trash
+                                </Button>
+                            )}
+
+                            {hasPermission('product_create') && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/products/create", {
+                                    state: {fromPage: 'Product List Page', fromAction: 'Click "Add Product" Button'}
+                                })}>
+                                    Add Product
+                                </Button>
+                            )}
                         </Space>
                     </Flex>
                 }

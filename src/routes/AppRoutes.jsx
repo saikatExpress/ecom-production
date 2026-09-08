@@ -40,6 +40,7 @@ import AddCourier from "../pages/courier/AddCourier";
 import Courier from "../pages/courier/Courier";
 import CourierTrash from "../pages/courier/CourierTrash";
 import EditCourier from "../pages/courier/EditCourier";
+import NotFound from "../pages/error/NotFound";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import AddCoupon from "../pages/order/coupon/AddCoupon";
 import Coupon from "../pages/order/coupon/Coupon";
@@ -71,6 +72,7 @@ import AddCategory from "../pages/products/category/AddCategory";
 import Category from "../pages/products/category/Category";
 import CategoryTrash from "../pages/products/category/CategoryTrash";
 import EditCategory from "../pages/products/category/EditCategory";
+import EditProduct from "../pages/products/EditProduct";
 import ProductList from "../pages/products/ProductList";
 import AddSubCategory from "../pages/products/sub-category/AddSubCategory";
 import EditSubCategory from "../pages/products/sub-category/EditSubCategory";
@@ -93,7 +95,6 @@ import EditRole from "../pages/user/Role/EditRole";
 import Role from "../pages/user/Role/Role";
 import Status from './../pages/order/status/Status';
 import Customer from './../pages/user/Customer';
-import NotFound from "../pages/error/NotFound";
 
 export default function AppRoutes() {
     return (
@@ -197,6 +198,12 @@ export default function AppRoutes() {
                         <Route path="/products/create" element={
                             <PermissionRoute permission="product_create">
                                 <AddProduct />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/edit/product/:id" element={
+                            <PermissionRoute permission="product_update">
+                                <EditProduct />
                             </PermissionRoute>
                         } />
 
