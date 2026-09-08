@@ -1,8 +1,8 @@
 import { ClearOutlined, DeleteOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
-import { Badge, Breadcrumb, Button, Card, Flex, Input, Popconfirm, Select, Space, Table, Tag, Tooltip, Typography, message } from "antd";
+import { Badge, Breadcrumb, Button, Card, Flex, Input, InputNumber, Popconfirm, Select, Space, Table, Tag, Tooltip, Typography, message } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getDatas } from "../../services/request";
+import { deleteData, getDatas } from "../../services/request";
 import usePermissions from './../../hooks/usePermissions';
 import useTitle from './../../hooks/useTitle';
 
@@ -17,14 +17,18 @@ export default function ProductList() {
     const navigate                    = useNavigate();
     const [products, setProducts]     = useState([]);
     const [categories, setCategories] = useState([]);
+    const [subCategories, setSubCategories] = useState([]);
     const [brands, setBrands]         = useState([]);
     const [loading, setLoading]       = useState(false);
 
     // Filter states
-    const [search, setSearch]         = useState("");
-    const [categoryId, setCategoryId] = useState(undefined);
-    const [brandId, setBrandId]       = useState(undefined);
-    const [status, setStatus]         = useState(undefined);
+    const [searchKey, setSearchKey]           = useState("");
+    const [categoryIds, setCategoryIds]       = useState([]);
+    const [subCategoryIds, setSubCategoryIds] = useState([]);
+    const [brandIds, setBrandIds]             = useState([]);
+    const [minPrice, setMinPrice]             = useState(undefined);
+    const [maxPrice, setMaxPrice]             = useState(undefined);
+    const [status, setStatus]                 = useState(undefined);
 
     const [pagination, setPagination] = useState({
         current: 1,
@@ -41,9 +45,14 @@ export default function ProductList() {
                 paginate_size: pageSize,
             };
 
-            if (search) params.search = search;
-            if (categoryId) params.category_id = categoryId;
-            if (brandId) params.brand_id = brandId;
+            if (searchKey) params.search_key = searchKey;
+            
+            if (categoryIds?.length > 0) params.category_ids = categoryIds;
+            if (subCategoryIds?.length > 0) params.sub_category_ids = subCategoryIds;
+            if (brandIds?.length > 0) params.brand_ids = brandIds;
+            
+            if (minPrice !== undefined && minPrice !== null) params.min_price = minPrice;
+            if (maxPrice !== undefined && maxPrice !== null) params.max_price = maxPrice;
             if (status) params.status = status;
 
             const response = await getDatas("admin/product", params);
@@ -69,7 +78,7 @@ export default function ProductList() {
         } finally {
             setLoading(false);
         }
-    }, [search, categoryId, brandId, status]);
+    }, [searchKey, categoryIds, subCategoryIds, brandIds, minPrice, maxPrice, status]);
 
     useEffect(() => {
         const fetchDropdownData = async () => {
@@ -96,6 +105,26 @@ export default function ProductList() {
     }, []);
 
     useEffect(() => {
+        if (!categoryIds || categoryIds.length === 0) {
+            setSubCategories([]);
+            return;
+        }
+
+        const fetchSubCategories = async () => {
+            try {
+                const subCatRes = await getDatas("admin/subcategory/list", { category_ids: categoryIds });
+                if (subCatRes?.data) {
+                    setSubCategories(subCatRes.data);
+                }
+            } catch (err) {
+                console.log("Could not load subcategories:", err);
+            }
+        };
+
+        fetchSubCategories();
+    }, [categoryIds]);
+
+    useEffect(() => {
         fetchProducts(pagination.current, pagination.pageSize);
     }, [fetchProducts, pagination.current, pagination.pageSize]);
 
@@ -108,14 +137,17 @@ export default function ProductList() {
     };
 
     const handleSearchSubmit = (value) => {
-        setSearch(value);
+        setSearchKey(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
     };
 
     const handleResetFilters = () => {
-        setSearch("");
-        setCategoryId(undefined);
-        setBrandId(undefined);
+        setSearchKey("");
+        setCategoryIds([]);
+        setSubCategoryIds([]);
+        setBrandIds([]);
+        setMinPrice(undefined);
+        setMaxPrice(undefined);
         setStatus(undefined);
         setPagination((prev) => ({ ...prev, current: 1 }));
     };
@@ -124,14 +156,29 @@ export default function ProductList() {
         fetchProducts(pagination.current, pagination.pageSize);
     };
 
+    const handleDelete = async (id) => {
+        try {
+            const res = await deleteData(`/admin/product/${id}`);
+            if (res?.success) {
+                message.success(res?.message || "Product deleted successfully");
+                setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
+                setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+            } else {
+                message.error(res?.message || "Failed to delete product");
+            }
+        } catch (error) {
+            console.error("Delete product error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during deletion");
+        }
+    };
+
     const columns = 
     [
         {
-            title: "ID",
-            dataIndex: "id",
-            key: "id",
+            title: "SL",
+            key: "sl",
             width: 65,
-            sorter: (a, b) => a.id - b.id,
+            render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
             title: "Product Details",
@@ -248,6 +295,7 @@ export default function ProductList() {
                             description={`Delete "${record.name}"?`}
                             okText="Yes"
                             cancelText="No"
+                            onConfirm={() => handleDelete(record.id)}
                         >
                             <Tooltip title="Delete Product">
                                 <Button type="text" danger size="small" icon={<DeleteOutlined />} />
@@ -313,43 +361,87 @@ export default function ProductList() {
                                 placeholder="Search Name or SKU..."
                                 allowClear
                                 enterButton={<SearchOutlined />}
-                                style={{ width: 260 }}
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+                                style={{ width: 220 }}
+                                value={searchKey}
+                                onChange={(e) => setSearchKey(e.target.value)}
                                 onSearch={handleSearchSubmit}
                             />
 
                             {/* Category Filter */}
                             <Select
-                                placeholder="Category"
+                                placeholder="Categories"
                                 allowClear
-                                style={{ width: 160 }}
-                                value={categoryId}
+                                mode="multiple"
+                                maxTagCount="responsive"
+                                style={{ minWidth: 140, maxWidth: 220 }}
+                                value={categoryIds}
                                 onChange={(val) => {
-                                    setCategoryId(val);
+                                    setCategoryIds(val);
+                                    setSubCategoryIds([]);
                                     setPagination((prev) => ({ ...prev, current: 1 }));
                                 }}
                                 options={categories.map((c) => ({ label: c.name, value: c.id }))}
                             />
 
+                            {/* Sub Category Filter */}
+                            <Select
+                                placeholder="Sub Categories"
+                                allowClear
+                                mode="multiple"
+                                maxTagCount="responsive"
+                                style={{ minWidth: 150, maxWidth: 220 }}
+                                value={subCategoryIds}
+                                onChange={(val) => {
+                                    setSubCategoryIds(val);
+                                    setPagination((prev) => ({ ...prev, current: 1 }));
+                                }}
+                                options={subCategories.map((c) => ({ label: c.name, value: c.id }))}
+                            />
+
                             {/* Brand Filter */}
                             <Select
-                                placeholder="Brand"
+                                placeholder="Brands"
                                 allowClear
-                                style={{ width: 160 }}
-                                value={brandId}
+                                mode="multiple"
+                                maxTagCount="responsive"
+                                style={{ minWidth: 120, maxWidth: 220 }}
+                                value={brandIds}
                                 onChange={(val) => {
-                                    setBrandId(val);
+                                    setBrandIds(val);
                                     setPagination((prev) => ({ ...prev, current: 1 }));
                                 }}
                                 options={brands.map((b) => ({ label: b.name, value: b.id }))}
+                            />
+
+                            {/* Min Price */}
+                            <InputNumber 
+                                placeholder="Min Price" 
+                                style={{ width: 110 }} 
+                                min={0} 
+                                value={minPrice} 
+                                onChange={(val) => {
+                                    setMinPrice(val);
+                                    setPagination((prev) => ({ ...prev, current: 1 }));
+                                }} 
+                            />
+
+                            {/* Max Price */}
+                            <InputNumber 
+                                placeholder="Max Price" 
+                                style={{ width: 110 }} 
+                                min={0} 
+                                value={maxPrice} 
+                                onChange={(val) => {
+                                    setMaxPrice(val);
+                                    setPagination((prev) => ({ ...prev, current: 1 }));
+                                }} 
                             />
 
                             {/* Status Filter */}
                             <Select
                                 placeholder="Status"
                                 allowClear
-                                style={{ width: 130 }}
+                                style={{ width: 100 }}
                                 value={status}
                                 onChange={(val) => {
                                     setStatus(val);
@@ -362,7 +454,7 @@ export default function ProductList() {
                             />
 
                             {/* Clear Filters */}
-                            {(search || categoryId || brandId || status) && (
+                            {(searchKey || categoryIds?.length > 0 || subCategoryIds?.length > 0 || brandIds?.length > 0 || minPrice !== undefined || maxPrice !== undefined || status) && (
                                 <Button icon={<ClearOutlined />} onClick={handleResetFilters}>
                                     Reset
                                 </Button>
