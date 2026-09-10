@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
+import ProductAiChat from "../../components/product/ProductAiChat";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -662,6 +663,13 @@ export default function AddProduct() {
                     </Col>
                 </Row>
             </Form>
+
+            <ProductAiChat 
+                form={form} 
+                categories={categories} 
+                subCategories={filteredSubCategories} 
+                brands={brands} 
+            />
         </div>
     );
 }

@@ -11,7 +11,11 @@ export default function GlobalAiChat() {
     const location = useLocation();
 
     // Hide global chat on specific pages where we use internal AI chat
-    const hideGlobalChat = location.pathname === "/create/blog" || location.pathname.startsWith("/edit/blog/");
+    const hideGlobalChat = 
+        location.pathname === "/create/blog" || 
+        location.pathname.startsWith("/edit/blog/") ||
+        location.pathname === "/products/create" ||
+        location.pathname.startsWith("/edit/product/");
 
     const [chatOpen, setChatOpen]         = useState(false);
     const [aiPrompt, setAiPrompt]         = useState("");
