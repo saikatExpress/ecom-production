@@ -6,6 +6,7 @@ import ApiErrorOverlay from "../components/common/ApiErrorOverlay";
 import Footer from "../components/common/Footer";
 import Header from "../components/common/Header";
 import Sidebar from "../components/common/Sidebar";
+import GlobalAiChat from "../components/common/GlobalAiChat";
 import "./AdminLayout.css";
 
 export default function AdminLayout() {
@@ -36,6 +37,8 @@ export default function AdminLayout() {
                     <Footer />
                 </div>
             </div>
+
+            <GlobalAiChat />
         </ConfigProvider>
     );
 }
