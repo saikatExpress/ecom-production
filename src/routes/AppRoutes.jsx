@@ -74,6 +74,7 @@ import CategoryTrash from "../pages/products/category/CategoryTrash";
 import EditCategory from "../pages/products/category/EditCategory";
 import EditProduct from "../pages/products/EditProduct";
 import ProductList from "../pages/products/ProductList";
+import ProductTrash from "../pages/products/ProductTrash";
 import AddSubCategory from "../pages/products/sub-category/AddSubCategory";
 import EditSubCategory from "../pages/products/sub-category/EditSubCategory";
 import SubCategory from "../pages/products/sub-category/SubCategory";
@@ -192,6 +193,12 @@ export default function AppRoutes() {
                         <Route path="/products" element={
                             <PermissionRoute permission="product_read">
                                 <ProductList />
+                            </PermissionRoute>
+                        } />
+
+                        <Route path="/product/trash" element={
+                            <PermissionRoute permission="product_read">
+                                <ProductTrash />
                             </PermissionRoute>
                         } />
 

@@ -9,9 +9,9 @@ import useTitle from './../../hooks/useTitle';
 
 const { Title, Text } = Typography;
 
-export default function ProductList() {
+export default function ProductTrash() {
     // Hook
-    useTitle('Product List');
+    useTitle('Product Trash List');
 
     const {hasPermission} = usePermissions();
 
@@ -27,8 +27,6 @@ export default function ProductList() {
     const [categoryIds, setCategoryIds]       = useState([]);
     const [subCategoryIds, setSubCategoryIds] = useState([]);
     const [brandIds, setBrandIds]             = useState([]);
-    const [minPrice, setMinPrice]             = useState(undefined);
-    const [maxPrice, setMaxPrice]             = useState(undefined);
     const [status, setStatus]                 = useState(undefined);
 
     const [pagination, setPagination] = useState({
@@ -61,11 +59,9 @@ export default function ProductList() {
             if (subCategoryIds?.length > 0) params.sub_category_ids = subCategoryIds;
             if (brandIds?.length > 0) params.brand_ids = brandIds;
             
-            if (minPrice !== undefined && minPrice !== null) params.min_price = minPrice;
-            if (maxPrice !== undefined && maxPrice !== null) params.max_price = maxPrice;
             if (status) params.status = status;
 
-            const response = await getDatas("admin/product", params);
+            const response = await getDatas("admin/product/trash", params);
 
             if (response?.success && response?.data) {
                 setProducts(response.data.items || []);
@@ -88,7 +84,7 @@ export default function ProductList() {
         } finally {
             setLoading(false);
         }
-    }, [searchKey, categoryIds, subCategoryIds, brandIds, minPrice, maxPrice, status]);
+    }, [searchKey, categoryIds, subCategoryIds, brandIds, status]);
 
     useEffect(() => {
         const fetchDropdownData = async () => {
@@ -156,8 +152,6 @@ export default function ProductList() {
         setCategoryIds([]);
         setSubCategoryIds([]);
         setBrandIds([]);
-        setMinPrice(undefined);
-        setMaxPrice(undefined);
         setStatus(undefined);
         setPagination((prev) => ({ ...prev, current: 1 }));
     };
@@ -166,18 +160,35 @@ export default function ProductList() {
         fetchProducts(pagination.current, pagination.pageSize);
     };
 
-    const handleDelete = async (id) => {
+    const handleRestore = async (id) => {
         try {
-            const res = await deleteData(`/admin/product/${id}`);
+            // Assuming restore uses a POST or GET endpoint. Update as needed.
+            const res = await getDatas(`/admin/product/restore/${id}`);
             if (res?.success) {
-                message.success(res?.message || "Product deleted successfully");
+                message.success(res?.message || "Product restored successfully");
                 setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
                 setPagination(prev => ({ ...prev, total: prev.total - 1 }));
             } else {
-                message.error(res?.message || "Failed to delete product");
+                message.error(res?.message || "Failed to restore product");
             }
         } catch (error) {
-            console.error("Delete product error:", error);
+            console.error("Restore product error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during restoration");
+        }
+    };
+
+    const handleForceDelete = async (id) => {
+        try {
+            const res = await deleteData(`/admin/product/force-delete/${id}`);
+            if (res?.success) {
+                message.success(res?.message || "Product permanently deleted");
+                setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
+                setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+            } else {
+                message.error(res?.message || "Failed to permanently delete product");
+            }
+        } catch (error) {
+            console.error("Force delete product error:", error);
             message.error(error?.response?.data?.message || "An error occurred during deletion");
         }
     };
@@ -383,29 +394,30 @@ export default function ProductList() {
             fixed: "right",
             render: (_, record) => (
                 <Space size="small">
-                    {hasPermission('product_read') && (
-                        <Tooltip title="View Details">
-                            <Button type="text" size="small" icon={<EyeOutlined />} onClick={() => handlePreviewProduct(record.id)} />
-                        </Tooltip>
-                    )}
-
                     {hasPermission('product_update') && (
-                        <Tooltip title="Edit Product">
-                            <Button type="text" size="small" icon={<EditOutlined style={{ color: "#1677ff" }} />} onClick={() => navigate(`/edit/product/${record.id}`, {
-                                state: {fromPage: 'Product List Page', fromAction: 'Click "Edit" Button'}
-                            })}/>
-                        </Tooltip>
+                        <Popconfirm
+                            title="Restore Product"
+                            description={`Restore "${record.name}"?`}
+                            okText="Yes"
+                            cancelText="No"
+                            onConfirm={() => handleRestore(record.id)}
+                        >
+                            <Tooltip title="Restore Product">
+                                <Button type="text" size="small" icon={<ReloadOutlined style={{ color: "#52c41a" }} />} />
+                            </Tooltip>
+                        </Popconfirm>
                     )}
 
                     {hasPermission('product_delete') && (
                         <Popconfirm
-                            title="Delete Product"
-                            description={`Delete "${record.name}"?`}
+                            title="Permanent Delete"
+                            description={`Permanently delete "${record.name}"?`}
                             okText="Yes"
                             cancelText="No"
-                            onConfirm={() => handleDelete(record.id)}
+                            okType="danger"
+                            onConfirm={() => handleForceDelete(record.id)}
                         >
-                            <Tooltip title="Delete Product">
+                            <Tooltip title="Permanent Delete">
                                 <Button type="text" danger size="small" icon={<DeleteOutlined />} />
                             </Tooltip>
                         </Popconfirm>
@@ -423,7 +435,7 @@ export default function ProductList() {
                 items={[
                     { title: "Dashboard" },
                     { title: "Product" },
-                    { title: "Product List" },
+                    { title: "Product Trash List" },
                 ]}
                 style={{ marginBottom: 16 }}
             />
@@ -433,10 +445,10 @@ export default function ProductList() {
                     <Flex justify="space-between" align="center" wrap="wrap" gap="small">
                         <Space align="center" size="middle">
                             <Title level={3} style={{ margin: 0 }}>
-                                Product List
+                                Product Trash List
                             </Title>
-                            <Tag color="blue" style={{ borderRadius: '16px', padding: '2px 12px', fontSize: '14px', fontWeight: 'bold' }}>
-                                Total: {pagination.total}
+                            <Tag color="red" style={{ borderRadius: '16px', padding: '2px 12px', fontSize: '14px', fontWeight: 'bold' }}>
+                                Total Trashed: {pagination.total}
                             </Tag>
                         </Space>
                         <Space>
@@ -445,21 +457,9 @@ export default function ProductList() {
                                     Bulk Actions ({selectedRowKeys.length})
                                 </Button>
                             )}
-                            {hasPermission('product_delete') && (
-                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/product/trash', {
-                                    state: {fromPage: 'Product List Page', fromAction: 'Click "Trash" Button'}
-                                })}>
-                                    Trash
-                                </Button>
-                            )}
-
-                            {hasPermission('product_create') && (
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/products/create", {
-                                    state: {fromPage: 'Product List Page', fromAction: 'Click "Add Product" Button'}
-                                })}>
-                                    Add Product
-                                </Button>
-                            )}
+                            <Button type="primary" onClick={() => navigate('/products')}>
+                                Back to Products
+                            </Button>
                         </Space>
                     </Flex>
                 }
@@ -535,29 +535,7 @@ export default function ProductList() {
                                 options={brands.map((b) => ({ label: b.name, value: b.id }))}
                             />
 
-                            {/* Min Price */}
-                            <InputNumber 
-                                placeholder="Min Price" 
-                                style={{ width: 110 }} 
-                                min={0} 
-                                value={minPrice} 
-                                onChange={(val) => {
-                                    setMinPrice(val);
-                                    setPagination((prev) => ({ ...prev, current: 1 }));
-                                }} 
-                            />
 
-                            {/* Max Price */}
-                            <InputNumber 
-                                placeholder="Max Price" 
-                                style={{ width: 110 }} 
-                                min={0} 
-                                value={maxPrice} 
-                                onChange={(val) => {
-                                    setMaxPrice(val);
-                                    setPagination((prev) => ({ ...prev, current: 1 }));
-                                }} 
-                            />
 
                             {/* Status Filter */}
                             <Select
@@ -576,7 +554,7 @@ export default function ProductList() {
                             />
 
                             {/* Clear Filters */}
-                            {(searchKey || categoryIds?.length > 0 || subCategoryIds?.length > 0 || brandIds?.length > 0 || minPrice !== undefined || maxPrice !== undefined || status) && (
+                            {(searchKey || categoryIds?.length > 0 || subCategoryIds?.length > 0 || brandIds?.length > 0 || status) && (
                                 <Button icon={<ClearOutlined />} onClick={handleResetFilters}>
                                     Reset
                                 </Button>
