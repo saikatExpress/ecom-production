@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getData, getDatas, postData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
+import BlogAiChat from "../../components/blog/BlogAiChat";
 
 export default function EditBlog() {
     // Hook
@@ -230,6 +231,8 @@ export default function EditBlog() {
                     </Row>
                 </Form>
             </Card>
+
+            <BlogAiChat form={form} />
         </div>
     );
 }

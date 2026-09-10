@@ -1,12 +1,13 @@
-import { ArrowLeftOutlined, UploadOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, Form, Input, Row, Select, Upload, message } from "antd";
-import { useEffect, useState } from "react";
+import { ArrowLeftOutlined, CloseOutlined, CopyOutlined, RobotOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Card, Col, Form, Input, Row, Select, Spin, Tooltip, Upload, message } from "antd";
+import { useEffect, useRef, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
 import { handleFormErrors } from './../../utils/formUtils';
+import BlogAiChat from "../../components/blog/BlogAiChat";
 
 export default function AddBlog() {
     // Hook
@@ -163,9 +164,7 @@ export default function AddBlog() {
                             </Card>
 
                             <Card type="inner" title="Featured Image" style={{ marginTop: 16 }}>
-                                <Form.Item
-                                    name="image"
-                                >
+                                <Form.Item name="image">
                                     <Upload
                                         listType="picture-card"
                                         fileList={fileList}
@@ -190,6 +189,8 @@ export default function AddBlog() {
                     </Row>
                 </Form>
             </Card>
+
+            <BlogAiChat form={form} />
         </div>
     );
 }
