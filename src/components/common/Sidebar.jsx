@@ -1,4 +1,4 @@
-import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
+import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined, EnvironmentOutlined, InfoCircleOutlined } from "@ant-design/icons";
 
 import { Drawer, Menu } from "antd";
 import { useEffect, useState } from "react";
@@ -110,7 +110,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             children: [
                 {
                     key       : "orders/list",
-                    icon      : <ProfileOutlined />,
+                    icon      : <UnorderedListOutlined />,
                     label     : t("Order List"),
                     permission: "order_read"
                 },
@@ -122,19 +122,19 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                 },
                 {
                     key       : "order/source",
-                    icon      : <GlobalOutlined />,
+                    icon      : <ApiOutlined />,
                     label     : t("Order Source"),
                     permission: "order_source_read"
                 },
                 {
                     key       : "districts",
-                    icon      : <GlobalOutlined />,
+                    icon      : <EnvironmentOutlined />,
                     label     : t("District"),
                     permission: "district_read"
                 },
                 {
                     key       : "status",
-                    icon      : <GlobalOutlined />,
+                    icon      : <InfoCircleOutlined />,
                     label     : t("Status"),
                     permission: "status_read"
                 },

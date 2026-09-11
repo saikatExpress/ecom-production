@@ -50,6 +50,7 @@ import CustomerType from "../pages/order/customer-type/CustomerType";
 import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGateway";
 import DeliveryGateway from "../pages/order/delivery-gateway/DeliveryGateway";
 import EditDeliveryGateway from "../pages/order/delivery-gateway/EditDeliveryGateway";
+import District from "../pages/order/district/District";
 import OrderGuard from "../pages/order/order-guard/OrderGuard";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
@@ -345,6 +346,12 @@ export default function AppRoutes() {
                         <Route path="/trash/status" element={
                             <PermissionRoute permission="status_delete">
                                 <StatusTrash/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/districts" element={
+                            <PermissionRoute permission="district_read">
+                                <District/>
                             </PermissionRoute>
                         }/>
 
