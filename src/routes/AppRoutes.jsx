@@ -41,6 +41,7 @@ import Courier from "../pages/courier/Courier";
 import CourierTrash from "../pages/courier/CourierTrash";
 import EditCourier from "../pages/courier/EditCourier";
 import NotFound from "../pages/error/NotFound";
+import AddOrder from "../pages/order/AddOrder";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import AddCoupon from "../pages/order/coupon/AddCoupon";
 import Coupon from "../pages/order/coupon/Coupon";
@@ -51,6 +52,8 @@ import AddDeliveryGateway from "../pages/order/delivery-gateway/AddDeliveryGatew
 import DeliveryGateway from "../pages/order/delivery-gateway/DeliveryGateway";
 import EditDeliveryGateway from "../pages/order/delivery-gateway/EditDeliveryGateway";
 import District from "../pages/order/district/District";
+import EditOrder from "../pages/order/EditOrder";
+import Order from "../pages/order/Order";
 import OrderGuard from "../pages/order/order-guard/OrderGuard";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
@@ -307,6 +310,24 @@ export default function AppRoutes() {
                         {/* Product Menu */}
 
                         {/* Order Menu */}
+                        <Route path="/orders" element={
+                            <PermissionRoute permission="order_read">
+                                <Order/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/add/order" element={
+                            <PermissionRoute permission="order_create">
+                                <AddOrder/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="//edit/order/:id" element={
+                            <PermissionRoute permission="order_update">
+                                <EditOrder/>
+                            </PermissionRoute>
+                        }/>
+
                         <Route path="/order/source" element={
                             <PermissionRoute permission="order_source_read">
                                 <OrderSource/>

@@ -1,4 +1,4 @@
-import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, GlobalOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined, EnvironmentOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, EnvironmentOutlined, InfoCircleOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
 
 import { Drawer, Menu } from "antd";
 import { useEffect, useState } from "react";
@@ -109,13 +109,13 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: t("Orders"),
             children: [
                 {
-                    key       : "orders/list",
+                    key       : "orders",
                     icon      : <UnorderedListOutlined />,
                     label     : t("Order List"),
                     permission: "order_read"
                 },
                 {
-                    key       : "add/orders",
+                    key       : "add/order",
                     icon      : <PlusCircleOutlined />,
                     label     : t("Add Order"),
                     permission: "order_create"

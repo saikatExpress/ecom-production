@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../../services/request";
+import { handleFormErrors } from "../../../utils/formUtils";
 
 const { Title, Text } = Typography;
 
@@ -164,6 +165,7 @@ export default function AttributeValue() {
         } catch (error) {
             console.error("Submit error:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }

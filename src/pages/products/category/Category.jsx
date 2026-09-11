@@ -6,6 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas, postData } from "../../../services/request";
 
@@ -53,7 +54,8 @@ export default function Category() {
     useTitle("Category List");
 
     // Variable
-    const navigate = useNavigate();
+    const navigate        = useNavigate();
+    const {hasPermission} = usePermissions();
 
     // States
     const [categories, setCategories] = useState([]);
@@ -232,14 +234,19 @@ export default function Category() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/category/${record.id}`)}>
-                        Edit
-                    </Button>
-                    <Popconfirm title="Delete Category" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                            Delete
+                    {hasPermission('category_update') && (
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/category/${record.id}`)}>
+                            Edit
                         </Button>
-                    </Popconfirm>
+                    )}
+
+                    {hasPermission('category_delete') && (
+                        <Popconfirm title="Delete Category" description={`Are you sure to delete "${record.name}"?`} okText="Yes" cancelText="No" onConfirm={() => handleDelete(record.id)}>
+                            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+                                Delete
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -263,12 +270,19 @@ export default function Category() {
                             Category List
                         </Title>
                         <Space>
-                            <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/category/trash/list')}>
-                                Trash
-                            </Button>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/category')}>
-                                Add Category
-                            </Button>
+                            {hasPermission('category_delete') && (
+                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/category/trash/list',{
+                                    state: {fromPage: 'Category List Page', fromAction: 'Click "Trash" Button'}
+                                })}>
+                                    Trash
+                                </Button>
+                            )}
+                            
+                            {hasPermission('category_create') && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/category')}>
+                                    Add Category
+                                </Button>
+                            )}
                         </Space>
                     </Flex>
                 }

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../../services/request";
+import { handleFormErrors } from "../../../utils/formUtils";
 
 const { Title, Text } = Typography;
 
@@ -119,8 +120,8 @@ export default function Attribute() {
         setSubmitting(true);
         try {
             if (editingAttribute) {
-                // Update
                 const res = await putData(`/admin/attribute/${editingAttribute.id}`, values);
+
                 if (res?.success) {
                     message.success(res?.message || "Attribute updated successfully");
                     setIsModalOpen(false);
@@ -129,8 +130,8 @@ export default function Attribute() {
                     message.error(res?.message || "Failed to update attribute");
                 }
             } else {
-                // Create
                 const res = await postData("/admin/attribute", values);
+
                 if (res?.success) {
                     message.success(res?.message || "Attribute created successfully");
                     setIsModalOpen(false);
@@ -142,6 +143,7 @@ export default function Attribute() {
         } catch (error) {
             console.error("Submit error:", error);
             message.error(error?.response?.data?.message || "An error occurred");
+            handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }

@@ -2,6 +2,7 @@ import { ClearOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutli
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas } from "../../../services/request";
 
@@ -12,7 +13,8 @@ export default function Brand() {
     useTitle("Brand List");
 
     // Variable
-    const navigate = useNavigate();
+    const navigate        = useNavigate();
+    const {hasPermission} = usePermissions();
 
     // States
     const [brands, setBrands]         = useState([]);
@@ -143,20 +145,25 @@ export default function Brand() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/brand/${record.id}`)}>
-                        Edit
-                    </Button>
-                    <Popconfirm
-                        title="Delete Brand"
-                        description={`Are you sure to delete "${record.name}"?`}
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                            Delete
+                    {hasPermission('brand_update') && (
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/brand/${record.id}`)}>
+                            Edit
                         </Button>
-                    </Popconfirm>
+                    )}
+                    
+                    {hasPermission('brand_delete') && (
+                        <Popconfirm
+                            title="Delete Brand"
+                            description={`Are you sure to delete "${record.name}"?`}
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="Yes"
+                            cancelText="No"
+                        >
+                            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+                                Delete
+                            </Button>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -180,14 +187,19 @@ export default function Brand() {
                             Brand List
                         </Title>
                         <Space>
-                            <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/brand/trash')}>
-                                Trash
-                            </Button>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/brand', {
-                                    state: { fromPage: 'Brand List', fromAction: 'Click "Add Brand" Button' }
-                                })}>
-                                Add Brand
-                            </Button>
+                            {hasPermission('brand_delete') && (
+                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/brand/trash')}>
+                                    Trash
+                                </Button>
+                            )}
+                            
+                            {hasPermission('brand_create') && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create/brand', {
+                                        state: { fromPage: 'Brand List', fromAction: 'Click "Add Brand" Button' }
+                                    })}>
+                                    Add Brand
+                                </Button>
+                            )}
                         </Space>
                     </Flex>
                 }

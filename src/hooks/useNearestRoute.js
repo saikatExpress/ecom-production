@@ -33,6 +33,8 @@ export const KNOWN_ROUTES = [
     { path: '/attribute-value',        label: 'Attribute Value' },
 
     // Orders
+    { path: '/orders',                 label: 'Add Order' },
+    { path: '/orders',                 label: 'Order List' },
     { path: '/coupons',                label: 'Coupon List' },
     { path: '/coupon/trash',           label: 'Coupon Trash' },
     { path: '/coupon/add',             label: 'Add Coupon' },

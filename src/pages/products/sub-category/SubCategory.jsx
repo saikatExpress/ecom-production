@@ -216,16 +216,20 @@ export default function SubCategory() {
                             Sub Category List
                         </Title>
                         <Space>
-                            <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/subcategory/trash')}>
-                                Trash
-                            </Button>
+                            {hasPermission('sub_category_delete') && (
+                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/subcategory/trash')}>
+                                    Trash
+                                </Button>
+                            )}
+                            
                             {hasPermission('sub_category_create') && (
                                 <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/subcategory', {
                                     state: { fromPage: 'Sub-Category List', fromAction: 'Breadcrumb "Sub-Category List' }
                                 })}>
                                     Add New Sub-Category
                                 </Button>
-                            )}</Space>
+                            )}
+                        </Space>
                     </Flex>
                 }
             >
@@ -235,7 +239,6 @@ export default function SubCategory() {
                             onChange={(e) => setSearchKey(e.target.value)} onSearch={handleSearchSubmit}
                         />
 
-                        {/* Filter by Category */}
                         <Select
                             placeholder="Filter by Category"
                             allowClear
@@ -251,7 +254,6 @@ export default function SubCategory() {
                             }))}
                         />
 
-                        {/* Reset Filters */}
                         {(searchKey || categoryId) && (
                             <Button icon={<ClearOutlined />} onClick={handleResetFilters}>
                                 Reset
