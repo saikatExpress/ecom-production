@@ -105,6 +105,7 @@ const resources = {
       "Order"             : "অর্ডার",
       "Order Status"      : "অর্ডার স্ট্যাটাস",
       "Coupons"           : "কুপন",
+      "District"          : "জেলা",
       "Courier"           : "কুরিয়ার",
       "Delivery Gateway"  : "ডেলিভারি গেটওয়ে",
       "Payment Gateway"   : "পেমেন্ট গেটওয়ে",

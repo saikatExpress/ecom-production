@@ -127,6 +127,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "order_source_read"
                 },
                 {
+                    key       : "districts",
+                    icon      : <GlobalOutlined />,
+                    label     : t("District"),
+                    permission: "district_read"
+                },
+                {
                     key       : "status",
                     icon      : <GlobalOutlined />,
                     label     : t("Status"),
