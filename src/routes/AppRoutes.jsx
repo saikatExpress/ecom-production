@@ -58,6 +58,7 @@ import OrderGuard from "../pages/order/order-guard/OrderGuard";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
 import EditOrderSource from "../pages/order/order-source/EditOrderSource";
 import OrderSource from "../pages/order/order-source/OrderSource";
+import OrderTrash from "../pages/order/OrderTrash";
 import AddPaymentGateway from "../pages/order/payment-gateway/AddPaymentGateway";
 import EditPaymentGateway from "../pages/order/payment-gateway/EditPaymentGateway";
 import PaymentGateway from "../pages/order/payment-gateway/PaymentGateway";
@@ -322,9 +323,15 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
 
-                        <Route path="//edit/order/:id" element={
+                        <Route path="/edit/order/:id" element={
                             <PermissionRoute permission="order_update">
                                 <EditOrder/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/trash/order" element={
+                            <PermissionRoute permission="order_delete">
+                                <OrderTrash/>
                             </PermissionRoute>
                         }/>
 

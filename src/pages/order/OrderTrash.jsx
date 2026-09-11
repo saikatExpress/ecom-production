@@ -1,16 +1,16 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, Collapse, DatePicker, Flex, Form, Input, Row, Select, Space, Table, Tabs, Tag, Typography, message, Popconfirm } from "antd";
+import { ArrowLeftOutlined, DeleteOutlined, ReloadOutlined, SearchOutlined, UndoOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Card, Col, Collapse, DatePicker, Flex, Form, Input, message, Popconfirm, Row, Select, Space, Table, Tag, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import usePermissions from "../../hooks/usePermissions";
 import useTitle from "../../hooks/useTitle";
-import { getDatas, deleteData } from "../../services/request";
+import { deleteData, getDatas, postData } from "../../services/request";
 
 const { Title, Text } = Typography;
 
-const Order = () => {
+const OrderTrash = () => {
     // Hook
-    useTitle("Order List");
+    useTitle("Order Trash List");
 
     // Variable
     const navigate = useNavigate();
@@ -19,28 +19,24 @@ const Order = () => {
 
     // States
     const [orders, setOrders] = useState([]);
-    const [statuses, setStatuses] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [totalAllOrders, setTotalAllOrders] = useState(0);
     
     const [filters, setFilters] = useState({
-        search_key: '',
-        status_id: null,
-        paid_status: null,
-        customer_type_id: null,
+        search_key         : '',
+        status_id          : null,
+        paid_status        : null,
+        customer_type_id   : null,
         delivery_gateway_id: null,
-        payment_gateway_id: null,
-        district_id: null,
-        courier_id: null,
-        courier_status: null,
-        assign_user_id: null,
-        prepared_by: null,
-        date_from: null,
-        date_to: null,
-        min_amount: null,
-        max_amount: null,
-        sort_by: 'id',
-        sort_direction: 'desc'
+        payment_gateway_id : null,
+        district_id        : null,
+        courier_id         : null,
+        is_duplicate       : null,
+        date_from          : null,
+        date_to            : null,
+        deleted_from       : null,
+        deleted_to         : null,
+        sort_by            : 'deleted_at',
+        sort_direction     : 'desc'
     });
 
     const [pagination, setPagination] = useState({ current_page: 1, per_page: 25, total: 0 });
@@ -61,26 +57,19 @@ const Order = () => {
                 }
             });
 
-            const res = await getDatas("/admin/order", params);
+            const res = await getDatas("/admin/order/trash", params);
             
             if (res?.success && res?.data) {
-                if (res.data.items) {
-                    setOrders(res.data.items);
-                }
-                if (res.data.pagination) {
-                    setPagination(res.data.pagination);
-                    // Track total count for All Orders tab (when no status filter)
-                    if (!currentFilters.status_id) {
-                        setTotalAllOrders(res.data.pagination.total);
-                    }
-                }
-                if (res.data.statuses) {
-                    setStatuses(res.data.statuses);
-                }
+                setOrders(res.data.data || []);
+                setPagination({
+                    current_page: res.data.current_page || 1,
+                    per_page: res.data.per_page || 25,
+                    total: res.data.total || 0
+                });
             }
         } catch (error) {
-            console.error("Failed to fetch orders:", error);
-            message.error(error?.response?.data?.message || "Failed to fetch orders.");
+            console.error("Failed to fetch trash orders:", error);
+            message.error(error?.response?.data?.message || "Failed to fetch trash orders.");
         } finally {
             setLoading(false);
         }
@@ -89,7 +78,7 @@ const Order = () => {
     useEffect(() => {
         fetchOrders(filters, pagination.current_page, pagination.per_page);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters.status_id]); // Fetch only when status_id (tab) changes. Other filters are handled via submit button.
+    }, []); 
 
     const handleTableChange = (paginationOpts, filtersOpts, sorter) => {
         let newSortBy = filters.sort_by;
@@ -112,14 +101,19 @@ const Order = () => {
     const handleFilterSubmit = (values) => {
         const date_from = values.dateRange ? values.dateRange[0].format('YYYY-MM-DD') : null;
         const date_to = values.dateRange ? values.dateRange[1].format('YYYY-MM-DD') : null;
+        const deleted_from = values.deletedRange ? values.deletedRange[0].format('YYYY-MM-DD') : null;
+        const deleted_to = values.deletedRange ? values.deletedRange[1].format('YYYY-MM-DD') : null;
         
         const newFilters = {
             ...filters,
             ...values,
             date_from,
-            date_to
+            date_to,
+            deleted_from,
+            deleted_to
         };
         delete newFilters.dateRange;
+        delete newFilters.deletedRange;
         
         setFilters(newFilters);
         fetchOrders(newFilters, 1, pagination.per_page);
@@ -129,140 +123,59 @@ const Order = () => {
         form.resetFields();
         const resetFilters = {
             search_key: '',
-            status_id: filters.status_id, // keep active tab
-            sort_by: 'id',
+            status_id: null,
+            paid_status: null,
+            customer_type_id: null,
+            delivery_gateway_id: null,
+            payment_gateway_id: null,
+            district_id: null,
+            courier_id: null,
+            is_duplicate: null,
+            date_from: null,
+            date_to: null,
+            deleted_from: null,
+            deleted_to: null,
+            sort_by: 'deleted_at',
             sort_direction: 'desc'
         };
         setFilters(resetFilters);
         fetchOrders(resetFilters, 1, pagination.per_page);
     };
 
-    let activeMainTab = 'all';
-    if (filters.status_id) {
-        if ([4, 13, 14].includes(filters.status_id)) {
-            activeMainTab = '4';
-        } else if ([9, 10, 11, 12].includes(filters.status_id)) {
-            activeMainTab = 'rnd';
-        } else {
-            activeMainTab = filters.status_id.toString();
-        }
-    }
-
-    const handleMainTabChange = (key) => {
-        if (key === 'all') {
-            setFilters(prev => ({ ...prev, status_id: null }));
-        } else if (key === 'rnd') {
-            const firstRnd = statuses.find(s => [9, 10, 11, 12].includes(s.id));
-            setFilters(prev => ({ ...prev, status_id: firstRnd ? firstRnd.id : 9 }));
-        } else if (key === '4') {
-            setFilters(prev => ({ ...prev, status_id: 4 }));
-        } else {
-            setFilters(prev => ({ ...prev, status_id: parseInt(key, 10) }));
-        }
-    };
-
-    const handleSubTabChange = (key) => {
-        setFilters(prev => ({ ...prev, status_id: parseInt(key, 10) }));
-    };
-
-    const handleDeleteRow = async (id) => {
+    const handleRestore = async (id) => {
         try {
-            const res = await deleteData(`/admin/order/${id}`);
+            const res = await postData(`/admin/order/${id}/restore`);
             if (res?.success) {
-                message.success("Order deleted successfully!");
+                message.success("Order restored successfully!");
                 setOrders(prev => prev.filter(order => order.id !== id));
             } else {
-                message.error(res?.message || "Failed to delete order");
+                message.error(res?.message || "Failed to restore order.");
             }
         } catch (error) {
-            console.error("Failed to delete order:", error);
+            console.error("Failed to restore order:", error);
+            message.error("An error occurred while restoring the order.");
+        }
+    };
+
+    const handleForceDelete = async (id) => {
+        try {
+            const res = await deleteData(`/admin/order/${id}/force`);
+            if (res?.success) {
+                message.success("Order permanently deleted!");
+                setOrders(prev => prev.filter(order => order.id !== id));
+            } else {
+                message.error(res?.message || "Failed to permanently delete order.");
+            }
+        } catch (error) {
+            console.error("Failed to permanently delete order:", error);
             message.error("An error occurred while deleting the order.");
         }
     };
 
-    const buildTabLabel = (s, active) => (
-        <span style={{
-            background: active ? s.bg_color : 'transparent',
-            color: active ? s.text_color : undefined,
-            padding: '2px 10px',
-            borderRadius: 20,
-            fontWeight: 500,
-            transition: 'all 0.2s',
-            display: 'inline-block',
-        }}>
-            {s.name} ({s.total_orders})
-        </span>
-    );
-
-    const mainTabItems = [
-        {
-            key: 'all',
-            label: (
-                <span style={{
-                    background: activeMainTab === 'all' ? '#1677ff' : 'transparent',
-                    color: activeMainTab === 'all' ? '#fff' : undefined,
-                    padding: '2px 10px',
-                    borderRadius: 20,
-                    fontWeight: 500,
-                    display: 'inline-block',
-                }}>
-                    All Orders ({totalAllOrders})
-                </span>
-            )
-        }
-    ];
-
-    [1, 2, 3, 4, 5, 6, 7, 8].forEach(id => {
-        const s = statuses.find(st => st.id === id);
-        if (s) {
-            mainTabItems.push({key: s.id.toString(),label: buildTabLabel(s, activeMainTab === s.id.toString())});
-        }
-    });
-
-    const rndStatus = statuses.find(s => [9, 10, 11, 12].includes(s.id));
-    const rndBg = rndStatus?.bg_color || '#9C27B0';
-    const rndTotalOrders = statuses.filter(s => [9, 10, 11, 12].includes(s.id)).reduce((sum, s) => sum + s.total_orders, 0);
-    mainTabItems.push({
-        key: 'rnd',
-        label: (
-            <span style={{
-                background  : activeMainTab === 'rnd' ? rndBg : 'transparent',
-                color       : activeMainTab === 'rnd' ? '#fff': undefined,
-                padding     : '2px 10px',
-                borderRadius: 20,
-                fontWeight  : 500,
-                display     : 'inline-block',
-            }}>
-                R & D ({rndTotalOrders})
-            </span>
-        )
-    });
-
-    let subTabItems = [];
-    if (activeMainTab === '4') {
-        subTabItems = [4, 13, 14].map(id => {
-            const s = statuses.find(st => st.id === id);
-            if (s) return {
-                key: s.id.toString(),
-                label: buildTabLabel(s, filters.status_id === s.id)
-            };
-            return null;
-        }).filter(Boolean);
-    } else if (activeMainTab === 'rnd') {
-        subTabItems = [9, 10, 11, 12].map(id => {
-            const s = statuses.find(st => st.id === id);
-            if (s) return {
-                key: s.id.toString(),
-                label: buildTabLabel(s, filters.status_id === s.id)
-            };
-            return null;
-        }).filter(Boolean);
-    }
-
-    // SL starts from the first item of the current page
     const slStart = (pagination.current_page - 1) * pagination.per_page + 1;
 
-    const columns = [
+    const columns = 
+    [
         {
             title: 'SL',
             key: 'sl',
@@ -279,11 +192,16 @@ const Order = () => {
             render: (text) => <Text strong>{text}</Text>
         },
         {
-            title: 'Date',
-            dataIndex: 'order_date',
-            key: 'order_date',
+            title: 'Deleted At',
+            dataIndex: 'deleted_at',
+            key: 'deleted_at',
             sorter: true,
-            render: (date) => new Date(date).toLocaleString()
+            render: (date) => date ? new Date(date).toLocaleString() : 'N/A'
+        },
+        {
+            title: 'Deleted By',
+            key: 'deleted_by',
+            render: (_, record) => record.deleted_by?.username || 'N/A'
         },
         {
             title: 'Customer',
@@ -330,20 +248,23 @@ const Order = () => {
             render: (_, record) => (
                 <Space size="small">
                     {hasPermission('order_read') && (
-                        <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => navigate(`/orders/view/${record.id}`)}>
-                            View
-                        </Button>
-                    )}
-                    {hasPermission('order_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/order/${record.id}`)}>
-                            Edit
-                        </Button>
+                        <Popconfirm
+                            title="Restore order"
+                            description="Are you sure you want to restore this order?"
+                            onConfirm={() => handleRestore(record.id)}
+                            okText="Yes"
+                            cancelText="No"
+                        >
+                            <Button type="link" size="small" icon={<UndoOutlined />}>
+                                Restore
+                            </Button>
+                        </Popconfirm>
                     )}
                     {hasPermission('order_delete') && (
                         <Popconfirm
-                            title="Delete the order"
-                            description="Are you sure to delete this order?"
-                            onConfirm={() => handleDeleteRow(record.id)}
+                            title="Permanently delete"
+                            description="Are you sure you want to delete this permanently? This action cannot be undone."
+                            onConfirm={() => handleForceDelete(record.id)}
                             okText="Yes"
                             cancelText="No"
                         >
@@ -358,12 +279,12 @@ const Order = () => {
     ];
 
     return (
-        <div className="order-page">
+        <div className="order-trash-page">
             <Breadcrumb
                 items={[
                     { title: "Dashboard" },
                     { title: "Order" },
-                    { title: "Order List" },
+                    { title: "Order Trash" },
                 ]}
                 style={{ marginBottom: 16 }}
             />
@@ -372,24 +293,13 @@ const Order = () => {
                 title={
                     <Flex justify="space-between" align="center" wrap="wrap" gap="small">
                         <Title level={3} style={{ margin: 0 }}>
-                            Order List
+                            Order Trash List
                         </Title>
-                        <Flex gap="small">
-                            {hasPermission('order_delete') && (
-                                <Button danger icon={<DeleteOutlined />} onClick={() => navigate('/trash/order', {
-                                    state: {fromPage: 'Order List Page', fromAction: 'Click "Trash" Button'}
-                                })}>
-                                    Trash
-                                </Button>
-                            )}
-                            {hasPermission('order_create') && (
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/add/order', {
-                                    state: {fromPage: 'Order List Page', fromAction: 'Click "Add Order" Button'}
-                                })}>
-                                    Add Order
-                                </Button>
-                            )}
-                        </Flex>
+                        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/orders', {
+                            state: {fromPage: 'Order Trash List Page', fromAction: 'Click "Back to Orders" Button'}
+                        })}>
+                            Back to Orders
+                        </Button>
                     </Flex>
                 }
             >
@@ -402,17 +312,13 @@ const Order = () => {
                                 </Form.Item>
                             </Col>
                             <Col span={8}>
-                                <Form.Item name="dateRange" label="Order Date">
+                                <Form.Item name="deletedRange" label="Deleted Date">
                                     <DatePicker.RangePicker style={{ width: '100%' }} />
                                 </Form.Item>
                             </Col>
                             <Col span={8}>
-                                <Form.Item name="paid_status" label="Paid Status">
-                                    <Select placeholder="Select status" allowClear>
-                                        <Select.Option value="paid">Paid</Select.Option>
-                                        <Select.Option value="partial">Partial</Select.Option>
-                                        <Select.Option value="unpaid">Unpaid</Select.Option>
-                                    </Select>
+                                <Form.Item name="dateRange" label="Order Date">
+                                    <DatePicker.RangePicker style={{ width: '100%' }} />
                                 </Form.Item>
                             </Col>
                         </Row>
@@ -420,13 +326,25 @@ const Order = () => {
                             <Collapse.Panel header="Advanced Filters" key="1" style={{ padding: 0 }}>
                                 <Row gutter={16}>
                                     <Col span={4}>
-                                        <Form.Item name="min_amount" label="Min Amount">
-                                            <Input type="number" placeholder="Min" allowClear />
+                                        <Form.Item name="status_id" label="Status ID">
+                                            <Input type="number" placeholder="ID" allowClear />
                                         </Form.Item>
                                     </Col>
                                     <Col span={4}>
-                                        <Form.Item name="max_amount" label="Max Amount">
-                                            <Input type="number" placeholder="Max" allowClear />
+                                        <Form.Item name="paid_status" label="Paid Status">
+                                            <Select placeholder="Select status" allowClear>
+                                                <Select.Option value="paid">Paid</Select.Option>
+                                                <Select.Option value="partial">Partial</Select.Option>
+                                                <Select.Option value="unpaid">Unpaid</Select.Option>
+                                            </Select>
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={4}>
+                                        <Form.Item name="is_duplicate" label="Is Duplicate?">
+                                            <Select placeholder="Select" allowClear>
+                                                <Select.Option value="true">Yes</Select.Option>
+                                                <Select.Option value="false">No</Select.Option>
+                                            </Select>
                                         </Form.Item>
                                     </Col>
                                     <Col span={4}>
@@ -454,21 +372,6 @@ const Order = () => {
                                             <Input type="number" placeholder="ID" allowClear />
                                         </Form.Item>
                                     </Col>
-                                    <Col span={4}>
-                                        <Form.Item name="courier_status" label="Courier Status">
-                                            <Input placeholder="Status" allowClear />
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={4}>
-                                        <Form.Item name="assign_user_id" label="Assigned User ID">
-                                            <Input type="number" placeholder="ID" allowClear />
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={4}>
-                                        <Form.Item name="prepared_by" label="Prepared By ID">
-                                            <Input type="number" placeholder="ID" allowClear />
-                                        </Form.Item>
-                                    </Col>
                                 </Row>
                             </Collapse.Panel>
                         </Collapse>
@@ -481,23 +384,6 @@ const Order = () => {
                         </Flex>
                     </Form>
                 </div>
-
-                <Tabs 
-                    activeKey={activeMainTab} 
-                    items={mainTabItems} 
-                    onChange={handleMainTabChange} 
-                />
-
-                {subTabItems.length > 0 && (
-                    <Tabs 
-                        activeKey={filters.status_id ? filters.status_id.toString() : ''} 
-                        items={subTabItems} 
-                        onChange={handleSubTabChange} 
-                        type="card"
-                        size="small"
-                        style={{ marginBottom: 16 }}
-                    />
-                )}
 
                 <Table
                     columns={columns}
@@ -519,4 +405,4 @@ const Order = () => {
     );
 };
 
-export default Order;
+export default OrderTrash;
