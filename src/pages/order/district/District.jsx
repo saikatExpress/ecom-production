@@ -180,6 +180,12 @@ const District = () => {
             render: (text) => <Text strong>{text}</Text>,
         },
         {
+            title: "Total Order",
+            dataIndex: "orders_count",
+            key: "orders_count",
+            render: (count) => <Tag color="blue">{count !== undefined && count !== null ? count : 0}</Tag>,
+        },
+        {
             title: "Status",
             key: "status",
             render: (_, record) => {
