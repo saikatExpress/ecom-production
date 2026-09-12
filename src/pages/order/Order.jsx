@@ -22,7 +22,13 @@ const Order = () => {
     const [statuses, setStatuses]             = useState([]);
     const [loading, setLoading]               = useState(false);
     const [totalAllOrders, setTotalAllOrders] = useState(0);
-    const [showAdvanced, setShowAdvanced]     = useState(false);
+    const [showAdvanced, setShowAdvanced]         = useState(false);
+    const [customerTypes, setCustomerTypes]       = useState([]);
+    const [districts, setDistricts]               = useState([]);
+    const [deliveryGateways, setDeliveryGateways] = useState([]);
+    const [paymentGateways, setPaymentGateways]   = useState([]);
+    const [couriers, setCouriers]                 = useState([]);
+    const [users, setUsers]                       = useState([]);
 
     const [filters, setFilters] = useState({
         search_key         : '',
@@ -33,7 +39,6 @@ const Order = () => {
         payment_gateway_id : null,
         district_id        : null,
         courier_id         : null,
-        courier_status     : null,
         assign_user_id     : null,
         prepared_by        : null,
         date_from          : null,
@@ -84,6 +89,48 @@ const Order = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const fetchDropdownData = async () => {
+            try {
+                const [customerTypesRes, districtsRes, deliveryGatewaysRes, paymentGatewaysRes, couriersRes, usersRes] = await Promise.all([
+                    getDatas("/admin/customer-type/list"),
+                    getDatas("/admin/district/list"),
+                    getDatas("/admin/delivery-gateway/list"),
+                    getDatas("/admin/payment-gateway/list"),
+                    getDatas("/admin/courier/list"),
+                    getDatas("/admin/user/list")
+                ]);
+
+                if (customerTypesRes?.success && customerTypesRes?.data) {
+                    setCustomerTypes(customerTypesRes.data);
+                }
+                
+                if (districtsRes?.success && districtsRes?.data) {
+                    setDistricts(districtsRes.data);
+                }
+
+                if (deliveryGatewaysRes?.success && deliveryGatewaysRes?.data) {
+                    setDeliveryGateways(deliveryGatewaysRes.data);
+                }
+
+                if (paymentGatewaysRes?.success && paymentGatewaysRes?.data) {
+                    setPaymentGateways(paymentGatewaysRes.data);
+                }
+
+                if (couriersRes?.success && couriersRes?.data) {
+                    setCouriers(couriersRes.data);
+                }
+
+                if (usersRes?.success && usersRes?.data) {
+                    setUsers(usersRes.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch dropdown data:", error);
+            }
+        };
+        fetchDropdownData();
+    }, []);
 
     useEffect(() => {
         fetchOrders(filters, pagination.current_page, pagination.per_page);
@@ -331,7 +378,8 @@ const Order = () => {
                 <Text strong copyable={{ text }} style={{ fontSize: 13, color: '#1677ff' }}>
                     {text}
                 </Text>
-            )
+            ),
+            width: 100,
         },
         {
             title: 'Date',
@@ -660,43 +708,105 @@ const Order = () => {
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8} md={6} lg={4}>
-                                    <Form.Item name="district_id" label={<Text style={{ fontSize: 12 }}>District ID</Text>} style={{ marginBottom: 12 }}>
-                                        <InputNumber placeholder="ID" style={{ width: '100%' }} min={1} />
+                                    <Form.Item name="district_id" label={<Text style={{ fontSize: 12 }}>District</Text>} style={{ marginBottom: 12 }}>
+                                        <Select
+                                            placeholder="Select District"
+                                            allowClear
+                                            showSearch
+                                            optionFilterProp="children"
+                                            filterOption={(input, option) =>
+                                                (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                                            }
+                                        >
+                                            {districts.map(district => (
+                                                <Select.Option key={district.id} value={district.id}>
+                                                    {district.district_name}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8} md={6} lg={4}>
                                     <Form.Item name="customer_type_id" label={<Text style={{ fontSize: 12 }}>Customer Type</Text>} style={{ marginBottom: 12 }}>
-                                        <InputNumber placeholder="ID" style={{ width: '100%' }} min={1} />
+                                        <Select placeholder="Select Type" allowClear>
+                                            {customerTypes.map(type => (
+                                                <Select.Option key={type.id} value={type.id}>
+                                                    {type.name}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8} md={6} lg={4}>
                                     <Form.Item name="delivery_gateway_id" label={<Text style={{ fontSize: 12 }}>Del. Gateway</Text>} style={{ marginBottom: 12 }}>
-                                        <InputNumber placeholder="ID" style={{ width: '100%' }} min={1} />
+                                        <Select placeholder="Select Gateway" allowClear>
+                                            {deliveryGateways.map(gateway => (
+                                                <Select.Option key={gateway.id} value={gateway.id}>
+                                                    {gateway.name} (৳{gateway.delivery_fee})
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8} md={6} lg={4}>
                                     <Form.Item name="payment_gateway_id" label={<Text style={{ fontSize: 12 }}>Pay. Gateway</Text>} style={{ marginBottom: 12 }}>
-                                        <InputNumber placeholder="ID" style={{ width: '100%' }} min={1} />
+                                        <Select placeholder="Select Gateway" allowClear>
+                                            {paymentGateways.map(gateway => (
+                                                <Select.Option key={gateway.id} value={gateway.id}>
+                                                    {gateway.name}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8} md={6} lg={4}>
-                                    <Form.Item name="courier_id" label={<Text style={{ fontSize: 12 }}>Courier ID</Text>} style={{ marginBottom: 12 }}>
-                                        <InputNumber placeholder="ID" style={{ width: '100%' }} min={1} />
+                                    <Form.Item name="courier_id" label={<Text style={{ fontSize: 12 }}>Courier</Text>} style={{ marginBottom: 12 }}>
+                                        <Select placeholder="Select Courier" allowClear>
+                                            {couriers.map(courier => (
+                                                <Select.Option key={courier.id} value={courier.id}>
+                                                    {courier.name}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
-                                <Col xs={12} sm={8} md={6} lg={4}>
-                                    <Form.Item name="courier_status" label={<Text style={{ fontSize: 12 }}>Courier Status</Text>} style={{ marginBottom: 12 }}>
-                                        <Input placeholder="Status" allowClear />
-                                    </Form.Item>
-                                </Col>
+
                                 <Col xs={12} sm={8} md={6} lg={4}>
                                     <Form.Item name="assign_user_id" label={<Text style={{ fontSize: 12 }}>Assigned User</Text>} style={{ marginBottom: 12 }}>
-                                        <InputNumber placeholder="ID" style={{ width: '100%' }} min={1} />
+                                        <Select
+                                            placeholder="Select User"
+                                            allowClear
+                                            showSearch
+                                            optionFilterProp="children"
+                                            filterOption={(input, option) =>
+                                                (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                                            }
+                                        >
+                                            {users.map(user => (
+                                                <Select.Option key={user.id} value={user.id}>
+                                                    {user.username}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8} md={6} lg={4}>
                                     <Form.Item name="prepared_by" label={<Text style={{ fontSize: 12 }}>Prepared By</Text>} style={{ marginBottom: 12 }}>
-                                        <InputNumber placeholder="ID" style={{ width: '100%' }} min={1} />
+                                        <Select
+                                            placeholder="Select User"
+                                            allowClear
+                                            showSearch
+                                            optionFilterProp="children"
+                                            filterOption={(input, option) =>
+                                                (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                                            }
+                                        >
+                                            {users.map(user => (
+                                                <Select.Option key={user.id} value={user.id}>
+                                                    {user.username}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                             </Row>
