@@ -1,5 +1,5 @@
-import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, PhoneOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, DatePicker, Flex, Form, Input, InputNumber, Popconfirm, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
+import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, Popconfirm, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import usePermissions from "../../hooks/usePermissions";
@@ -370,29 +370,81 @@ const Order = () => {
             )
         },
         {
-            title: 'Invoice',
-            dataIndex: 'invoice_number',
-            key: 'invoice_number',
-            sorter: true,
-            render: (text) => (
-                <Text strong copyable={{ text }} style={{ fontSize: 13, color: '#1677ff' }}>
-                    {text}
-                </Text>
-            ),
-            width: 100,
-        },
-        {
-            title: 'Date',
-            dataIndex: 'order_date',
-            key: 'order_date',
-            sorter: true,
-            width: 160,
-            render: (date) => (
-                <Flex align="center" gap={6}>
-                    <CalendarOutlined style={{ color: '#8c8c8c', fontSize: 13 }} />
-                    <Text style={{ fontSize: 13 }}>{new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</Text>
-                </Flex>
-            )
+            title: 'Order Info',
+            key: 'order_info',
+            width: 280,
+            render: (_, record) => {
+                const firstProduct = record.details?.[0];
+                const extraCount = record.details?.length > 1 ? record.details.length - 1 : 0;
+                
+                return (
+                    <Flex gap={10} align="flex-start">
+                        {firstProduct?.product_img_path ? (
+                            <div style={{
+                                width: 45,
+                                height: 45,
+                                borderRadius: 6,
+                                overflow: 'hidden',
+                                flexShrink: 0,
+                                border: '1px solid #e8e8e8'
+                            }}>
+                                <img src={firstProduct.product_img_path} alt="product" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
+                        ) : (
+                            <div style={{
+                                width: 45,
+                                height: 45,
+                                borderRadius: 6,
+                                background: '#f5f5f5',
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid #e8e8e8'
+                            }}>
+                                <ShoppingCartOutlined style={{ color: '#bfbfbf', fontSize: 20 }} />
+                            </div>
+                        )}
+                        <div style={{ lineHeight: 1.4, overflow: 'hidden' }}>
+                            <div style={{ marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Text strong copyable={{ text: record.invoice_number }} style={{ fontSize: 13, color: '#1677ff' }}>
+                                    {record.invoice_number}
+                                </Text>
+                                <Dropdown
+                                    menu={{
+                                        items: [
+                                            { key: 'normal', label: 'Normal Invoice' },
+                                            { key: 'a5', label: 'A5 Invoice' },
+                                            { key: 'pos', label: 'Pos Invoice' },
+                                        ]
+                                    }}
+                                    trigger={['click']}
+                                >
+                                    <Button type="text" size="small" icon={<PrinterOutlined />} style={{ color: '#555', padding: 0, height: 'auto' }} />
+                                </Dropdown>
+                            </div>
+                            {firstProduct && (
+                                <div style={{ 
+                                    whiteSpace: 'nowrap', 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis',
+                                    fontSize: 12,
+                                    color: '#333'
+                                }}>
+                                    {firstProduct.product_name}
+                                    {extraCount > 0 && <Text type="secondary" style={{ fontSize: 11, marginLeft: 4 }}>+{extraCount}</Text>}
+                                </div>
+                            )}
+                            <div style={{ marginTop: 2 }}>
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                    <CalendarOutlined style={{ marginRight: 4 }} />
+                                    {new Date(record.order_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </Text>
+                            </div>
+                        </div>
+                    </Flex>
+                );
+            }
         },
         {
             title: 'Customer',
@@ -416,11 +468,43 @@ const Order = () => {
                         {record.customer_name?.charAt(0)?.toUpperCase()}
                     </div>
                     <div style={{ lineHeight: 1.4 }}>
-                        <div><Text strong style={{ fontSize: 13 }}>{record.customer_name}</Text></div>
                         <div>
+                            <Text strong style={{ fontSize: 13 }}>{record.customer_name}</Text>
+                            {record.customer_type?.name && (
+                                <sup style={{
+                                    marginLeft: 4,
+                                    color: '#52c41a',
+                                    fontWeight: 600,
+                                    fontSize: 10,
+                                    background: '#f6ffed',
+                                    padding: '0 4px',
+                                    borderRadius: 4,
+                                    border: '1px solid #b7eb8f'
+                                }}>
+                                    {record.customer_type.name}
+                                </sup>
+                            )}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
                             <Text type="secondary" style={{ fontSize: 12 }}>
                                 <PhoneOutlined style={{ marginRight: 4 }} />{record.phone_number}
                             </Text>
+                            <Tooltip title="WhatsApp">
+                                <Button 
+                                    type="text" 
+                                    size="small" 
+                                    icon={<WhatsAppOutlined />} 
+                                    style={{ color: '#25D366', padding: 0, height: 'auto' }} 
+                                    onClick={() => {
+                                        const phone = record.phone_number?.startsWith('0') ? '88' + record.phone_number : record.phone_number;
+                                        const msg = `Hello ${record.customer_name},\n\nRegarding your order ${record.invoice_number} (Amount: ৳${record.total_payable_amount}).\n\nPlease let us know if you need any assistance!`;
+                                        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                                    }}
+                                />
+                            </Tooltip>
+                            <Tooltip title="More Info">
+                                <Button type="text" size="small" icon={<InfoCircleOutlined />} style={{ color: '#1677ff', padding: 0, height: 'auto' }} />
+                            </Tooltip>
                         </div>
                         {record.shipping_address && (
                             <div>
@@ -439,24 +523,46 @@ const Order = () => {
             key: 'total_payable_amount',
             sorter: true,
             align: 'right',
-            width: 140,
-            render: (amount, record) => (
-                <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: '#1a1a1a' }}>
-                        ৳{parseFloat(amount || 0).toLocaleString()}
+            width: 160,
+            render: (amount, record) => {
+                const discount = parseFloat(record.special_discount || 0) + parseFloat(record.coupon_discount || 0);
+                const advance = parseFloat(record.advanced_payment || 0);
+                const delivery = parseFloat(record.delivery_charge || 0);
+                const additional = parseFloat(record.additional_cost || 0);
+
+                return (
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <div style={{ fontSize: 11, color: '#888', lineHeight: '1.4', textAlign: 'right', width: '100%' }}>
+                            <div>Net: ৳{parseFloat(record.net_order_amount || 0).toLocaleString()}</div>
+                            {delivery > 0 && <div>+ Del: ৳{delivery.toLocaleString()}</div>}
+                            {additional > 0 && <div>+ Add: ৳{additional.toLocaleString()}</div>}
+                            {discount > 0 && <div style={{ color: '#ff4d4f' }}>- Disc: ৳{discount.toLocaleString()}</div>}
+                            {advance > 0 && <div style={{ color: '#52c41a' }}>- Adv: ৳{advance.toLocaleString()}</div>}
+                        </div>
+                        <div style={{ 
+                            fontWeight: 700, 
+                            fontSize: 14, 
+                            color: '#1a1a1a', 
+                            marginTop: 4, 
+                            paddingTop: 4, 
+                            borderTop: '1px dashed #d9d9d9',
+                            width: '100%',
+                            textAlign: 'right'
+                        }}>
+                            ৳{parseFloat(amount || 0).toLocaleString()}
+                        </div>
+                        {parseFloat(record.due) > 0 ? (
+                            <Tag color="red" style={{ marginTop: 4, fontSize: 11, borderRadius: 4, marginInlineEnd: 0 }}>
+                                Due: ৳{parseFloat(record.due).toLocaleString()}
+                            </Tag>
+                        ) : (
+                            <Tag color="green" style={{ marginTop: 4, fontSize: 11, borderRadius: 4, marginInlineEnd: 0 }}>
+                                Paid
+                            </Tag>
+                        )}
                     </div>
-                    {parseFloat(record.due) > 0 && (
-                        <Tag color="red" style={{ marginTop: 2, fontSize: 11, borderRadius: 4 }}>
-                            Due: ৳{parseFloat(record.due).toLocaleString()}
-                        </Tag>
-                    )}
-                    {parseFloat(record.due) <= 0 && (
-                        <Tag color="green" style={{ marginTop: 2, fontSize: 11, borderRadius: 4 }}>
-                            Paid
-                        </Tag>
-                    )}
-                </div>
-            )
+                );
+            }
         },
         {
             title: 'Payment',
@@ -485,6 +591,59 @@ const Order = () => {
                     }}>
                         {c.label}
                     </span>
+                );
+            }
+        },
+        {
+            title: 'Courier',
+            key: 'courier',
+            width: 160,
+            render: (_, record) => {
+                if (!record.courier?.name && !record.consignment_id && !record.tracking_code) {
+                    return <Text type="secondary" style={{ fontSize: 12 }}>N/A</Text>;
+                }
+                return (
+                    <div style={{ lineHeight: 1.4 }}>
+                        {record.courier?.name && (
+                            <div>
+                                <Tag color="blue" style={{ margin: 0, fontSize: 11, borderRadius: 4, fontWeight: 600 }}>
+                                    {record.courier.name}
+                                </Tag>
+                            </div>
+                        )}
+                        {record.consignment_id && (
+                            <div style={{ marginTop: 6 }}>
+                                <Text type="secondary" style={{ fontSize: 10, display: 'block', marginBottom: 2, textTransform: 'uppercase', letterSpacing: 0.5 }}>Consignment ID</Text>
+                                <Text strong copyable={{ text: record.consignment_id }} style={{ 
+                                    fontSize: 12, 
+                                    background: '#f0f5ff', 
+                                    color: '#1677ff', 
+                                    padding: '2px 6px', 
+                                    borderRadius: 4, 
+                                    border: '1px solid #d6e4ff',
+                                    display: 'inline-block'
+                                }}>
+                                    {record.consignment_id}
+                                </Text>
+                            </div>
+                        )}
+                        {record.tracking_code && (
+                            <div style={{ marginTop: 6 }}>
+                                <Text type="secondary" style={{ fontSize: 10, display: 'block', marginBottom: 2, textTransform: 'uppercase', letterSpacing: 0.5 }}>Tracking Code</Text>
+                                <Text strong copyable={{ text: record.tracking_code }} style={{ 
+                                    fontSize: 12, 
+                                    background: '#fffbe6', 
+                                    color: '#faad14', 
+                                    padding: '2px 6px', 
+                                    borderRadius: 4, 
+                                    border: '1px solid #ffe58f',
+                                    display: 'inline-block'
+                                }}>
+                                    {record.tracking_code}
+                                </Text>
+                            </div>
+                        )}
+                    </div>
                 );
             }
         },
