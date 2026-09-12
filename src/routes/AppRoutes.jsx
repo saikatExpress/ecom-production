@@ -38,6 +38,8 @@ import SliderTrash from "../pages/cms/slider/SliderTrash";
 import TermsCondition from "../pages/cms/termsCondition/TermsCondition";
 import AddCourier from "../pages/courier/AddCourier";
 import Courier from "../pages/courier/Courier";
+import CourierIntegrate from "../pages/courier/CourierIntegrate";
+import CourierSetting from "../pages/courier/CourierSetting";
 import CourierTrash from "../pages/courier/CourierTrash";
 import EditCourier from "../pages/courier/EditCourier";
 import NotFound from "../pages/error/NotFound";
@@ -536,6 +538,18 @@ export default function AppRoutes() {
                         <Route path="/trash/courier" element={
                             <PermissionRoute permission="courier_delete">
                                 <CourierTrash/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/courier/settings" element={
+                            <PermissionRoute permission="courier_settings_read">
+                                <CourierSetting/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/courier/integration" element={
+                            <PermissionRoute permission="courier_settings_read">
+                                <CourierIntegrate/>
                             </PermissionRoute>
                         }/>
                         {/* Courier Menu */}
