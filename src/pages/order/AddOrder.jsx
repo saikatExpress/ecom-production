@@ -1,12 +1,12 @@
-import { MinusCircleOutlined, PlusOutlined, SaveOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Row, Select, Typography, message, Affix } from "antd";
+import { ArrowLeftOutlined, DollarOutlined, FileTextOutlined, MinusCircleOutlined, PhoneOutlined, PlusOutlined, SaveOutlined, SettingOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
+import { Affix, Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Row, Select, Tag, Tooltip, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const generateUUID = () => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -14,6 +14,28 @@ const generateUUID = () => {
         return v.toString(16);
     });
 };
+
+const SectionHeader = ({ icon, title, subtitle, color = '#667eea' }) => (
+    <Flex align="center" gap={12}>
+        <div style={{
+            width         : 36,
+            height        : 36,
+            borderRadius  : 10,
+            background    : `linear-gradient(135deg, ${color}, ${color}dd)`,
+            display       : 'flex',
+            alignItems    : 'center',
+            justifyContent: 'center',
+            color         : '#fff',
+            fontSize      : 16,
+        }}>
+            {icon}
+        </div>
+        <div>
+            <Text strong style={{ fontSize: 15, display: 'block', lineHeight: 1.3 }}>{title}</Text>
+            {subtitle && <Text type="secondary" style={{ fontSize: 12 }}>{subtitle}</Text>}
+        </div>
+    </Flex>
+);
 
 const AddOrder = () => {
     // Hook
@@ -25,13 +47,17 @@ const AddOrder = () => {
     const [submitting, setSubmitting] = useState(false);
 
     // Dropdown States
-    const [districts, setDistricts] = useState([]);
-    const [customerTypes, setCustomerTypes] = useState([]);
+    const [districts, setDistricts]               = useState([]);
+    const [customerTypes, setCustomerTypes]       = useState([]);
     const [deliveryGateways, setDeliveryGateways] = useState([]);
-    const [paymentGateways, setPaymentGateways] = useState([]);
-    const [statuses, setStatuses] = useState([]);
-    const [coupons, setCoupons] = useState([]);
-    const [couriers, setCouriers] = useState([]);
+    const [paymentGateways, setPaymentGateways]   = useState([]);
+    const [statuses, setStatuses]                 = useState([]);
+    const [coupons, setCoupons]                   = useState([]);
+    const [couriers, setCouriers]                 = useState([]);
+    const [productOptions, setProductOptions]     = useState([]);
+    const [fetchedProducts, setFetchedProducts]   = useState({});
+    const [searchTimeout, setSearchTimeout]       = useState(null);
+    const [isSearching, setIsSearching]           = useState(false);
 
     useEffect(() => {
         const fetchDropdowns = async () => {
@@ -105,15 +131,9 @@ const AddOrder = () => {
         fetchDropdowns();
     }, [form]);
 
-    // Product Search States
-    const [productOptions, setProductOptions] = useState([]);
-    const [fetchedProducts, setFetchedProducts] = useState({});
-    const [searchTimeout, setSearchTimeout] = useState(null);
-    const [isSearching, setIsSearching] = useState(false);
-
     const handleProductSearch = (value) => {
         if (searchTimeout) clearTimeout(searchTimeout);
-        
+
         if (value) {
             setIsSearching(true);
             const timeout = setTimeout(async () => {
@@ -127,9 +147,9 @@ const AddOrder = () => {
                     } else if (res?.data?.items) {
                         products = res.data.items;
                     }
-                    
+
                     setProductOptions(products);
-                    
+
                     setFetchedProducts(prev => {
                         const newDict = { ...prev };
                         products.forEach(p => {
@@ -158,7 +178,7 @@ const AddOrder = () => {
             };
 
             const response = await postData("/admin/order", payload);
-            
+
             if (response?.success || response?.id) {
                 message.success("Order created successfully!");
                 navigate('/orders');
@@ -173,20 +193,18 @@ const AddOrder = () => {
         }
     };
 
-    return (
-        <div className="add-order-page" style={{ margin: '5px' }}>
-            <Breadcrumb
-                items={[
-                    { title: "Dashboard" },
-                    { title: "Order" },
-                    { title: "Add Order" },
-                ]}
-                style={{ marginBottom: 24 }}
-            />
+    const cardStyle = {
+        marginBottom: 20,
+        borderRadius: 12,
+        border      : '1px solid #f0f0f0',
+        boxShadow   : '0 1px 3px rgba(0,0,0,0.04)',
+    };
 
-            <Form 
-                form={form} 
-                layout="vertical" 
+    return (
+        <div style={{ margin: 5 }}>
+            <Form
+                form={form}
+                layout="vertical"
                 onFinish={onFinish}
                 initialValues={{
                     advanced_payment: 0,
@@ -199,51 +217,84 @@ const AddOrder = () => {
                 }}
             >
                 <Affix offsetTop={0}>
-                    <Flex 
-                        justify="space-between" 
-                        align="center" 
-                        wrap="wrap" 
-                        gap="small"
-                        style={{ 
-                            marginBottom: 24, 
-                            zIndex: 99, 
-                            background: 'rgba(255, 255, 255, 0.90)', 
-                            backdropFilter: 'blur(8px)',
-                            padding: '16px 24px', 
-                            borderRadius: 8,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                            border: '1px solid #f0f0f0'
-                        }}
-                    >
-                        <Title level={2} style={{ margin: 0 }}>Create New Order</Title>
-                        <Flex gap="small">
-                            <Button onClick={() => navigate('/orders')} size="large">Cancel</Button>
-                            <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting} size="large">
-                                Save Order
-                            </Button>
+                    <div style={{
+                        background  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        padding     : '12px 24px',
+                        borderRadius: 10,
+                        marginBottom: 20,
+                        boxShadow   : '0 4px 15px rgba(102, 126, 234, 0.3)',
+                    }}>
+                        <Flex justify="space-between" align="center" wrap="wrap" gap={12}>
+                            <div>
+                                <Breadcrumb
+                                    items={[
+                                        { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Dashboard</span> },
+                                        { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Order</span> },
+                                        { title: <span style={{ color: '#fff' }}>Create New</span> },
+                                    ]}
+                                    separator={<span style={{ color: 'rgba(255,255,255,0.5)' }}>/</span>}
+                                />
+                                <Title level={4} style={{ margin: '4px 0 0', color: '#fff' }}>
+                                    <PlusOutlined style={{ marginRight: 8 }} />
+                                    Create New Order
+                                </Title>
+                            </div>
+                            <Flex gap={8}>
+                                <Button
+                                    icon={<ArrowLeftOutlined />}
+                                    onClick={() => navigate('/orders')}
+                                    size="large"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.15)',
+                                        borderColor: 'rgba(255,255,255,0.3)',
+                                        color: '#fff',
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    icon={<SaveOutlined />}
+                                    loading={submitting}
+                                    size="large"
+                                    style={{
+                                        background: '#fff',
+                                        color: '#764ba2',
+                                        fontWeight: 700,
+                                        border: 'none',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                    }}
+                                >
+                                    Save Order
+                                </Button>
+                            </Flex>
                         </Flex>
-                    </Flex>
+                    </div>
                 </Affix>
 
-                <Row gutter={[24, 24]}>
-                    {/* Left Column */}
+                <Row gutter={[20, 0]}>
                     <Col xs={24} lg={12}>
-                        {/* Customer Information Card */}
-                        <Card title="Customer Details" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
+                        <Card
+                            title={<SectionHeader icon={<UserOutlined />} title="Customer Details" subtitle="Customer & shipping information" color="#667eea" />}
+                            bordered={false}
+                            style={cardStyle}
+                            styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
+                        >
                             <Row gutter={16}>
                                 <Col xs={24}>
                                     <Form.Item name="customer_name" label="Customer Name" rules={[{ required: true, message: 'Please enter customer name' }]}>
-                                        <Input size="large" placeholder="e.g. John Doe" />
+                                        <Input size="large" placeholder="e.g. John Doe" prefix={<UserOutlined style={{ color: '#bfbfbf' }} />} />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} sm={12}>
                                     <Form.Item name="phone_number" label="Phone Number" rules={[{ required: true, message: 'Please enter phone number' }]}>
-                                        <Input size="large" placeholder="e.g. 01700000000" />
+                                        <Input size="large" placeholder="e.g. 01700000000" prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} sm={12}>
                                     <Form.Item name="customer_type_id" label="Customer Type">
-                                        <Select size="large" placeholder="Select type" options={customerTypes.map(c => ({ value: c.id, label: c.name }))} allowClear />
+                                        <Select size="large" placeholder="Select type" showSearch optionFilterProp="label" options={customerTypes.map(c => ({ value: c.id, label: c.name }))} allowClear />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24}>
@@ -253,14 +304,26 @@ const AddOrder = () => {
                                 </Col>
                                 <Col xs={24} sm={12}>
                                     <Form.Item name="district_id" label="District">
-                                        <Select size="large" showSearch placeholder="Select a district" optionFilterProp="children" filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} options={districts.map(d => ({ value: d.id, label: d.district_name }))} allowClear />
+                                        <Select
+                                            size="large"
+                                            showSearch
+                                            placeholder="Select a district"
+                                            optionFilterProp="children"
+                                            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                                            options={districts.map(d => ({ value: d.id, label: d.district_name }))}
+                                            allowClear
+                                        />
                                     </Form.Item>
                                 </Col>
                             </Row>
                         </Card>
 
-                        {/* Order Information Card */}
-                        <Card title="Order Settings" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
+                        <Card
+                            title={<SectionHeader icon={<SettingOutlined />} title="Order Settings" subtitle="Status, gateway & courier" color="#f5222d" />}
+                            bordered={false}
+                            style={cardStyle}
+                            styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
+                        >
                             <Row gutter={16}>
                                 <Col xs={24} sm={12}>
                                     <Form.Item name="status_id" label="Status" rules={[{ required: true, message: 'Please select a status' }]}>
@@ -278,7 +341,9 @@ const AddOrder = () => {
                                             }
                                         }}>
                                             {deliveryGateways.map(g => (
-                                                <Select.Option key={g.id} value={g.id}>{g.name} (৳{g.delivery_fee})</Select.Option>
+                                                <Select.Option key={g.id} value={g.id}>
+                                                    {g.name} <Tag color="blue" style={{ marginLeft: 4 }}>৳{g.delivery_fee}</Tag>
+                                                </Select.Option>
                                             ))}
                                         </Select>
                                     </Form.Item>
@@ -310,12 +375,15 @@ const AddOrder = () => {
                             </Row>
                         </Card>
                     </Col>
-                    
-                    {/* Right Column */}
+
                     <Col xs={24} lg={12}>
-                        {/* Order Items Card */}
-                        <Card title="Order Items" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
-                            <Form.List 
+                        <Card
+                            title={<SectionHeader icon={<ShoppingCartOutlined />} title="Order Items" subtitle="Add products to the order" color="#52c41a" />}
+                            bordered={false}
+                            style={cardStyle}
+                            styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
+                        >
+                            <Form.List
                                 name="items"
                                 rules={[
                                     {
@@ -329,20 +397,44 @@ const AddOrder = () => {
                             >
                                 {(fields, { add, remove }, { errors }) => (
                                     <>
-                                        {fields.map(({ key, name, ...restField }) => (
-                                            <Card size="small" style={{ marginBottom: 12, background: '#fafafa', border: '1px solid #f0f0f0' }} key={key}>
-                                                <Row gutter={[16, 16]} align="middle">
-                                                    <Col xs={24} sm={24} md={12}>
+                                        {fields.map(({ key, name, ...restField }, idx) => (
+                                            <div
+                                                key={key}
+                                                style={{
+                                                    marginBottom: 12,
+                                                    padding     : '14px 16px',
+                                                    background  : idx % 2 === 0 ? '#fafbff': '#f8faf5',
+                                                    borderRadius: 10,
+                                                    border      : '1px solid #f0f0f0',
+                                                    position    : 'relative',
+                                                }}
+                                            >
+                                                <div style={{
+                                                    position    : 'absolute',
+                                                    top         : -8,
+                                                    left        : 12,
+                                                    background  : 'linear-gradient(135deg, #52c41a, #73d13d)',
+                                                    color       : '#fff',
+                                                    fontSize    : 10,
+                                                    fontWeight  : 700,
+                                                    padding     : '1px 8px',
+                                                    borderRadius: 8,
+                                                }}>
+                                                    ITEM #{idx + 1}
+                                                </div>
+
+                                                <Row gutter={[12, 8]} align="middle">
+                                                    <Col xs={24} md={11}>
                                                         <Form.Item
                                                             {...restField}
                                                             name={[name, 'product_id']}
-                                                            label="Product"
+                                                            label={<Text style={{ fontSize: 12 }}>Product</Text>}
                                                             rules={[{ required: true, message: 'Missing product' }]}
                                                             style={{ marginBottom: 0 }}
                                                         >
                                                             <Select
                                                                 showSearch
-                                                                placeholder="Search..."
+                                                                placeholder="Search products..."
                                                                 onSearch={handleProductSearch}
                                                                 filterOption={false}
                                                                 loading={isSearching}
@@ -357,14 +449,21 @@ const AddOrder = () => {
                                                             >
                                                                 {Object.values(fetchedProducts).map(p => (
                                                                     <Select.Option key={p.id} value={p.id} label={p.name}>
-                                                                        <Flex align="center" gap="small">
-                                                                            {p.image && <img src={p.image} alt={p.name} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 4 }} />}
-                                                                            <div style={{ flex: 1, overflow: 'hidden', lineHeight: '1.2' }}>
-                                                                                <div style={{ fontWeight: 500, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                                                        <Flex align="center" gap={10}>
+                                                                            {p.image ? (
+                                                                                <img src={p.image} alt={p.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #f0f0f0' }} />
+                                                                            ) : (
+                                                                                <div style={{ width: 36, height: 36, borderRadius: 6, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bfbfbf', fontSize: 16 }}>
+                                                                                    <ShoppingCartOutlined />
+                                                                                </div>
+                                                                            )}
+                                                                            <div style={{ flex: 1, overflow: 'hidden', lineHeight: 1.3 }}>
+                                                                                <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                                                                                     {p.name}
                                                                                 </div>
-                                                                                <div style={{ fontSize: '12px', color: 'gray', marginTop: 2 }}>
-                                                                                    {p.category?.name || 'Uncategorized'} • <span style={{ color: '#1677ff' }}>৳{p.sell_price}</span>
+                                                                                <div style={{ fontSize: 11, color: '#8c8c8c', marginTop: 1 }}>
+                                                                                    {p.category?.name || 'Uncategorized'}
+                                                                                    <span style={{ color: '#1677ff', fontWeight: 600, marginLeft: 6 }}>৳{p.sell_price}</span>
                                                                                 </div>
                                                                             </div>
                                                                         </Flex>
@@ -373,7 +472,7 @@ const AddOrder = () => {
                                                             </Select>
                                                         </Form.Item>
                                                     </Col>
-                                                    <Col xs={24} sm={12} md={7}>
+                                                    <Col xs={16} md={7}>
                                                         <Form.Item
                                                             noStyle
                                                             shouldUpdate={(prevValues, currentValues) => {
@@ -384,12 +483,12 @@ const AddOrder = () => {
                                                                 const selectedProductId = form.getFieldValue(['items', name, 'product_id']);
                                                                 const selectedProduct = fetchedProducts[selectedProductId];
                                                                 const variants = selectedProduct?.variants || [];
-                                                                
+
                                                                 return (
                                                                     <Form.Item
                                                                         {...restField}
                                                                         name={[name, 'product_variant_id']}
-                                                                        label="Variant"
+                                                                        label={<Text style={{ fontSize: 12 }}>Variant</Text>}
                                                                         style={{ marginBottom: 0 }}
                                                                         rules={[{ required: variants.length > 0, message: 'Variant required' }]}
                                                                     >
@@ -408,30 +507,49 @@ const AddOrder = () => {
                                                             }}
                                                         </Form.Item>
                                                     </Col>
-                                                    <Col xs={20} sm={10} md={3}>
+                                                    <Col xs={5} md={4}>
                                                         <Form.Item
                                                             {...restField}
                                                             name={[name, 'quantity']}
-                                                            label="Qty"
-                                                            rules={[{ required: true, message: 'Missing Qty' }]}
+                                                            label={<Text style={{ fontSize: 12 }}>Qty</Text>}
+                                                            rules={[{ required: true, message: 'Qty' }]}
                                                             style={{ marginBottom: 0 }}
                                                         >
                                                             <InputNumber style={{ width: '100%' }} min={1} />
                                                         </Form.Item>
                                                     </Col>
-                                                    <Col xs={4} sm={2} md={2} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 28 }}>
+                                                    <Col xs={3} md={2} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 24 }}>
                                                         {fields.length > 1 ? (
-                                                            <MinusCircleOutlined
-                                                                style={{ color: '#ff4d4f', fontSize: 18, cursor: 'pointer' }}
-                                                                onClick={() => remove(name)}
-                                                            />
+                                                            <Tooltip title="Remove item">
+                                                                <MinusCircleOutlined
+                                                                    style={{
+                                                                        color: '#ff4d4f',
+                                                                        fontSize: 18,
+                                                                        cursor: 'pointer',
+                                                                        transition: 'transform 0.2s',
+                                                                    }}
+                                                                    onClick={() => remove(name)}
+                                                                />
+                                                            </Tooltip>
                                                         ) : null}
                                                     </Col>
                                                 </Row>
-                                            </Card>
+                                            </div>
                                         ))}
-                                        <Form.Item style={{ marginBottom: 0 }}>
-                                            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                        <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
+                                            <Button
+                                                type="dashed"
+                                                onClick={() => add()}
+                                                block
+                                                icon={<PlusOutlined />}
+                                                style={{
+                                                    height: 44,
+                                                    borderRadius: 10,
+                                                    borderColor: '#52c41a',
+                                                    color: '#52c41a',
+                                                    fontWeight: 600,
+                                                }}
+                                            >
                                                 Add Another Item
                                             </Button>
                                             <Form.ErrorList errors={errors} />
@@ -441,40 +559,44 @@ const AddOrder = () => {
                             </Form.List>
                         </Card>
 
-                        {/* Financials Card */}
-                        <Card title="Financials & Summary" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
-                            <Row gutter={16}>
+                        <Card
+                            title={<SectionHeader icon={<DollarOutlined />} title="Financials & Summary" subtitle="Charges, discounts & payment" color="#faad14" />}
+                            bordered={false}
+                            style={cardStyle}
+                            styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
+                        >
+                            <Row gutter={[16, 0]}>
                                 <Col xs={12} sm={8}>
-                                    <Form.Item name="delivery_charge" label="Delivery Charge">
+                                    <Form.Item name="delivery_charge" label={<Text style={{ fontSize: 12 }}>🚚 Delivery Charge</Text>}>
                                         <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8}>
-                                    <Form.Item name="advanced_payment" label="Advanced Payment">
+                                    <Form.Item name="advanced_payment" label={<Text style={{ fontSize: 12 }}>💰 Advanced Payment</Text>}>
                                         <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8}>
-                                    <Form.Item name="special_discount" label="Special Discount">
+                                    <Form.Item name="special_discount" label={<Text style={{ fontSize: 12 }}>🏷️ Special Discount</Text>}>
                                         <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8}>
-                                    <Form.Item name="coupon_discount" label="Coupon Discount">
+                                    <Form.Item name="coupon_discount" label={<Text style={{ fontSize: 12 }}>🎫 Coupon Discount</Text>}>
                                         <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8}>
-                                    <Form.Item name="additional_cost" label="Additional Cost">
+                                    <Form.Item name="additional_cost" label={<Text style={{ fontSize: 12 }}>➕ Additional Cost</Text>}>
                                         <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={12} sm={8}>
-                                    <Form.Item name="paid_status" label="Paid Status">
+                                    <Form.Item name="paid_status" label={<Text style={{ fontSize: 12 }}>💳 Paid Status</Text>}>
                                         <Select
                                             options={[
-                                                { value: 'paid', label: 'Paid' },
-                                                { value: 'unpaid', label: 'Unpaid' }
+                                                { value: 'paid', label: '✅ Paid' },
+                                                { value: 'unpaid', label: '❌ Unpaid' }
                                             ]}
                                         />
                                     </Form.Item>
@@ -485,7 +607,7 @@ const AddOrder = () => {
                                 {() => {
                                     const items = form.getFieldValue('items') || [];
                                     let subtotal = 0;
-                                    
+
                                     items.forEach(item => {
                                         if (item && item.product_id && item.quantity) {
                                             const product = fetchedProducts[item.product_id];
@@ -512,53 +634,73 @@ const AddOrder = () => {
                                     const due = total - advanced_payment;
 
                                     return (
-                                        <div style={{ background: '#f5f7fa', padding: 16, borderRadius: 8, marginTop: 16, border: '1px dashed #d9d9d9' }}>
-                                            <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: '#1f1f1f' }}>Order Summary</Title>
-                                            <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                <Typography.Text type="secondary">Subtotal:</Typography.Text>
-                                                <Typography.Text>৳{subtotal.toFixed(2)}</Typography.Text>
+                                        <div style={{
+                                            background: 'linear-gradient(135deg, #f8f9fe 0%, #f0f4ff 100%)',
+                                            padding: '20px',
+                                            borderRadius: 12,
+                                            marginTop: 8,
+                                            border: '1px solid #e6e9f0',
+                                        }}>
+                                            <Flex align="center" gap={8} style={{ marginBottom: 16 }}>
+                                                <FileTextOutlined style={{ color: '#667eea', fontSize: 16 }} />
+                                                <Text strong style={{ fontSize: 15, color: '#1f1f1f' }}>Order Summary</Text>
                                             </Flex>
-                                            <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                <Typography.Text type="secondary">Delivery Charge:</Typography.Text>
-                                                <Typography.Text>+ ৳{delivery_charge.toFixed(2)}</Typography.Text>
+
+                                            <div style={{ fontSize: 13 }}>
+                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                    <Text type="secondary">Subtotal</Text>
+                                                    <Text style={{ fontWeight: 600 }}>৳{subtotal.toFixed(2)}</Text>
+                                                </Flex>
+                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                    <Text type="secondary">Delivery Charge</Text>
+                                                    <Text style={{ color: '#1677ff' }}>+ ৳{delivery_charge.toFixed(2)}</Text>
+                                                </Flex>
+                                                {additional_cost > 0 && (
+                                                    <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                        <Text type="secondary">Additional Cost</Text>
+                                                        <Text style={{ color: '#1677ff' }}>+ ৳{additional_cost.toFixed(2)}</Text>
+                                                    </Flex>
+                                                )}
+                                                {special_discount > 0 && (
+                                                    <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                        <Text style={{ color: '#ff4d4f' }}>Special Discount</Text>
+                                                        <Text style={{ color: '#ff4d4f' }}>- ৳{special_discount.toFixed(2)}</Text>
+                                                    </Flex>
+                                                )}
+                                                {coupon_discount > 0 && (
+                                                    <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                        <Text style={{ color: '#ff4d4f' }}>Coupon Discount</Text>
+                                                        <Text style={{ color: '#ff4d4f' }}>- ৳{coupon_discount.toFixed(2)}</Text>
+                                                    </Flex>
+                                                )}
+                                            </div>
+
+                                            <Divider style={{ margin: '12px 0', borderColor: '#d6dce8' }} />
+
+                                            <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+                                                <Text strong style={{ fontSize: 16 }}>Total Payable</Text>
+                                                <Text strong style={{ fontSize: 18, color: '#1f1f1f' }}>৳{total.toFixed(2)}</Text>
                                             </Flex>
-                                            {additional_cost > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="secondary">Additional Cost:</Typography.Text>
-                                                    <Typography.Text>+ ৳{additional_cost.toFixed(2)}</Typography.Text>
-                                                </Flex>
-                                            )}
-                                            {special_discount > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="danger">Special Discount:</Typography.Text>
-                                                    <Typography.Text type="danger">- ৳{special_discount.toFixed(2)}</Typography.Text>
-                                                </Flex>
-                                            )}
-                                            {coupon_discount > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="danger">Coupon Discount:</Typography.Text>
-                                                    <Typography.Text type="danger">- ৳{coupon_discount.toFixed(2)}</Typography.Text>
-                                                </Flex>
-                                            )}
-                                            <Divider style={{ margin: '12px 0', borderColor: '#d9d9d9' }} />
-                                            <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                <Typography.Text strong style={{ fontSize: 16 }}>Total Payable:</Typography.Text>
-                                                <Typography.Text strong style={{ fontSize: 16 }}>৳{total.toFixed(2)}</Typography.Text>
-                                            </Flex>
-                                            {advanced_payment > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="success">Advanced Payment:</Typography.Text>
-                                                    <Typography.Text type="success">- ৳{advanced_payment.toFixed(2)}</Typography.Text>
-                                                </Flex>
-                                            )}
+
                                             {advanced_payment > 0 && (
                                                 <>
-                                                    <Divider style={{ margin: '12px 0', borderColor: '#d9d9d9' }} />
-                                                    <Flex justify="space-between">
-                                                        <Typography.Text strong style={{ fontSize: 18 }}>Due Amount:</Typography.Text>
-                                                        <Typography.Text strong style={{ fontSize: 18, color: due > 0 ? '#ff4d4f' : '#52c41a' }}>
+                                                    <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                        <Text style={{ color: '#52c41a' }}>Advanced Payment</Text>
+                                                        <Text style={{ color: '#52c41a', fontWeight: 600 }}>- ৳{advanced_payment.toFixed(2)}</Text>
+                                                    </Flex>
+                                                    <Divider style={{ margin: '12px 0', borderColor: '#d6dce8' }} />
+                                                    <Flex justify="space-between" align="center">
+                                                        <Text strong style={{ fontSize: 18 }}>Due Amount</Text>
+                                                        <div style={{
+                                                            background: due > 0 ? 'linear-gradient(135deg, #ff4d4f, #ff7875)' : 'linear-gradient(135deg, #52c41a, #73d13d)',
+                                                            color: '#fff',
+                                                            padding: '4px 16px',
+                                                            borderRadius: 8,
+                                                            fontSize: 18,
+                                                            fontWeight: 700,
+                                                        }}>
                                                             ৳{due.toFixed(2)}
-                                                        </Typography.Text>
+                                                        </div>
                                                     </Flex>
                                                 </>
                                             )}
@@ -570,6 +712,20 @@ const AddOrder = () => {
                     </Col>
                 </Row>
             </Form>
+
+            <style>{`
+                .ant-card {
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+                }
+                .ant-form-item-label > label {
+                    font-weight: 600 !important;
+                    font-size: 13px !important;
+                    color: #444 !important;
+                }
+                .ant-input-lg, .ant-select-lg .ant-select-selector, .ant-input-number-lg {
+                    border-radius: 8px !important;
+                }
+            `}</style>
         </div>
     );
 

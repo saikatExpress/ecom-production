@@ -1,12 +1,12 @@
-import { MinusCircleOutlined, PlusOutlined, SaveOutlined } from "@ant-design/icons";
-import { Affix, Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Row, Select, Spin, Typography, message } from "antd";
+import { ArrowLeftOutlined, DollarOutlined, EditOutlined, FileTextOutlined, MinusCircleOutlined, PhoneOutlined, PlusOutlined, SaveOutlined, SettingOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
+import { Affix, Breadcrumb, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Row, Select, Spin, Tag, Tooltip, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getData, getDatas, putData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const generateUUID = () => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -15,18 +15,40 @@ const generateUUID = () => {
     });
 };
 
+const SectionHeader = ({ icon, title, subtitle, color = '#fa8c16' }) => (
+    <Flex align="center" gap={12}>
+        <div style={{
+            width         : 36,
+            height        : 36,
+            borderRadius  : 10,
+            background    : `linear-gradient(135deg, ${color}, ${color}dd)`,
+            display       : 'flex',
+            alignItems    : 'center',
+            justifyContent: 'center',
+            color         : '#fff',
+            fontSize      : 16,
+        }}>
+            {icon}
+        </div>
+        <div>
+            <Text strong style={{ fontSize: 15, display: 'block', lineHeight: 1.3 }}>{title}</Text>
+            {subtitle && <Text type="secondary" style={{ fontSize: 12 }}>{subtitle}</Text>}
+        </div>
+    </Flex>
+);
+
 const EditOrder = () => {
     // Hook
     useTitle("Edit Order");
 
     // Variable
-    const navigate                    = useNavigate();
-    const { id }                      = useParams();
-    const [loading, setLoading]       = useState(true);
-    const [form]                      = Form.useForm();
-    const [submitting, setSubmitting] = useState(false);
-
+    const navigate = useNavigate();
+    const { id }   = useParams();
+    const [form]   = Form.useForm();
+    
     // Dropdown States
+    const [loading, setLoading]                   = useState(true);
+    const [submitting, setSubmitting]             = useState(false);
     const [districts, setDistricts]               = useState([]);
     const [customerTypes, setCustomerTypes]       = useState([]);
     const [deliveryGateways, setDeliveryGateways] = useState([]);
@@ -43,57 +65,33 @@ const EditOrder = () => {
         const fetchDropdowns = async () => {
             try {
                 const res = await getDatas("/admin/district/list");
-                if (res?.success && res?.data) {
-                    setDistricts(res.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch districts:", error);
-            }
+                if (res?.success && res?.data) setDistricts(res.data);
+            } catch (error) { console.error("Failed to fetch districts:", error); }
 
             try {
                 const res = await getDatas("/admin/customer-type/list");
-                if (res?.success && res?.data) {
-                    setCustomerTypes(res.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch customer types:", error);
-            }
+                if (res?.success && res?.data) setCustomerTypes(res.data);
+            } catch (error) { console.error("Failed to fetch customer types:", error); }
 
             try {
                 const res = await getDatas("/admin/delivery-gateway/list");
-                if (res?.success && res?.data) {
-                    setDeliveryGateways(res.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch delivery gateways:", error);
-            }
+                if (res?.success && res?.data) setDeliveryGateways(res.data);
+            } catch (error) { console.error("Failed to fetch delivery gateways:", error); }
 
             try {
                 const res = await getDatas("/admin/payment-gateway/list");
-                if (res?.success && res?.data) {
-                    setPaymentGateways(res.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch payment gateways:", error);
-            }
+                if (res?.success && res?.data) setPaymentGateways(res.data);
+            } catch (error) { console.error("Failed to fetch payment gateways:", error); }
 
             try {
                 const res = await getDatas("/admin/status/list");
-                if (res?.success && res?.data) {
-                    setStatuses(res.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch statuses:", error);
-            }
+                if (res?.success && res?.data) setStatuses(res.data);
+            } catch (error) { console.error("Failed to fetch statuses:", error); }
 
             try {
                 const res = await getDatas("/admin/coupon/list");
-                if (res?.success && res?.data) {
-                    setCoupons(res.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch coupons:", error);
-            }
+                if (res?.success && res?.data) setCoupons(res.data);
+            } catch (error) { console.error("Failed to fetch coupons:", error); }
 
             try {
                 const res = await getDatas("/admin/courier/list");
@@ -104,13 +102,10 @@ const EditOrder = () => {
                         form.setFieldsValue({ courier_id: defaultCourier.id });
                     }
                 }
-            } catch (error) {
-                console.error("Failed to fetch couriers:", error);
-            }
+            } catch (error) { console.error("Failed to fetch couriers:", error); }
         };
         fetchDropdowns();
     }, [form]);
-
 
     useEffect(() => {
         if (!id) return;
@@ -120,53 +115,52 @@ const EditOrder = () => {
 
                 if (res?.success && res?.data) {
                     const order = res.data;
-                    
+
                     const initialProducts = {};
                     const items = (order.details || []).map(d => {
                         initialProducts[d.product_id] = {
-                            id        : d.product_id,
-                            name      : d.product_name,
-                            sku       : d.product_sku,
-                            image     : d.product_img_path,
+                            id: d.product_id,
+                            name: d.product_name,
+                            sku: d.product_sku,
+                            image: d.product_img_path,
                             sell_price: d.sell_price,
-                            variants  : d.product_variant_id ? [{
-                                id           : d.product_variant_id,
-                                sku          : d.variant_sku,
-                                sell_price   : d.sell_price,
+                            variants: d.product_variant_id ? [{
+                                id: d.product_variant_id,
+                                sku: d.variant_sku,
+                                sell_price: d.sell_price,
                                 current_stock: 100,
-                                attributes   : d.variant_options ? [{ attribute_value_name: d.variant_name }]: []
-                            }]           : []
+                                attributes: d.variant_options ? [{ attribute_value_name: d.variant_name }] : []
+                            }] : []
                         };
-                        
+
                         return {
-                            product_id        : d.product_id,
+                            product_id: d.product_id,
                             product_variant_id: d.product_variant_id,
-                            quantity          : d.quantity
+                            quantity: d.quantity
                         };
                     });
-                    
+
                     setFetchedProducts(prev => ({ ...prev, ...initialProducts }));
 
                     form.setFieldsValue({
-                        customer_name      : order.customer_name,
-                        phone_number       : order.phone_number,
-                        customer_type_id   : order.customer_type_id,
-                        shipping_address   : order.shipping_address,
-                        district_id        : order.district_id,
-                        status_id          : order.status_id,
+                        customer_name: order.customer_name,
+                        phone_number: order.phone_number,
+                        customer_type_id: order.customer_type_id,
+                        shipping_address: order.shipping_address,
+                        district_id: order.district_id,
+                        status_id: order.status_id,
                         delivery_gateway_id: order.delivery_gateway_id,
-                        payment_gateway_id : order.payment_gateway_id,
-                        courier_id         : order.courier_id,
-                        coupon_id          : order.coupon_id,
-                        note               : order.note || '',
-                        delivery_charge    : Number(order.delivery_charge) || 0,
-                        advanced_payment   : Number(order.advanced_payment) || 0,
-                        special_discount   : Number(order.special_discount) || 0,
-                        coupon_discount    : Number(order.coupon_discount) || 0,
-                        additional_cost    : Number(order.additional_cost) || 0,
-                        paid_status        : order.paid_status || 'unpaid',
-                        
-                        items: items.length > 0 ? items: [{}]
+                        payment_gateway_id: order.payment_gateway_id,
+                        courier_id: order.courier_id,
+                        coupon_id: order.coupon_id,
+                        note: order.note || '',
+                        delivery_charge: Number(order.delivery_charge) || 0,
+                        advanced_payment: Number(order.advanced_payment) || 0,
+                        special_discount: Number(order.special_discount) || 0,
+                        coupon_discount: Number(order.coupon_discount) || 0,
+                        additional_cost: Number(order.additional_cost) || 0,
+                        paid_status: order.paid_status || 'unpaid',
+                        items: items.length > 0 ? items : [{}]
                     });
                 }
             } catch (error) {
@@ -181,7 +175,7 @@ const EditOrder = () => {
 
     const handleProductSearch = (value) => {
         if (searchTimeout) clearTimeout(searchTimeout);
-        
+
         if (value) {
             setIsSearching(true);
             const timeout = setTimeout(async () => {
@@ -195,9 +189,9 @@ const EditOrder = () => {
                     } else if (res?.data?.items) {
                         products = res.data.items;
                     }
-                    
+
                     setProductOptions(products);
-                    
+
                     setFetchedProducts(prev => {
                         const newDict = { ...prev };
                         products.forEach(p => {
@@ -226,412 +220,560 @@ const EditOrder = () => {
             };
 
             const response = await putData(`/admin/order/${id}`, payload);
-            
+
             if (response?.success || response?.id) {
                 message.success("Order updated successfully!");
                 navigate('/orders');
             } else {
-                message.error(response?.message || "Failed to create order");
+                message.error(response?.message || "Failed to update order");
             }
         } catch (error) {
-            console.error("Failed to create order:", error);
+            console.error("Failed to update order:", error);
             handleFormErrors(error, form, message.error);
         } finally {
             setSubmitting(false);
         }
     };
 
+    const cardStyle = {
+        marginBottom: 20,
+        borderRadius: 12,
+        border      : '1px solid #f0f0f0',
+        boxShadow   : '0 1px 3px rgba(0,0,0,0.04)',
+    };
+
     return (
-        <div className="add-order-page" style={{ margin: '5px' }}>
-            <Breadcrumb
-                items={[
-                    { title: "Dashboard" },
-                    { title: "Order" },
-                    { title: "Edit Order" },
-                ]}
-                style={{ marginBottom: 24 }}
-            />
-
+        <div style={{ margin: 5 }}>
             <Spin spinning={loading}>
-            <Form form={form} layout="vertical" onFinish={onFinish}
-                initialValues={{
-                    advanced_payment: 0,
-                    special_discount: 0,
-                    coupon_discount : 0,
-                    delivery_charge : 0,
-                    additional_cost : 0,
-                    paid_status     : 'unpaid',
-                    items           : [{}]
-                }}
-            >
-                <Affix offsetTop={0}>
-                    <Flex 
-                        justify="space-between" 
-                        align="center" 
-                        wrap="wrap" 
-                        gap="small"
-                        style={{ 
-                            marginBottom  : 24,
-                            zIndex        : 99,
-                            background    : 'rgba(255, 255, 255, 0.90)',
-                            backdropFilter: 'blur(8px)',
-                            padding       : '16px 24px',
-                            borderRadius  : 8,
-                            boxShadow     : '0 4px 12px rgba(0,0,0,0.05)',
-                            border        : '1px solid #f0f0f0'
-                        }}
-                    >
-                        <Title level={2} style={{ margin: 0 }}>Edit Order</Title>
-                        <Flex gap="small">
-                            <Button onClick={() => navigate('/orders')} size="large">Cancel</Button>
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={onFinish}
+                    initialValues={{
+                        advanced_payment: 0,
+                        special_discount: 0,
+                        coupon_discount : 0,
+                        delivery_charge : 0,
+                        additional_cost : 0,
+                        paid_status     : 'unpaid',
+                        items           : [{}]
+                    }}
+                >
+                    <Affix offsetTop={0}>
+                        <div style={{
+                            background: 'linear-gradient(135deg, #fa8c16 0%, #fa541c 100%)',
+                            padding: '12px 24px',
+                            borderRadius: 10,
+                            marginBottom: 20,
+                            boxShadow: '0 4px 15px rgba(250, 140, 22, 0.3)',
+                        }}>
+                            <Flex justify="space-between" align="center" wrap="wrap" gap={12}>
+                                <div>
+                                    <Breadcrumb
+                                        items={[
+                                            { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Dashboard</span> },
+                                            { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Order</span> },
+                                            { title: <span style={{ color: '#fff' }}>Edit Order</span> },
+                                        ]}
+                                        separator={<span style={{ color: 'rgba(255,255,255,0.5)' }}>/</span>}
+                                    />
+                                    <Title level={4} style={{ margin: '4px 0 0', color: '#fff' }}>
+                                        <EditOutlined style={{ marginRight: 8 }} />
+                                        Edit Order #{id}
+                                    </Title>
+                                </div>
+                                <Flex gap={8}>
+                                    <Button
+                                        icon={<ArrowLeftOutlined />}
+                                        onClick={() => navigate('/orders')}
+                                        size="large"
+                                        style={{
+                                            background: 'rgba(255,255,255,0.15)',
+                                            borderColor: 'rgba(255,255,255,0.3)',
+                                            color: '#fff',
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        icon={<SaveOutlined />}
+                                        loading={submitting}
+                                        size="large"
+                                        style={{
+                                            background: '#fff',
+                                            color: '#fa541c',
+                                            fontWeight: 700,
+                                            border: 'none',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                        }}
+                                    >
+                                        Update Order
+                                    </Button>
+                                </Flex>
+                            </Flex>
+                        </div>
+                    </Affix>
 
-                            <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting} size="large">
-                                Update Order
-                            </Button>
-                        </Flex>
-                    </Flex>
-                </Affix>
-
-                <Row gutter={[24, 24]}>
-                    <Col xs={24} lg={12}>
-                        <Card title="Customer Details" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
-                            <Row gutter={16}>
-                                <Col xs={24}>
-                                    <Form.Item name="customer_name" label="Customer Name" rules={[{ required: true, message: 'Please enter customer name' }]}>
-                                        <Input size="large" placeholder="e.g. John Doe" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="phone_number" label="Phone Number" rules={[{ required: true, message: 'Please enter phone number' }]}>
-                                        <Input size="large" placeholder="e.g. 01700000000" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="customer_type_id" label="Customer Type">
-                                        <Select size="large" placeholder="Select type" options={customerTypes.map(c => ({ value: c.id, label: c.name }))} allowClear />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24}>
-                                    <Form.Item name="shipping_address" label="Shipping Address" rules={[{ required: true, message: 'Please enter shipping address' }]}>
-                                        <Input.TextArea size="large" rows={2} placeholder="Full shipping address..." />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="district_id" label="District">
-                                        <Select size="large" showSearch placeholder="Select a district" optionFilterProp="children" filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} options={districts.map(d => ({ value: d.id, label: d.district_name }))} allowClear />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-                        </Card>
-
-                        <Card title="Order Settings" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
-                            <Row gutter={16}>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="status_id" label="Status" rules={[{ required: true, message: 'Please select a status' }]}>
-                                        <Select size="large" placeholder="Select Status" showSearch optionFilterProp="label" options={statuses.map(s => ({ value: s.id, label: s.name }))} allowClear />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="delivery_gateway_id" label="Delivery Gateway">
-                                        <Select size="large" placeholder="Select Gateway" allowClear onChange={(val) => {
-                                            if (val) {
-                                                const selected = deliveryGateways.find(g => g.id === val);
-                                                if (selected && selected.delivery_fee !== undefined) {
-                                                    form.setFieldsValue({ delivery_charge: selected.delivery_fee });
-                                                }
-                                            }
-                                        }}>
-                                            {deliveryGateways.map(g => (
-                                                <Select.Option key={g.id} value={g.id}>{g.name} (৳{g.delivery_fee})</Select.Option>
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="payment_gateway_id" label="Payment Gateway">
-                                        <Select size="large" placeholder="Select Payment Gateway" allowClear>
-                                            {paymentGateways.map(g => (
-                                                <Select.Option key={g.id} value={g.id}>{g.name}</Select.Option>
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="courier_id" label="Select Courier">
-                                        <Select size="large" placeholder="Choose Courier" showSearch optionFilterProp="label" options={couriers.map(c => ({ value: c.id, label: c.name }))} allowClear />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name="coupon_id" label="Coupon">
-                                        <Select size="large" placeholder="Select Coupon" showSearch optionFilterProp="label" options={coupons.map(c => ({ value: c.id, label: c.code }))} allowClear />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24}>
-                                    <Form.Item name="note" label="Customer Note">
-                                        <Input.TextArea size="large" rows={2} placeholder="Any notes from the customer..." />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-                        </Card>
-                    </Col>
-                    
-                    <Col xs={24} lg={12}>
-                        <Card title="Order Items" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
-                            <Form.List 
-                                name="items"
-                                rules={[
-                                    {
-                                        validator: async (_, items) => {
-                                            if (!items || items.length < 1) {
-                                                return Promise.reject(new Error('At least one item is required'));
-                                            }
-                                        },
-                                    },
-                                ]}
+                    <Row gutter={[20, 0]}>
+                        <Col xs={24} lg={12}>
+                            <Card
+                                title={<SectionHeader icon={<UserOutlined />} title="Customer Details" subtitle="Customer & shipping information" color="#fa8c16" />}
+                                bordered={false}
+                                style={cardStyle}
+                                styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
                             >
-                                {(fields, { add, remove }, { errors }) => (
-                                    <>
-                                        {fields.map(({ key, name, ...restField }) => (
-                                            <Card size="small" style={{ marginBottom: 12, background: '#fafafa', border: '1px solid #f0f0f0' }} key={key}>
-                                                <Row gutter={[16, 16]} align="middle">
-                                                    <Col xs={24} sm={24} md={12}>
-                                                        <Form.Item
-                                                            {...restField}
-                                                            name={[name, 'product_id']}
-                                                            label="Product"
-                                                            rules={[{ required: true, message: 'Missing product' }]}
-                                                            style={{ marginBottom: 0 }}
-                                                        >
-                                                            <Select
-                                                                showSearch
-                                                                placeholder="Search..."
-                                                                onSearch={handleProductSearch}
-                                                                filterOption={false}
-                                                                loading={isSearching}
-                                                                optionLabelProp="label"
-                                                                onChange={() => {
-                                                                    const currentItems = form.getFieldValue('items');
-                                                                    if (currentItems[name]) {
-                                                                        currentItems[name].product_variant_id = null;
-                                                                    }
-                                                                    form.setFieldsValue({ items: currentItems });
-                                                                }}
-                                                            >
-                                                                {Object.values(fetchedProducts).map(p => (
-                                                                    <Select.Option key={p.id} value={p.id} label={p.name}>
-                                                                        <Flex align="center" gap="small">
-                                                                            {p.image && <img src={p.image} alt={p.name} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 4 }} />}
-                                                                            <div style={{ flex: 1, overflow: 'hidden', lineHeight: '1.2' }}>
-                                                                                <div style={{ fontWeight: 500, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                                                                                    {p.name}
-                                                                                </div>
-                                                                                <div style={{ fontSize: '12px', color: 'gray', marginTop: 2 }}>
-                                                                                    {p.category?.name || 'Uncategorized'} • <span style={{ color: '#1677ff' }}>৳{p.sell_price}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </Flex>
-                                                                    </Select.Option>
-                                                                ))}
-                                                            </Select>
-                                                        </Form.Item>
-                                                    </Col>
-                                                    <Col xs={24} sm={12} md={7}>
-                                                        <Form.Item
-                                                            noStyle
-                                                            shouldUpdate={(prevValues, currentValues) => {
-                                                                return prevValues.items?.[name]?.product_id !== currentValues.items?.[name]?.product_id;
-                                                            }}
-                                                        >
-                                                            {() => {
-                                                                const selectedProductId = form.getFieldValue(['items', name, 'product_id']);
-                                                                const selectedProduct = fetchedProducts[selectedProductId];
-                                                                const variants = selectedProduct?.variants || [];
-                                                                
-                                                                return (
-                                                                    <Form.Item
-                                                                        {...restField}
-                                                                        name={[name, 'product_variant_id']}
-                                                                        label="Variant"
-                                                                        style={{ marginBottom: 0 }}
-                                                                        rules={[{ required: variants.length > 0, message: 'Variant required' }]}
-                                                                    >
-                                                                        <Select placeholder="Select Variant" disabled={!selectedProductId || variants.length === 0} allowClear>
-                                                                            {variants.map(v => {
-                                                                                const attrs = v.attributes.map(a => a.attribute_value_name).join(', ');
-                                                                                return (
-                                                                                    <Select.Option key={v.id} value={v.id}>
-                                                                                        {attrs || v.sku} (Stock: {v.current_stock})
-                                                                                    </Select.Option>
-                                                                                );
-                                                                            })}
-                                                                        </Select>
-                                                                    </Form.Item>
-                                                                );
-                                                            }}
-                                                        </Form.Item>
-                                                    </Col>
-                                                    <Col xs={20} sm={10} md={3}>
-                                                        <Form.Item
-                                                            {...restField}
-                                                            name={[name, 'quantity']}
-                                                            label="Qty"
-                                                            rules={[{ required: true, message: 'Missing Qty' }]}
-                                                            style={{ marginBottom: 0 }}
-                                                        >
-                                                            <InputNumber style={{ width: '100%' }} min={1} />
-                                                        </Form.Item>
-                                                    </Col>
-                                                    <Col xs={4} sm={2} md={2} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 28 }}>
-                                                        {fields.length > 1 ? (
-                                                            <MinusCircleOutlined
-                                                                style={{ color: '#ff4d4f', fontSize: 18, cursor: 'pointer' }}
-                                                                onClick={() => remove(name)}
-                                                            />
-                                                        ) : null}
-                                                    </Col>
-                                                </Row>
-                                            </Card>
-                                        ))}
-                                        <Form.Item style={{ marginBottom: 0 }}>
-                                            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                                Add Another Item
-                                            </Button>
-                                            <Form.ErrorList errors={errors} />
+                                <Row gutter={16}>
+                                    <Col xs={24}>
+                                        <Form.Item name="customer_name" label="Customer Name" rules={[{ required: true, message: 'Please enter customer name' }]}>
+                                            <Input size="large" placeholder="e.g. John Doe" prefix={<UserOutlined style={{ color: '#bfbfbf' }} />} />
                                         </Form.Item>
-                                    </>
-                                )}
-                            </Form.List>
-                        </Card>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="phone_number" label="Phone Number" rules={[{ required: true, message: 'Please enter phone number' }]}>
+                                            <Input size="large" placeholder="e.g. 01700000000" prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="customer_type_id" label="Customer Type">
+                                            <Select size="large" placeholder="Select type" showSearch optionFilterProp="label" options={customerTypes.map(c => ({ value: c.id, label: c.name }))} allowClear />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24}>
+                                        <Form.Item name="shipping_address" label="Shipping Address" rules={[{ required: true, message: 'Please enter shipping address' }]}>
+                                            <Input.TextArea size="large" rows={2} placeholder="Full shipping address..." />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="district_id" label="District">
+                                            <Select
+                                                size="large"
+                                                showSearch
+                                                placeholder="Select a district"
+                                                optionFilterProp="children"
+                                                filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                                                options={districts.map(d => ({ value: d.id, label: d.district_name }))}
+                                                allowClear
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                            </Card>
 
-                        <Card title="Financials & Summary" bordered={false} style={{ marginBottom: 24, boxShadow: '0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02)' }}>
-                            <Row gutter={16}>
-                                <Col xs={12} sm={8}>
-                                    <Form.Item name="delivery_charge" label="Delivery Charge">
-                                        <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={12} sm={8}>
-                                    <Form.Item name="advanced_payment" label="Advanced Payment">
-                                        <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={12} sm={8}>
-                                    <Form.Item name="special_discount" label="Special Discount">
-                                        <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={12} sm={8}>
-                                    <Form.Item name="coupon_discount" label="Coupon Discount">
-                                        <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={12} sm={8}>
-                                    <Form.Item name="additional_cost" label="Additional Cost">
-                                        <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={12} sm={8}>
-                                    <Form.Item name="paid_status" label="Paid Status">
-                                        <Select
-                                            options={[
-                                                { value: 'paid', label: 'Paid' },
-                                                { value: 'unpaid', label: 'Unpaid' }
-                                            ]}
-                                        />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-
-                            <Form.Item noStyle shouldUpdate>
-                                {() => {
-                                    const items = form.getFieldValue('items') || [];
-                                    let subtotal = 0;
-                                    
-                                    items.forEach(item => {
-                                        if (item && item.product_id && item.quantity) {
-                                            const product = fetchedProducts[item.product_id];
-                                            if (product) {
-                                                let price = Number(product.sell_price);
-                                                if (item.product_variant_id) {
-                                                    const variant = product.variants?.find(v => v.id === item.product_variant_id);
-                                                    if (variant && variant.sell_price) {
-                                                        price = Number(variant.sell_price);
+                            <Card
+                                title={<SectionHeader icon={<SettingOutlined />} title="Order Settings" subtitle="Status, gateway & courier" color="#f5222d" />}
+                                bordered={false}
+                                style={cardStyle}
+                                styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
+                            >
+                                <Row gutter={16}>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="status_id" label="Status" rules={[{ required: true, message: 'Please select a status' }]}>
+                                            <Select size="large" placeholder="Select Status" showSearch optionFilterProp="label" options={statuses.map(s => ({ value: s.id, label: s.name }))} allowClear />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="delivery_gateway_id" label="Delivery Gateway">
+                                            <Select size="large" placeholder="Select Gateway" allowClear onChange={(val) => {
+                                                if (val) {
+                                                    const selected = deliveryGateways.find(g => g.id === val);
+                                                    if (selected && selected.delivery_fee !== undefined) {
+                                                        form.setFieldsValue({ delivery_charge: selected.delivery_fee });
                                                     }
                                                 }
-                                                subtotal += price * Number(item.quantity);
+                                            }}>
+                                                {deliveryGateways.map(g => (
+                                                    <Select.Option key={g.id} value={g.id}>
+                                                        {g.name} <Tag color="blue" style={{ marginLeft: 4 }}>৳{g.delivery_fee}</Tag>
+                                                    </Select.Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="payment_gateway_id" label="Payment Gateway">
+                                            <Select size="large" placeholder="Select Payment Gateway" allowClear>
+                                                {paymentGateways.map(g => (
+                                                    <Select.Option key={g.id} value={g.id}>{g.name}</Select.Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="courier_id" label="Select Courier">
+                                            <Select size="large" placeholder="Choose Courier" showSearch optionFilterProp="label" options={couriers.map(c => ({ value: c.id, label: c.name }))} allowClear />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name="coupon_id" label="Coupon">
+                                            <Select size="large" placeholder="Select Coupon" showSearch optionFilterProp="label" options={coupons.map(c => ({ value: c.id, label: c.code }))} allowClear />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24}>
+                                        <Form.Item name="note" label="Customer Note">
+                                            <Input.TextArea size="large" rows={2} placeholder="Any notes from the customer..." />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                            </Card>
+                        </Col>
+
+                        <Col xs={24} lg={12}>
+                            <Card
+                                title={<SectionHeader icon={<ShoppingCartOutlined />} title="Order Items" subtitle="Manage products in the order" color="#52c41a" />}
+                                bordered={false}
+                                style={cardStyle}
+                                styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
+                            >
+                                <Form.List
+                                    name="items"
+                                    rules={[
+                                        {
+                                            validator: async (_, items) => {
+                                                if (!items || items.length < 1) {
+                                                    return Promise.reject(new Error('At least one item is required'));
+                                                }
+                                            },
+                                        },
+                                    ]}
+                                >
+                                    {(fields, { add, remove }, { errors }) => (
+                                        <>
+                                            {fields.map(({ key, name, ...restField }, idx) => (
+                                                <div
+                                                    key={key}
+                                                    style={{
+                                                        marginBottom: 12,
+                                                        padding: '14px 16px',
+                                                        background: idx % 2 === 0 ? '#fafbff' : '#f8faf5',
+                                                        borderRadius: 10,
+                                                        border: '1px solid #f0f0f0',
+                                                        position: 'relative',
+                                                    }}
+                                                >
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: -8,
+                                                        left: 12,
+                                                        background: 'linear-gradient(135deg, #52c41a, #73d13d)',
+                                                        color: '#fff',
+                                                        fontSize: 10,
+                                                        fontWeight: 700,
+                                                        padding: '1px 8px',
+                                                        borderRadius: 8,
+                                                    }}>
+                                                        ITEM #{idx + 1}
+                                                    </div>
+
+                                                    <Row gutter={[12, 8]} align="middle">
+                                                        <Col xs={24} md={11}>
+                                                            <Form.Item
+                                                                {...restField}
+                                                                name={[name, 'product_id']}
+                                                                label={<Text style={{ fontSize: 12 }}>Product</Text>}
+                                                                rules={[{ required: true, message: 'Missing product' }]}
+                                                                style={{ marginBottom: 0 }}
+                                                            >
+                                                                <Select
+                                                                    showSearch
+                                                                    placeholder="Search products..."
+                                                                    onSearch={handleProductSearch}
+                                                                    filterOption={false}
+                                                                    loading={isSearching}
+                                                                    optionLabelProp="label"
+                                                                    onChange={() => {
+                                                                        const currentItems = form.getFieldValue('items');
+                                                                        if (currentItems[name]) {
+                                                                            currentItems[name].product_variant_id = null;
+                                                                        }
+                                                                        form.setFieldsValue({ items: currentItems });
+                                                                    }}
+                                                                >
+                                                                    {Object.values(fetchedProducts).map(p => (
+                                                                        <Select.Option key={p.id} value={p.id} label={p.name}>
+                                                                            <Flex align="center" gap={10}>
+                                                                                {p.image ? (
+                                                                                    <img src={p.image} alt={p.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #f0f0f0' }} />
+                                                                                ) : (
+                                                                                    <div style={{ width: 36, height: 36, borderRadius: 6, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bfbfbf', fontSize: 16 }}>
+                                                                                        <ShoppingCartOutlined />
+                                                                                    </div>
+                                                                                )}
+                                                                                <div style={{ flex: 1, overflow: 'hidden', lineHeight: 1.3 }}>
+                                                                                    <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                                                                        {p.name}
+                                                                                    </div>
+                                                                                    <div style={{ fontSize: 11, color: '#8c8c8c', marginTop: 1 }}>
+                                                                                        {p.category?.name || 'Uncategorized'}
+                                                                                        <span style={{ color: '#1677ff', fontWeight: 600, marginLeft: 6 }}>৳{p.sell_price}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </Flex>
+                                                                        </Select.Option>
+                                                                    ))}
+                                                                </Select>
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col xs={16} md={7}>
+                                                            <Form.Item
+                                                                noStyle
+                                                                shouldUpdate={(prevValues, currentValues) => {
+                                                                    return prevValues.items?.[name]?.product_id !== currentValues.items?.[name]?.product_id;
+                                                                }}
+                                                            >
+                                                                {() => {
+                                                                    const selectedProductId = form.getFieldValue(['items', name, 'product_id']);
+                                                                    const selectedProduct = fetchedProducts[selectedProductId];
+                                                                    const variants = selectedProduct?.variants || [];
+
+                                                                    return (
+                                                                        <Form.Item
+                                                                            {...restField}
+                                                                            name={[name, 'product_variant_id']}
+                                                                            label={<Text style={{ fontSize: 12 }}>Variant</Text>}
+                                                                            style={{ marginBottom: 0 }}
+                                                                            rules={[{ required: variants.length > 0, message: 'Variant required' }]}
+                                                                        >
+                                                                            <Select placeholder="Select Variant" disabled={!selectedProductId || variants.length === 0} allowClear>
+                                                                                {variants.map(v => {
+                                                                                    const attrs = v.attributes.map(a => a.attribute_value_name).join(', ');
+                                                                                    return (
+                                                                                        <Select.Option key={v.id} value={v.id}>
+                                                                                            {attrs || v.sku} (Stock: {v.current_stock})
+                                                                                        </Select.Option>
+                                                                                    );
+                                                                                })}
+                                                                            </Select>
+                                                                        </Form.Item>
+                                                                    );
+                                                                }}
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col xs={5} md={4}>
+                                                            <Form.Item
+                                                                {...restField}
+                                                                name={[name, 'quantity']}
+                                                                label={<Text style={{ fontSize: 12 }}>Qty</Text>}
+                                                                rules={[{ required: true, message: 'Qty' }]}
+                                                                style={{ marginBottom: 0 }}
+                                                            >
+                                                                <InputNumber style={{ width: '100%' }} min={1} />
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col xs={3} md={2} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 24 }}>
+                                                            {fields.length > 1 ? (
+                                                                <Tooltip title="Remove item">
+                                                                    <MinusCircleOutlined
+                                                                        style={{
+                                                                            color: '#ff4d4f',
+                                                                            fontSize: 18,
+                                                                            cursor: 'pointer',
+                                                                            transition: 'transform 0.2s',
+                                                                        }}
+                                                                        onClick={() => remove(name)}
+                                                                    />
+                                                                </Tooltip>
+                                                            ) : null}
+                                                        </Col>
+                                                    </Row>
+                                                </div>
+                                            ))}
+                                            <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
+                                                <Button
+                                                    type="dashed"
+                                                    onClick={() => add()}
+                                                    block
+                                                    icon={<PlusOutlined />}
+                                                    style={{
+                                                        height: 44,
+                                                        borderRadius: 10,
+                                                        borderColor: '#52c41a',
+                                                        color: '#52c41a',
+                                                        fontWeight: 600,
+                                                    }}
+                                                >
+                                                    Add Another Item
+                                                </Button>
+                                                <Form.ErrorList errors={errors} />
+                                            </Form.Item>
+                                        </>
+                                    )}
+                                </Form.List>
+                            </Card>
+
+                            {/* Financials */}
+                            <Card
+                                title={<SectionHeader icon={<DollarOutlined />} title="Financials & Summary" subtitle="Charges, discounts & payment" color="#faad14" />}
+                                bordered={false}
+                                style={cardStyle}
+                                styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: 20 } }}
+                            >
+                                <Row gutter={[16, 0]}>
+                                    <Col xs={12} sm={8}>
+                                        <Form.Item name="delivery_charge" label={<Text style={{ fontSize: 12 }}>🚚 Delivery Charge</Text>}>
+                                            <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={12} sm={8}>
+                                        <Form.Item name="advanced_payment" label={<Text style={{ fontSize: 12 }}>💰 Advanced Payment</Text>}>
+                                            <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={12} sm={8}>
+                                        <Form.Item name="special_discount" label={<Text style={{ fontSize: 12 }}>🏷️ Special Discount</Text>}>
+                                            <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={12} sm={8}>
+                                        <Form.Item name="coupon_discount" label={<Text style={{ fontSize: 12 }}>🎫 Coupon Discount</Text>}>
+                                            <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={12} sm={8}>
+                                        <Form.Item name="additional_cost" label={<Text style={{ fontSize: 12 }}>➕ Additional Cost</Text>}>
+                                            <InputNumber style={{ width: '100%' }} min={0} addonAfter="৳" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={12} sm={8}>
+                                        <Form.Item name="paid_status" label={<Text style={{ fontSize: 12 }}>💳 Paid Status</Text>}>
+                                            <Select
+                                                options={[
+                                                    { value: 'paid', label: '✅ Paid' },
+                                                    { value: 'unpaid', label: '❌ Unpaid' }
+                                                ]}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+
+                                {/* ─── Live Order Summary ──────────────────── */}
+                                <Form.Item noStyle shouldUpdate>
+                                    {() => {
+                                        const items = form.getFieldValue('items') || [];
+                                        let subtotal = 0;
+
+                                        items.forEach(item => {
+                                            if (item && item.product_id && item.quantity) {
+                                                const product = fetchedProducts[item.product_id];
+                                                if (product) {
+                                                    let price = Number(product.sell_price);
+                                                    if (item.product_variant_id) {
+                                                        const variant = product.variants?.find(v => v.id === item.product_variant_id);
+                                                        if (variant && variant.sell_price) {
+                                                            price = Number(variant.sell_price);
+                                                        }
+                                                    }
+                                                    subtotal += price * Number(item.quantity);
+                                                }
                                             }
-                                        }
-                                    });
+                                        });
 
-                                    const delivery_charge = Number(form.getFieldValue('delivery_charge') || 0);
-                                    const additional_cost = Number(form.getFieldValue('additional_cost') || 0);
-                                    const special_discount = Number(form.getFieldValue('special_discount') || 0);
-                                    const coupon_discount = Number(form.getFieldValue('coupon_discount') || 0);
-                                    const advanced_payment = Number(form.getFieldValue('advanced_payment') || 0);
+                                        const delivery_charge = Number(form.getFieldValue('delivery_charge') || 0);
+                                        const additional_cost = Number(form.getFieldValue('additional_cost') || 0);
+                                        const special_discount = Number(form.getFieldValue('special_discount') || 0);
+                                        const coupon_discount = Number(form.getFieldValue('coupon_discount') || 0);
+                                        const advanced_payment = Number(form.getFieldValue('advanced_payment') || 0);
 
-                                    const total = subtotal + delivery_charge + additional_cost - special_discount - coupon_discount;
-                                    const due = total - advanced_payment;
+                                        const total = subtotal + delivery_charge + additional_cost - special_discount - coupon_discount;
+                                        const due = total - advanced_payment;
 
-                                    return (
-                                        <div style={{ background: '#f5f7fa', padding: 16, borderRadius: 8, marginTop: 16, border: '1px dashed #d9d9d9' }}>
-                                            <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: '#1f1f1f' }}>Order Summary</Title>
-                                            <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                <Typography.Text type="secondary">Subtotal:</Typography.Text>
-                                                <Typography.Text>৳{subtotal.toFixed(2)}</Typography.Text>
-                                            </Flex>
-                                            <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                <Typography.Text type="secondary">Delivery Charge:</Typography.Text>
-                                                <Typography.Text>+ ৳{delivery_charge.toFixed(2)}</Typography.Text>
-                                            </Flex>
-                                            {additional_cost > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="secondary">Additional Cost:</Typography.Text>
-                                                    <Typography.Text>+ ৳{additional_cost.toFixed(2)}</Typography.Text>
+                                        return (
+                                            <div style={{
+                                                background: 'linear-gradient(135deg, #fff8f0 0%, #fff4e6 100%)',
+                                                padding: '20px',
+                                                borderRadius: 12,
+                                                marginTop: 8,
+                                                border: '1px solid #ffe0b2',
+                                            }}>
+                                                <Flex align="center" gap={8} style={{ marginBottom: 16 }}>
+                                                    <FileTextOutlined style={{ color: '#fa8c16', fontSize: 16 }} />
+                                                    <Text strong style={{ fontSize: 15, color: '#1f1f1f' }}>Order Summary</Text>
                                                 </Flex>
-                                            )}
-                                            {special_discount > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="danger">Special Discount:</Typography.Text>
-                                                    <Typography.Text type="danger">- ৳{special_discount.toFixed(2)}</Typography.Text>
-                                                </Flex>
-                                            )}
-                                            {coupon_discount > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="danger">Coupon Discount:</Typography.Text>
-                                                    <Typography.Text type="danger">- ৳{coupon_discount.toFixed(2)}</Typography.Text>
-                                                </Flex>
-                                            )}
-                                            <Divider style={{ margin: '12px 0', borderColor: '#d9d9d9' }} />
-                                            <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                <Typography.Text strong style={{ fontSize: 16 }}>Total Payable:</Typography.Text>
-                                                <Typography.Text strong style={{ fontSize: 16 }}>৳{total.toFixed(2)}</Typography.Text>
-                                            </Flex>
-                                            {advanced_payment > 0 && (
-                                                <Flex justify="space-between" style={{ marginBottom: 8 }}>
-                                                    <Typography.Text type="success">Advanced Payment:</Typography.Text>
-                                                    <Typography.Text type="success">- ৳{advanced_payment.toFixed(2)}</Typography.Text>
-                                                </Flex>
-                                            )}
-                                            {advanced_payment > 0 && (
-                                                <>
-                                                    <Divider style={{ margin: '12px 0', borderColor: '#d9d9d9' }} />
-                                                    <Flex justify="space-between">
-                                                        <Typography.Text strong style={{ fontSize: 18 }}>Due Amount:</Typography.Text>
-                                                        <Typography.Text strong style={{ fontSize: 18, color: due > 0 ? '#ff4d4f' : '#52c41a' }}>
-                                                            ৳{due.toFixed(2)}
-                                                        </Typography.Text>
+
+                                                {/* Summary rows */}
+                                                <div style={{ fontSize: 13 }}>
+                                                    <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                        <Text type="secondary">Subtotal</Text>
+                                                        <Text style={{ fontWeight: 600 }}>৳{subtotal.toFixed(2)}</Text>
                                                     </Flex>
-                                                </>
-                                            )}
-                                        </div>
-                                    );
-                                }}
-                            </Form.Item>
-                        </Card>
-                    </Col>
-                </Row>
-            </Form>
+                                                    <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                        <Text type="secondary">Delivery Charge</Text>
+                                                        <Text style={{ color: '#1677ff' }}>+ ৳{delivery_charge.toFixed(2)}</Text>
+                                                    </Flex>
+                                                    {additional_cost > 0 && (
+                                                        <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                            <Text type="secondary">Additional Cost</Text>
+                                                            <Text style={{ color: '#1677ff' }}>+ ৳{additional_cost.toFixed(2)}</Text>
+                                                        </Flex>
+                                                    )}
+                                                    {special_discount > 0 && (
+                                                        <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                            <Text style={{ color: '#ff4d4f' }}>Special Discount</Text>
+                                                            <Text style={{ color: '#ff4d4f' }}>- ৳{special_discount.toFixed(2)}</Text>
+                                                        </Flex>
+                                                    )}
+                                                    {coupon_discount > 0 && (
+                                                        <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                            <Text style={{ color: '#ff4d4f' }}>Coupon Discount</Text>
+                                                            <Text style={{ color: '#ff4d4f' }}>- ৳{coupon_discount.toFixed(2)}</Text>
+                                                        </Flex>
+                                                    )}
+                                                </div>
+
+                                                <Divider style={{ margin: '12px 0', borderColor: '#ffe0b2' }} />
+
+                                                <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+                                                    <Text strong style={{ fontSize: 16 }}>Total Payable</Text>
+                                                    <Text strong style={{ fontSize: 18, color: '#1f1f1f' }}>৳{total.toFixed(2)}</Text>
+                                                </Flex>
+
+                                                {advanced_payment > 0 && (
+                                                    <>
+                                                        <Flex justify="space-between" style={{ marginBottom: 8 }}>
+                                                            <Text style={{ color: '#52c41a' }}>Advanced Payment</Text>
+                                                            <Text style={{ color: '#52c41a', fontWeight: 600 }}>- ৳{advanced_payment.toFixed(2)}</Text>
+                                                        </Flex>
+                                                        <Divider style={{ margin: '12px 0', borderColor: '#ffe0b2' }} />
+                                                        <Flex justify="space-between" align="center">
+                                                            <Text strong style={{ fontSize: 18 }}>Due Amount</Text>
+                                                            <div style={{
+                                                                background: due > 0 ? 'linear-gradient(135deg, #ff4d4f, #ff7875)' : 'linear-gradient(135deg, #52c41a, #73d13d)',
+                                                                color: '#fff',
+                                                                padding: '4px 16px',
+                                                                borderRadius: 8,
+                                                                fontSize: 18,
+                                                                fontWeight: 700,
+                                                            }}>
+                                                                ৳{due.toFixed(2)}
+                                                            </div>
+                                                        </Flex>
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    }}
+                                </Form.Item>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Form>
             </Spin>
+
+            {/* ─── Custom Styles ──────────────────────────────── */}
+            <style>{`
+                .ant-card {
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+                }
+                .ant-form-item-label > label {
+                    font-weight: 600 !important;
+                    font-size: 13px !important;
+                    color: #444 !important;
+                }
+                .ant-input-lg, .ant-select-lg .ant-select-selector, .ant-input-number-lg {
+                    border-radius: 8px !important;
+                }
+            `}</style>
         </div>
     );
 };
