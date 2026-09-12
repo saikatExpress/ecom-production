@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useNavigate, useParams } from "react-router-dom";
+import ProductAiChat from "../../components/product/ProductAiChat";
 import useTitle from "../../hooks/useTitle";
 import { getData, getDatas, postData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
-import ProductAiChat from "../../components/product/ProductAiChat";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -21,6 +21,7 @@ export default function EditProduct() {
     const navigate = useNavigate();
     const [form]   = Form.useForm();
 
+    // States
     const [loading, setLoading]                     = useState(true);
     const [submitting, setSubmitting]               = useState(false);
     const [categories, setCategories]               = useState([]);
@@ -78,9 +79,6 @@ export default function EditProduct() {
                         current_stock      : data.current_stock,
                         total_sell_quantity: data.total_sell_quantity,
                         free_shipping      : data.free_shipping === 1,
-                        discount_type      : "fixed",
-                        discount_amount    : data.discount_amount,
-                        offer_price        : data.offer_price,
                         status             : data.status,
                         short_description  : data.short_description,
                         description        : data.description,
@@ -96,11 +94,11 @@ export default function EditProduct() {
 
                     if (data.gallery_images && data.gallery_images.length > 0) {
                         const galleries = data.gallery_images.map(g => ({
-                            uid: g.id.toString(),
-                            url: g.image,
-                            name: `Gallery Image ${g.id}`,
+                            uid   : g.id.toString(),
+                            url   : g.image,
+                            name  : `Gallery Image ${g.id}`,
                             status: 'done',
-                            dbId: g.id
+                            dbId  : g.id
                         }));
                         setFileList(galleries);
                     }
@@ -232,7 +230,6 @@ export default function EditProduct() {
         }
     };
 
-    // Prepare attribute values options for multi-select inside variants
     const allAttributeValueOptions = attributes.flatMap((attr) =>
         (attr.attributeValues || []).map((val) => ({
             label: `${attr.name}: ${val.attribute_value}`,
@@ -259,24 +256,22 @@ export default function EditProduct() {
                 style={{ marginBottom: 16 }}
             />
 
-            <Form
-                form={form}
-                layout="vertical"
-                onFinish={handleSubmit}
-            >
-                {/* Header Action Bar */}
+            <Form form={form} layout="vertical" onFinish={handleSubmit}>
                 <Card style={{ marginBottom: 24 }}>
                     <Flex justify="space-between" align="center" wrap="wrap" gap="small">
                         <Space align="center">
                             <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/products")}>
                                 Back
                             </Button>
+
                             <Title level={3} style={{ margin: 0 }}>
                                 Edit Product
                             </Title>
                         </Space>
+
                         <Space>
                             <Button onClick={() => navigate("/products")}>Cancel</Button>
+
                             <Button type="primary" icon={<SaveOutlined />} loading={submitting} htmlType="submit">
                                 Update Product
                             </Button>
@@ -285,9 +280,7 @@ export default function EditProduct() {
                 </Card>
 
                 <Row gutter={[24, 24]}>
-                    {/* Left Column: Basic Info, Pricing, Description, Media */}
                     <Col xs={24} lg={16}>
-                        {/* General Information */}
                         <Card
                             title={
                                 <Space>
@@ -297,21 +290,13 @@ export default function EditProduct() {
                             }
                             style={{ marginBottom: 24 }}
                         >
-                            <Form.Item
-                                label="Product Name"
-                                name="name"
-                                rules={[{ required: true, message: "Please enter product name" }]}
-                            >
+                            <Form.Item label="Product Name" name="name" rules={[{ required: true, message: "Please enter product name" }]}>
                                 <Input placeholder="e.g. Stylish Sunglass" size="large" />
                             </Form.Item>
 
                             <Row gutter={16}>
                                 <Col xs={24} sm={12}>
-                                    <Form.Item
-                                        label="Category"
-                                        name="category_id"
-                                        rules={[{ required: true, message: "Please select category" }]}
-                                    >
+                                    <Form.Item label="Category" name="category_id" rules={[{ required: true, message: "Please select category" }]}>
                                         <Select
                                             placeholder="Select Category"
                                             showSearch
@@ -358,7 +343,6 @@ export default function EditProduct() {
                             </Row>
                         </Card>
 
-                        {/* Pricing & Stock */}
                         <Card
                             title={
                                 <Space>
@@ -370,73 +354,20 @@ export default function EditProduct() {
                         >
                             <Row gutter={16}>
                                 <Col xs={24} sm={8}>
-                                    <Form.Item
-                                        label="MRP (Original Price)"
-                                        name="mrp"
-                                        rules={[{ required: true, message: "Please enter MRP" }]}
-                                    >
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
+                                    <Form.Item label="MRP (Original Price)" name="mrp" rules={[{ required: true, message: "Please enter MRP" }]}>
+                                        <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} min={0}/>
                                     </Form.Item>
                                 </Col>
 
                                 <Col xs={24} sm={8}>
-                                    <Form.Item
-                                        label="Selling Price"
-                                        name="sell_price"
-                                        rules={[{ required: true, message: "Please enter selling price" }]}
-                                    >
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
+                                    <Form.Item label="Selling Price" name="sell_price" rules={[{ required: true, message: "Please enter selling price" }]}>
+                                        <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} min={0}/>
                                     </Form.Item>
                                 </Col>
 
                                 <Col xs={24} sm={8}>
                                     <Form.Item label="Buying Price" name="buy_price">
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-
-                            <Row gutter={16}>
-                                <Col xs={24} sm={8}>
-                                    <Form.Item label="Discount Type" name="discount_type">
-                                        <Select
-                                            options={[
-                                                { label: "Fixed Amount", value: "fixed" },
-                                                { label: "Percentage (%)", value: "percentage" },
-                                            ]}
-                                        />
-                                    </Form.Item>
-                                </Col>
-
-                                <Col xs={24} sm={8}>
-                                    <Form.Item label="Discount Amount" name="discount_amount">
-                                        <InputNumber placeholder="0" style={{ width: "100%" }} min={0} />
-                                    </Form.Item>
-                                </Col>
-
-                                <Col xs={24} sm={8}>
-                                    <Form.Item label="Offer Price" name="offer_price">
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
+                                        <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} min={0}/>
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -447,11 +378,13 @@ export default function EditProduct() {
                                         <InputNumber placeholder="0" style={{ width: "100%" }} min={0} />
                                     </Form.Item>
                                 </Col>
+
                                 <Col xs={24} sm={8}>
                                     <Form.Item label="Total Sell Quantity" name="total_sell_quantity">
                                         <InputNumber placeholder="0" style={{ width: "100%" }} min={0} />
                                     </Form.Item>
                                 </Col>
+
                                 <Col xs={24} sm={8}>
                                     <Form.Item label="Free Shipping" name="free_shipping" valuePropName="checked">
                                         <Switch />
@@ -460,7 +393,6 @@ export default function EditProduct() {
                             </Row>
                         </Card>
 
-                        {/* Product Descriptions */}
                         <Card
                             title={
                                 <Space>
@@ -479,7 +411,6 @@ export default function EditProduct() {
                             </Form.Item>
                         </Card>
 
-                        {/* Media Uploads */}
                         <Card
                             title={
                                 <Space>
@@ -532,7 +463,6 @@ export default function EditProduct() {
                             </Form.Item>
                         </Card>
 
-                        {/* Product Variants (Dynamic Section) */}
                         <Card
                             title={
                                 <Flex justify="space-between" align="center">
@@ -540,12 +470,7 @@ export default function EditProduct() {
                                         <TagsOutlined />
                                         <span>Product Variants</span>
                                     </Space>
-                                    <Switch
-                                        checked={hasVariants}
-                                        onChange={(checked) => setHasVariants(checked)}
-                                        checkedChildren="Enabled"
-                                        unCheckedChildren="Disabled"
-                                    />
+                                    <Switch checked={hasVariants} onChange={(checked) => setHasVariants(checked)} checkedChildren="Enabled" unCheckedChildren="Disabled"/>
                                 </Flex>
                             }
                             style={{ marginBottom: 24 }}
@@ -564,40 +489,22 @@ export default function EditProduct() {
                                                     type="inner"
                                                     title={`Variant #${name + 1}`}
                                                     extra={
-                                                        <Button
-                                                            type="text"
-                                                            danger
-                                                            icon={<DeleteOutlined />}
-                                                            onClick={() => remove(name)}
-                                                        />
+                                                        <Button type="text" danger icon={<DeleteOutlined />} onClick={() => remove(name)}/>
                                                     }
                                                     style={{ marginBottom: 16 }}
                                                 >
-                                                    {/* Hidden ID Field for existing variants */}
                                                     <Form.Item {...restField} name={[name, "id"]} hidden>
                                                         <Input />
                                                     </Form.Item>
 
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Attribute Values"
-                                                                name={[name, "attribute_values"]}
-                                                            >
-                                                                <Select
-                                                                    mode="multiple"
-                                                                    placeholder="Select attributes (e.g. Size: M, Color: Blue)"
-                                                                    options={allAttributeValueOptions}
-                                                                />
+                                                            <Form.Item {...restField} label="Attribute Values" name={[name, "attribute_values"]}>
+                                                                <Select mode="multiple" placeholder="Select attributes (e.g. Size: M, Color: Blue)" options={allAttributeValueOptions}/>
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Variant SKU"
-                                                                name={[name, "sku"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Variant SKU" name={[name, "sku"]}>
                                                                 <Input placeholder="Variant SKU" />
                                                             </Form.Item>
                                                         </Col>
@@ -605,40 +512,23 @@ export default function EditProduct() {
 
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="MRP"
-                                                                name={[name, "mrp"]}
-                                                                rules={[{ required: true, message: "MRP is required" }]}
-                                                            >
+                                                            <Form.Item {...restField} label="MRP" name={[name, "mrp"]} rules={[{ required: true, message: "MRP is required" }]}>
                                                                 <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Selling Price"
-                                                                name={[name, "sell_price"]}
-                                                                rules={[{ required: true, message: "Selling price is required" }]}
-                                                            >
+                                                            <Form.Item {...restField} label="Selling Price" name={[name, "sell_price"]} rules={[{ required: true, message: "Selling price is required" }]}>
+                                                                <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} />
+                                                            </Form.Item>
+                                                        </Col>
+
+                                                        <Col xs={24} sm={6}>
+                                                            <Form.Item {...restField} label="Buying Price" name={[name, "buy_price"]}>
                                                                 <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Buying Price"
-                                                                name={[name, "buy_price"]}
-                                                            >
-                                                                <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} />
-                                                            </Form.Item>
-                                                        </Col>
-                                                        <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Stock"
-                                                                name={[name, "current_stock"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Stock" name={[name, "current_stock"]}>
                                                                 <InputNumber placeholder="0" style={{ width: "100%" }} min={0} />
                                                             </Form.Item>
                                                         </Col>
@@ -689,20 +579,12 @@ export default function EditProduct() {
 
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Short Description"
-                                                                name={[name, "short_description"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Short Description" name={[name, "short_description"]}>
                                                                 <ReactQuill theme="snow" style={{ height: '150px', marginBottom: '50px' }} placeholder="Variant short description..." />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Full Description"
-                                                                name={[name, "description"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Full Description" name={[name, "description"]}>
                                                                 <ReactQuill theme="snow" style={{ height: '150px', marginBottom: '50px' }} placeholder="Variant full description..." />
                                                             </Form.Item>
                                                         </Col>
@@ -720,9 +602,7 @@ export default function EditProduct() {
                         </Card>
                     </Col>
 
-                    {/* Right Column: Status & SEO Meta */}
                     <Col xs={24} lg={8}>
-                        {/* Status Card */}
                         <Card title="Publish Status" style={{ marginBottom: 24 }}>
                             <Form.Item label="Status" name="status">
                                 <Radio.Group buttonStyle="solid">
@@ -732,7 +612,6 @@ export default function EditProduct() {
                             </Form.Item>
                         </Card>
 
-                        {/* SEO Metadata */}
                         <Card
                             title={
                                 <Space>
@@ -757,12 +636,7 @@ export default function EditProduct() {
                 </Row>
             </Form>
             
-            <ProductAiChat 
-                form={form} 
-                categories={categories} 
-                subCategories={filteredSubCategories} 
-                brands={brands} 
-            />
+            <ProductAiChat  form={form}  categories={categories}  subCategories={filteredSubCategories} brands={brands} />
         </div>
     );
 }
