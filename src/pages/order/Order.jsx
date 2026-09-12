@@ -1,10 +1,10 @@
 import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, Popconfirm, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
+import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import usePermissions from "../../hooks/usePermissions";
 import useTitle from "../../hooks/useTitle";
-import { deleteData, getDatas } from "../../services/request";
+import { deleteData, getDatas, postData, putData } from "../../services/request";
 import OrderPreview from "../../components/order/OrderPreview";
 
 const { Title, Text } = Typography;
@@ -17,6 +17,7 @@ const Order = () => {
     const navigate          = useNavigate();
     const { hasPermission } = usePermissions();
     const [form]            = Form.useForm();
+    const [noteForm]        = Form.useForm();
 
     // States
     const [orders, setOrders]                 = useState([]);
@@ -32,6 +33,14 @@ const Order = () => {
     const [users, setUsers]                       = useState([]);
     const [previewOpen, setPreviewOpen]           = useState(false);
     const [previewId, setPreviewId]               = useState(null);
+
+    // Note states
+    const [noteModalOpen, setNoteModalOpen]         = useState(false);
+    const [noteOrderId, setNoteOrderId]             = useState(null);
+    const [addingNote, setAddingNote]               = useState(false);
+    const [viewNoteModalOpen, setViewNoteModalOpen] = useState(false);
+    const [viewNotes, setViewNotes]                 = useState([]);
+    const [notesLoading, setNotesLoading]           = useState(false);
 
     const [filters, setFilters] = useState({
         search_key         : '',
@@ -226,6 +235,72 @@ const Order = () => {
         } catch (error) {
             console.error("Failed to delete order:", error);
             message.error("An error occurred while deleting the order.");
+        }
+    };
+
+    const handleViewNote = async (orderId) => {
+        setViewNoteModalOpen(true);
+        setNotesLoading(true);
+        try {
+            const res = await getDatas("/admin/note", { order_id: orderId });
+            if (res?.success) {
+                // If it's a single object, wrap in array, or if it's an array, set directly
+                const noteData = res.data;
+                setViewNotes(Array.isArray(noteData) ? noteData : [noteData]);
+            }
+        } catch (error) {
+            console.error(error);
+            message.error("Failed to fetch notes");
+        } finally {
+            setNotesLoading(false);
+        }
+    };
+
+    const [editNoteId, setEditNoteId] = useState(null);
+
+    const handleAddNote = async (values) => {
+        setAddingNote(true);
+        try {
+            let res;
+            if (editNoteId) {
+                res = await putData(`/admin/note/${editNoteId}`, { note: values.note });
+            } else {
+                res = await postData("/admin/note", { order_id: noteOrderId, note: values.note });
+            }
+            if (res?.success) {
+                message.success(`Note ${editNoteId ? 'updated' : 'added'} successfully`);
+                setNoteModalOpen(false);
+                noteForm.resetFields();
+                setEditNoteId(null);
+                
+                if (viewNoteModalOpen && noteOrderId) {
+                    handleViewNote(noteOrderId);
+                }
+            } else {
+                message.error(res?.message || `Failed to ${editNoteId ? 'update' : 'add'} note`);
+            }
+        } catch (error) {
+            console.error(error);
+            message.error(`Failed to ${editNoteId ? 'update' : 'add'} note`);
+        } finally {
+            setAddingNote(false);
+        }
+    };
+
+    const handleDeleteNote = async (noteId) => {
+        try {
+            const res = await deleteData(`/admin/note/${noteId}`);
+            if (res?.success) {
+                message.success("Note deleted successfully");
+                if (noteOrderId) {
+                    handleViewNote(noteOrderId);
+                }
+            } else {
+                message.error(res?.message || "Failed to delete note");
+            }
+        } catch (error) {
+            console.error(error);
+            message.error("Failed to delete note");
         }
     };
 
@@ -679,6 +754,39 @@ const Order = () => {
             }
         },
         {
+            title: 'Note',
+            key: 'note',
+            align: 'center',
+            width: 90,
+            render: (_, record) => (
+                <Space size={4}>
+                    <Tooltip title="View Notes">
+                        <Button
+                            type="primary"
+                            ghost
+                            size="small"
+                            shape="circle"
+                            icon={<EyeOutlined />}
+                            onClick={() => handleViewNote(record.id)}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Add Note">
+                        <Button
+                            type="primary"
+                            size="small"
+                            shape="circle"
+                            icon={<PlusOutlined />}
+                            onClick={() => {
+                                setNoteOrderId(record.id);
+                                noteForm.setFieldsValue({ note: '' });
+                                setNoteModalOpen(true);
+                            }}
+                        />
+                    </Tooltip>
+                </Space>
+            )
+        },
+        {
             title: 'Action',
             key: 'action',
             align: 'center',
@@ -1080,6 +1188,104 @@ const Order = () => {
                 onClose={() => setPreviewOpen(false)} 
                 orderId={previewId} 
             />
+
+            <Modal
+                title={editNoteId ? "Edit Note" : "Add Note"}
+                open={noteModalOpen}
+                onCancel={() => {
+                    setNoteModalOpen(false);
+                    setEditNoteId(null);
+                    noteForm.resetFields();
+                }}
+                footer={null}
+                destroyOnClose
+            >
+                <Form
+                    form={noteForm}
+                    layout="vertical"
+                    onFinish={handleAddNote}
+                >
+                    <Form.Item
+                        name="note"
+                        label="Note Content"
+                        rules={[{ required: true, message: 'Please write a note' }]}
+                    >
+                        <Input.TextArea rows={4} placeholder="Write your note here..." />
+                    </Form.Item>
+                    <Flex justify="flex-end" gap={10}>
+                        <Button onClick={() => {
+                            setNoteModalOpen(false);
+                            setEditNoteId(null);
+                            noteForm.resetFields();
+                        }}>Cancel</Button>
+                        <Button type="primary" htmlType="submit" loading={addingNote}>
+                            {editNoteId ? "Update" : "Submit"}
+                        </Button>
+                    </Flex>
+                </Form>
+            </Modal>
+
+            <Modal
+                title="View Notes"
+                open={viewNoteModalOpen}
+                onCancel={() => setViewNoteModalOpen(false)}
+                footer={null}
+                destroyOnClose
+                bodyStyle={{ maxHeight: '60vh', overflowY: 'auto' }}
+            >
+                {notesLoading ? (
+                    <div style={{ textAlign: 'center', padding: '20px 0' }}>Loading notes...</div>
+                ) : viewNotes && viewNotes.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {viewNotes.map((noteItem, index) => (
+                            <div key={index} style={{ padding: 12, background: '#f8f9fa', borderRadius: 8, border: '1px solid #e8e8e8' }}>
+                                <Flex justify="space-between" align="flex-start">
+                                    <div style={{ fontSize: 13, color: '#333', flex: 1, whiteSpace: 'pre-wrap' }}>{noteItem.note}</div>
+                                    <Space size={4} style={{ marginLeft: 12 }}>
+                                        <Tooltip title="Edit Note">
+                                            <Button 
+                                                type="text" 
+                                                size="small" 
+                                                icon={<EditOutlined />} 
+                                                onClick={() => {
+                                                    setEditNoteId(noteItem.id);
+                                                    setNoteOrderId(noteItem.order_id);
+                                                    noteForm.setFieldsValue({ note: noteItem.note });
+                                                    setNoteModalOpen(true);
+                                                }}
+                                                style={{ color: '#1677ff' }}
+                                            />
+                                        </Tooltip>
+                                        <Popconfirm
+                                            title="Delete this note?"
+                                            onConfirm={() => handleDeleteNote(noteItem.id)}
+                                            okText="Yes"
+                                            cancelText="No"
+                                        >
+                                            <Tooltip title="Delete Note">
+                                                <Button 
+                                                    type="text" 
+                                                    size="small" 
+                                                    danger 
+                                                    icon={<DeleteOutlined />} 
+                                                />
+                                            </Tooltip>
+                                        </Popconfirm>
+                                    </Space>
+                                </Flex>
+                                <div style={{ fontSize: 11, color: '#888', marginTop: 8, borderTop: '1px solid #eee', paddingTop: 8 }}>
+                                    {noteItem.created_at ? new Date(noteItem.created_at).toLocaleString() : 'N/A'} 
+                                    {noteItem.created_by?.username && ` • By ${noteItem.created_by.username}`}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '20px 0', color: '#888' }}>
+                        No notes found for this order.
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };
