@@ -55,6 +55,9 @@ const Order = () => {
     const [printType, setPrintType]           = useState(null);
     const [printOrderData, setPrintOrderData] = useState(null);
 
+    // Selection state
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
     const [filters, setFilters] = useState({
         search_key         : '',
         status_id          : null,
@@ -510,7 +513,7 @@ const Order = () => {
                                         ],
                                         onClick: ({ key }) => {
                                             setPrintType(key);
-                                            setPrintOrderData(record);
+                                            setPrintOrderData([record]);
                                             setPrintModalOpen(true);
                                         }
                                     }}
@@ -1163,9 +1166,44 @@ const Order = () => {
                     <Text type="secondary" style={{ fontSize: 13 }}>
                         Showing <Text strong>{orders.length}</Text> of <Text strong>{pagination.total}</Text> orders
                     </Text>
+                    {selectedRowKeys.length > 0 && (
+                        <Flex gap={8} align="center">
+                            <Tag color="blue" style={{ margin: 0, padding: '4px 10px', fontSize: 13 }}>
+                                {selectedRowKeys.length} Selected
+                            </Tag>
+                            <Dropdown menu={{ items: [{ key: 'paid', label: 'Paid' }, { key: 'unpaid', label: 'Unpaid' }, { key: 'partial', label: 'Partial' }] }}>
+                                <Button size="small">Payment Status</Button>
+                            </Dropdown>
+                            <Dropdown menu={{ items: statuses.map(s => ({ key: s.id, label: s.name })) }}>
+                                <Button size="small">Order Status</Button>
+                            </Dropdown>
+                            <Dropdown menu={{ items: users.map(u => ({ key: u.id, label: u.username })) }}>
+                                <Button size="small">Order Assign</Button>
+                            </Dropdown>
+                            <Dropdown menu={{ 
+                                items: [{ key: 'normal', label: 'Normal Invoice' }, { key: 'a5', label: 'A5 Invoice' }, { key: 'pos', label: 'Pos Invoice' }],
+                                onClick: ({ key }) => {
+                                    const selectedOrders = orders.filter(o => selectedRowKeys.includes(o.id));
+                                    setPrintType(key);
+                                    setPrintOrderData(selectedOrders);
+                                    setPrintModalOpen(true);
+                                }
+                            }}>
+                                <Button size="small" icon={<PrinterOutlined />}>Print Invoice</Button>
+                            </Dropdown>
+                            <Button size="small">Export CSV</Button>
+                            <Popconfirm title="Delete selected orders?" okText="Yes" cancelText="No">
+                                <Button size="small" danger icon={<DeleteOutlined />}>Bulk Delete</Button>
+                            </Popconfirm>
+                        </Flex>
+                    )}
                 </Flex>
 
                 <Table
+                    rowSelection={{
+                        selectedRowKeys,
+                        onChange: (newSelectedRowKeys) => setSelectedRowKeys(newSelectedRowKeys),
+                    }}
                     columns={columns}
                     dataSource={orders}
                     rowKey="id"
@@ -1346,9 +1384,13 @@ const Order = () => {
                 className="print-modal"
             >
                 <div id="printable-area">
-                    {printType === 'normal' && <NormalInvoice order={printOrderData} />}
-                    {printType === 'a5' && <A5Invoice order={printOrderData} />}
-                    {printType === 'pos' && <PosInvoice order={printOrderData} />}
+                    {printOrderData && printOrderData.map((order, index) => (
+                        <div key={order.id} style={{ pageBreakAfter: index === printOrderData.length - 1 ? 'auto' : 'always', marginBottom: index === printOrderData.length - 1 ? 0 : 24 }}>
+                            {printType === 'normal' && <NormalInvoice order={order} />}
+                            {printType === 'a5' && <A5Invoice order={order} />}
+                            {printType === 'pos' && <PosInvoice order={order} />}
+                        </div>
+                    ))}
                 </div>
             </Modal>
             <style>{`
