@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import usePermissions from "../../hooks/usePermissions";
 import useTitle from "../../hooks/useTitle";
 import { deleteData, getDatas } from "../../services/request";
+import OrderPreview from "../../components/order/OrderPreview";
 
 const { Title, Text } = Typography;
 
@@ -29,6 +30,8 @@ const Order = () => {
     const [paymentGateways, setPaymentGateways]   = useState([]);
     const [couriers, setCouriers]                 = useState([]);
     const [users, setUsers]                       = useState([]);
+    const [previewOpen, setPreviewOpen]           = useState(false);
+    const [previewId, setPreviewId]               = useState(null);
 
     const [filters, setFilters] = useState({
         search_key         : '',
@@ -438,7 +441,7 @@ const Order = () => {
                             <div style={{ marginTop: 2 }}>
                                 <Text type="secondary" style={{ fontSize: 11 }}>
                                     <CalendarOutlined style={{ marginRight: 4 }} />
-                                    {new Date(record.order_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    {new Date(record.order_date).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
                                 </Text>
                             </div>
                         </div>
@@ -689,7 +692,10 @@ const Order = () => {
                                 type="text"
                                 size="small"
                                 icon={<EyeOutlined />}
-                                onClick={() => navigate(`/orders/view/${record.id}`)}
+                                onClick={() => {
+                                    setPreviewId(record.id);
+                                    setPreviewOpen(true);
+                                }}
                                 style={{ color: '#1677ff' }}
                             />
                         </Tooltip>
@@ -1068,6 +1074,12 @@ const Order = () => {
                     box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
                 }
             `}</style>
+            
+            <OrderPreview 
+                open={previewOpen} 
+                onClose={() => setPreviewOpen(false)} 
+                orderId={previewId} 
+            />
         </div>
     );
 };
