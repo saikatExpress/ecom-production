@@ -7,6 +7,10 @@ import useTitle from "../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../services/request";
 import OrderPreview from "../../components/order/OrderPreview";
 import OrderHistory from "../../components/order/OrderHistory";
+import NormalInvoice from "./invoice/NormalInvoice";
+import A5Invoice from "./invoice/A5Invoice";
+import PosInvoice from "./invoice/PosInvoice";
+
 const { Title, Text } = Typography;
 
 const Order = () => {
@@ -45,6 +49,11 @@ const Order = () => {
     // History states
     const [historyModalOpen, setHistoryModalOpen] = useState(false);
     const [historyOrderId, setHistoryOrderId]     = useState(null);
+
+    // Print states
+    const [printModalOpen, setPrintModalOpen] = useState(false);
+    const [printType, setPrintType]           = useState(null);
+    const [printOrderData, setPrintOrderData] = useState(null);
 
     const [filters, setFilters] = useState({
         search_key         : '',
@@ -498,7 +507,12 @@ const Order = () => {
                                             { key: 'normal', label: 'Normal Invoice' },
                                             { key: 'a5', label: 'A5 Invoice' },
                                             { key: 'pos', label: 'Pos Invoice' },
-                                        ]
+                                        ],
+                                        onClick: ({ key }) => {
+                                            setPrintType(key);
+                                            setPrintOrderData(record);
+                                            setPrintModalOpen(true);
+                                        }
                                     }}
                                     trigger={['click']}
                                     disabled={record.status_id === 1}
@@ -1315,6 +1329,62 @@ const Order = () => {
                 onClose={() => setHistoryModalOpen(false)}
                 orderId={historyOrderId}
             />
+
+            <Modal
+                title={
+                    <Flex justify="space-between" align="center" style={{ paddingRight: 30 }}>
+                        <span>Print Invoice</span>
+                        <Button type="primary" icon={<PrinterOutlined />} onClick={() => window.print()}>Print Now</Button>
+                    </Flex>
+                }
+                open={printModalOpen}
+                onCancel={() => setPrintModalOpen(false)}
+                footer={null}
+                width={printType === 'normal' ? 850 : printType === 'a5' ? 650 : 400}
+                destroyOnClose
+                bodyStyle={{ padding: '24px 0', background: '#f0f2f5', overflowX: 'auto' }}
+                className="print-modal"
+            >
+                <div id="printable-area">
+                    {printType === 'normal' && <NormalInvoice order={printOrderData} />}
+                    {printType === 'a5' && <A5Invoice order={printOrderData} />}
+                    {printType === 'pos' && <PosInvoice order={printOrderData} />}
+                </div>
+            </Modal>
+            <style>{`
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    .print-modal {
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    .print-modal .ant-modal-content {
+                        box-shadow: none !important;
+                        border: none !important;
+                        padding: 0 !important;
+                        background: transparent !important;
+                    }
+                    .print-modal .ant-modal-header,
+                    .print-modal .ant-modal-close {
+                        display: none !important;
+                    }
+                    #printable-area, #printable-area * {
+                        visibility: visible;
+                    }
+                    #printable-area {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
