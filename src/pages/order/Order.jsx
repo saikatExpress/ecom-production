@@ -1,4 +1,4 @@
-import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined } from "@ant-design/icons";
+import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, HistoryOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +6,7 @@ import usePermissions from "../../hooks/usePermissions";
 import useTitle from "../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../services/request";
 import OrderPreview from "../../components/order/OrderPreview";
-
+import OrderHistory from "../../components/order/OrderHistory";
 const { Title, Text } = Typography;
 
 const Order = () => {
@@ -41,6 +41,10 @@ const Order = () => {
     const [viewNoteModalOpen, setViewNoteModalOpen] = useState(false);
     const [viewNotes, setViewNotes]                 = useState([]);
     const [notesLoading, setNotesLoading]           = useState(false);
+    
+    // History states
+    const [historyModalOpen, setHistoryModalOpen] = useState(false);
+    const [historyOrderId, setHistoryOrderId]     = useState(null);
 
     const [filters, setFilters] = useState({
         search_key         : '',
@@ -497,9 +501,28 @@ const Order = () => {
                                         ]
                                     }}
                                     trigger={['click']}
+                                    disabled={record.status_id === 1}
                                 >
-                                    <Button type="text" size="small" icon={<PrinterOutlined />} style={{ color: '#555', padding: 0, height: 'auto' }} />
+                                    <Button 
+                                        type="text" 
+                                        size="small" 
+                                        icon={<PrinterOutlined />} 
+                                        style={{ color: record.status_id === 1 ? '#bfbfbf' : '#52c41a', padding: 0, height: 'auto' }} 
+                                        disabled={record.status_id === 1}
+                                    />
                                 </Dropdown>
+                                <Tooltip title="View Order History">
+                                    <Button 
+                                        type="text" 
+                                        size="small" 
+                                        icon={<HistoryOutlined />} 
+                                        onClick={() => {
+                                            setHistoryOrderId(record.id);
+                                            setHistoryModalOpen(true);
+                                        }}
+                                        style={{ color: '#555', padding: 0, height: 'auto' }} 
+                                    />
+                                </Tooltip>
                             </div>
                             {firstProduct && (
                                 <div style={{ 
@@ -1286,6 +1309,12 @@ const Order = () => {
                     </div>
                 )}
             </Modal>
+
+            <OrderHistory 
+                open={historyModalOpen}
+                onClose={() => setHistoryModalOpen(false)}
+                orderId={historyOrderId}
+            />
         </div>
     );
 };
