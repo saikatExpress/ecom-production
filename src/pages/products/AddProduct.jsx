@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
+import ProductAiChat from "../../components/product/ProductAiChat";
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
-import ProductAiChat from "../../components/product/ProductAiChat";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -112,7 +112,6 @@ export default function AddProduct() {
                 }
             });
 
-            // Append variants if enabled
             if (hasVariants && values.variants && values.variants.length > 0) {
                 values.variants.forEach((variant, index) => {
                     Object.keys(variant).forEach((vKey) => {
@@ -153,7 +152,6 @@ export default function AddProduct() {
         }
     };
 
-    // Prepare attribute values options for multi-select inside variants
     const allAttributeValueOptions = attributes.flatMap((attr) =>
         (attr.attributeValues || []).map((val) => ({
             label: `${attr.name}: ${val.attribute_value}`,
@@ -184,7 +182,6 @@ export default function AddProduct() {
                 }}
                 onFinish={handleSubmit}
             >
-                {/* Header Action Bar */}
                 <Card style={{ marginBottom: 24 }}>
                     <Flex justify="space-between" align="center" wrap="wrap" gap="small">
                         <Space align="center">
@@ -205,9 +202,7 @@ export default function AddProduct() {
                 </Card>
 
                 <Row gutter={[24, 24]}>
-                    {/* Left Column: Basic Info, Pricing, Description, Media */}
                     <Col xs={24} lg={16}>
-                        {/* General Information */}
                         <Card
                             title={
                                 <Space>
@@ -217,27 +212,14 @@ export default function AddProduct() {
                             }
                             style={{ marginBottom: 24 }}
                         >
-                            <Form.Item
-                                label="Product Name"
-                                name="name"
-                                rules={[{ required: true, message: "Please enter product name" }]}
-                            >
+                            <Form.Item label="Product Name" name="name" rules={[{ required: true, message: "Please enter product name" }]}>
                                 <Input placeholder="e.g. Stylish Sunglass" size="large" />
                             </Form.Item>
 
                             <Row gutter={16}>
                                 <Col xs={24} sm={12}>
-                                    <Form.Item
-                                        label="Category"
-                                        name="category_id"
-                                        rules={[{ required: true, message: "Please select category" }]}
-                                    >
-                                        <Select
-                                            placeholder="Select Category"
-                                            showSearch
-                                            optionFilterProp="label"
-                                            options={categories.map((c) => ({ label: c.name, value: c.id }))}
-                                        />
+                                    <Form.Item label="Category" name="category_id" rules={[{ required: true, message: "Please select category" }]}>
+                                        <Select placeholder="Select Category" showSearch optionFilterProp="label" options={categories.map((c) => ({ label: c.name, value: c.id }))}/>
                                     </Form.Item>
                                 </Col>
 
@@ -257,13 +239,7 @@ export default function AddProduct() {
                             <Row gutter={16}>
                                 <Col xs={24} sm={12}>
                                     <Form.Item label="Brand" name="brand_id">
-                                        <Select
-                                            placeholder="Select Brand"
-                                            allowClear
-                                            showSearch
-                                            optionFilterProp="label"
-                                            options={brands.map((b) => ({ label: b.name, value: b.id }))}
-                                        />
+                                        <Select placeholder="Select Brand" allowClear showSearch optionFilterProp="label" options={brands.map((b) => ({ label: b.name, value: b.id }))}/>
                                     </Form.Item>
                                 </Col>
 
@@ -275,7 +251,6 @@ export default function AddProduct() {
                             </Row>
                         </Card>
 
-                        {/* Pricing & Stock */}
                         <Card
                             title={
                                 <Space>
@@ -287,73 +262,20 @@ export default function AddProduct() {
                         >
                             <Row gutter={16}>
                                 <Col xs={24} sm={8}>
-                                    <Form.Item
-                                        label="MRP (Original Price)"
-                                        name="mrp"
-                                        rules={[{ required: true, message: "Please enter MRP" }]}
-                                    >
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
+                                    <Form.Item label="MRP (Original Price)" name="mrp" rules={[{ required: true, message: "Please enter MRP" }]}>
+                                        <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} min={0}/>
                                     </Form.Item>
                                 </Col>
 
                                 <Col xs={24} sm={8}>
-                                    <Form.Item
-                                        label="Selling Price"
-                                        name="sell_price"
-                                        rules={[{ required: true, message: "Please enter selling price" }]}
-                                    >
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
+                                    <Form.Item label="Selling Price" name="sell_price" rules={[{ required: true, message: "Please enter selling price" }]}>
+                                        <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} min={0}/>
                                     </Form.Item>
                                 </Col>
 
                                 <Col xs={24} sm={8}>
                                     <Form.Item label="Buying Price" name="buy_price">
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-
-                            <Row gutter={16}>
-                                <Col xs={24} sm={8}>
-                                    <Form.Item label="Discount Type" name="discount_type">
-                                        <Select
-                                            options={[
-                                                { label: "Fixed Amount", value: "fixed" },
-                                                { label: "Percentage (%)", value: "percentage" },
-                                            ]}
-                                        />
-                                    </Form.Item>
-                                </Col>
-
-                                <Col xs={24} sm={8}>
-                                    <Form.Item label="Discount Amount" name="discount_amount">
-                                        <InputNumber placeholder="0" style={{ width: "100%" }} min={0} />
-                                    </Form.Item>
-                                </Col>
-
-                                <Col xs={24} sm={8}>
-                                    <Form.Item label="Offer Price" name="offer_price">
-                                        <InputNumber
-                                            placeholder="0.00"
-                                            prefix="৳"
-                                            style={{ width: "100%" }}
-                                            min={0}
-                                        />
+                                        <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} min={0}/>
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -377,7 +299,6 @@ export default function AddProduct() {
                             </Row>
                         </Card>
 
-                        {/* Product Descriptions */}
                         <Card
                             title={
                                 <Space>
@@ -396,7 +317,6 @@ export default function AddProduct() {
                             </Form.Item>
                         </Card>
 
-                        {/* Media Uploads */}
                         <Card
                             title={
                                 <Space>
@@ -407,13 +327,7 @@ export default function AddProduct() {
                             style={{ marginBottom: 24 }}
                         >
                             <Form.Item label="Main Image" required tooltip="This is the primary image of the product.">
-                                <Upload
-                                    listType="picture-card"
-                                    maxCount={1}
-                                    fileList={mainFileList}
-                                    onChange={({ fileList }) => setMainFileList(fileList)}
-                                    beforeUpload={() => false}
-                                >
+                                <Upload listType="picture-card" maxCount={1} fileList={mainFileList} onChange={({ fileList }) => setMainFileList(fileList)} beforeUpload={() => false}>
                                     {mainFileList.length < 1 && (
                                         <div>
                                             <PlusOutlined />
@@ -424,13 +338,7 @@ export default function AddProduct() {
                             </Form.Item>
 
                             <Form.Item label="Gallery Images">
-                                <Upload.Dragger
-                                    multiple
-                                    listType="picture-card"
-                                    fileList={fileList}
-                                    onChange={({ fileList }) => setFileList(fileList)}
-                                    beforeUpload={() => false}
-                                >
+                                <Upload.Dragger multiple listType="picture-card" fileList={fileList} onChange={({ fileList }) => setFileList(fileList)} beforeUpload={() => false}>
                                     <p className="ant-upload-drag-icon">
                                         <InboxOutlined style={{ fontSize: 36, color: "#1677ff" }} />
                                     </p>
@@ -444,7 +352,6 @@ export default function AddProduct() {
                             </Form.Item>
                         </Card>
 
-                        {/* Product Variants (Dynamic Section) */}
                         <Card
                             title={
                                 <Flex justify="space-between" align="center">
@@ -452,12 +359,7 @@ export default function AddProduct() {
                                         <TagsOutlined />
                                         <span>Product Variants</span>
                                     </Space>
-                                    <Switch
-                                        checked={hasVariants}
-                                        onChange={(checked) => setHasVariants(checked)}
-                                        checkedChildren="Enabled"
-                                        unCheckedChildren="Disabled"
-                                    />
+                                    <Switch checked={hasVariants} onChange={(checked) => setHasVariants(checked)} checkedChildren="Enabled" unCheckedChildren="Disabled"/>
                                 </Flex>
                             }
                             style={{ marginBottom: 24 }}
@@ -476,35 +378,18 @@ export default function AddProduct() {
                                                     type="inner"
                                                     title={`Variant #${name + 1}`}
                                                     extra={
-                                                        <Button
-                                                            type="text"
-                                                            danger
-                                                            icon={<DeleteOutlined />}
-                                                            onClick={() => remove(name)}
-                                                        />
+                                                        <Button type="text" danger icon={<DeleteOutlined />} onClick={() => remove(name)}/>
                                                     }
                                                     style={{ marginBottom: 16 }}
                                                 >
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Attribute Values"
-                                                                name={[name, "attribute_values"]}
-                                                            >
-                                                                <Select
-                                                                    mode="multiple"
-                                                                    placeholder="Select attributes (e.g. Size: M, Color: Blue)"
-                                                                    options={allAttributeValueOptions}
-                                                                />
+                                                            <Form.Item {...restField} label="Attribute Values" name={[name, "attribute_values"]}>
+                                                                <Select mode="multiple" placeholder="Select attributes (e.g. Size: M, Color: Blue)" options={allAttributeValueOptions}/>
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Variant SKU"
-                                                                name={[name, "sku"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Variant SKU" name={[name, "sku"]}>
                                                                 <Input placeholder="Variant SKU" />
                                                             </Form.Item>
                                                         </Col>
@@ -512,40 +397,25 @@ export default function AddProduct() {
 
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="MRP"
-                                                                name={[name, "mrp"]}
-                                                                rules={[{ required: true, message: "MRP is required" }]}
-                                                            >
+                                                            <Form.Item {...restField} label="MRP" name={[name, "mrp"]} rules={[{ required: true, message: "MRP is required" }]}>
                                                                 <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} />
                                                             </Form.Item>
                                                         </Col>
+
                                                         <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Selling Price"
-                                                                name={[name, "sell_price"]}
-                                                                rules={[{ required: true, message: "Selling price is required" }]}
-                                                            >
+                                                            <Form.Item {...restField} label="Selling Price" name={[name, "sell_price"]} rules={[{ required: true, message: "Selling price is required" }]}>
                                                                 <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} />
                                                             </Form.Item>
                                                         </Col>
+
                                                         <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Buying Price"
-                                                                name={[name, "buy_price"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Buying Price" name={[name, "buy_price"]}>
                                                                 <InputNumber placeholder="0.00" prefix="৳" style={{ width: "100%" }} />
                                                             </Form.Item>
                                                         </Col>
+
                                                         <Col xs={24} sm={6}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Stock"
-                                                                name={[name, "current_stock"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Stock" name={[name, "current_stock"]}>
                                                                 <InputNumber placeholder="0" style={{ width: "100%" }} min={0} />
                                                             </Form.Item>
                                                         </Col>
@@ -553,13 +423,7 @@ export default function AddProduct() {
 
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={8}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Variant Status"
-                                                                name={[name, "status"]}
-                                                                initialValue="active"
-                                                                rules={[{ required: true, message: "Status is required" }]}
-                                                            >
+                                                            <Form.Item {...restField} label="Variant Status" name={[name, "status"]} initialValue="active" rules={[{ required: true, message: "Status is required" }]}>
                                                                 <Select
                                                                     options={[
                                                                         { label: "Active", value: "active" },
@@ -569,24 +433,12 @@ export default function AddProduct() {
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={8}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Default Variant"
-                                                                name={[name, "is_default"]}
-                                                                valuePropName="checked"
-                                                                initialValue={false}
-                                                            >
+                                                            <Form.Item {...restField} label="Default Variant" name={[name, "is_default"]} valuePropName="checked" initialValue={false}>
                                                                 <Switch />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={8}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Variant Image"
-                                                                name={[name, "image"]}
-                                                                valuePropName="fileList"
-                                                                getValueFromEvent={(e) => Array.isArray(e) ? e : e?.fileList}
-                                                            >
+                                                            <Form.Item {...restField} label="Variant Image" name={[name, "image"]} valuePropName="fileList" getValueFromEvent={(e) => Array.isArray(e) ? e : e?.fileList}>
                                                                 <Upload maxCount={1} beforeUpload={() => false} listType="picture">
                                                                     <Button icon={<UploadOutlined />}>Upload Image</Button>
                                                                 </Upload>
@@ -596,20 +448,12 @@ export default function AddProduct() {
 
                                                     <Row gutter={16}>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Short Description"
-                                                                name={[name, "short_description"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Short Description" name={[name, "short_description"]}>
                                                                 <ReactQuill theme="snow" style={{ height: '150px', marginBottom: '50px' }} placeholder="Variant short description..." />
                                                             </Form.Item>
                                                         </Col>
                                                         <Col xs={24} sm={12}>
-                                                            <Form.Item
-                                                                {...restField}
-                                                                label="Full Description"
-                                                                name={[name, "description"]}
-                                                            >
+                                                            <Form.Item {...restField} label="Full Description" name={[name, "description"]}>
                                                                 <ReactQuill theme="snow" style={{ height: '150px', marginBottom: '50px' }} placeholder="Variant full description..." />
                                                             </Form.Item>
                                                         </Col>
@@ -627,9 +471,7 @@ export default function AddProduct() {
                         </Card>
                     </Col>
 
-                    {/* Right Column: Status & SEO Meta */}
                     <Col xs={24} lg={8}>
-                        {/* Status Card */}
                         <Card title="Publish Status" style={{ marginBottom: 24 }}>
                             <Form.Item label="Status" name="status">
                                 <Radio.Group buttonStyle="solid">
@@ -639,7 +481,6 @@ export default function AddProduct() {
                             </Form.Item>
                         </Card>
 
-                        {/* SEO Metadata */}
                         <Card
                             title={
                                 <Space>
@@ -664,12 +505,7 @@ export default function AddProduct() {
                 </Row>
             </Form>
 
-            <ProductAiChat 
-                form={form} 
-                categories={categories} 
-                subCategories={filteredSubCategories} 
-                brands={brands} 
-            />
+            <ProductAiChat form={form} categories={categories} subCategories={filteredSubCategories} brands={brands} />
         </div>
     );
 }
