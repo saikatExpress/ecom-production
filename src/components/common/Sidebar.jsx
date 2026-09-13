@@ -1,4 +1,4 @@
-import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, EnvironmentOutlined, InfoCircleOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, RobotOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
+import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, DropboxOutlined, EnvironmentOutlined, InfoCircleOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, RobotOutlined, RocketOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, ThunderboltOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
 
 import { Drawer, Menu } from "antd";
 import { useEffect, useState } from "react";
@@ -215,7 +215,33 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     key       : "courier/integration",
                     icon      : <ApiOutlined />,
                     label     : t("Courier Integration"),
-                    permission: "courier_settings_read"
+                    permission: "courier_settings_read",
+                    children: [
+                        {
+                            key       : "pathao",
+                            icon      : <RocketOutlined />,
+                            label     : t("Pathao"),
+                            permission: "courier_settings_read"
+                        },
+                        {
+                            key       : "steadfast",
+                            icon      : <ThunderboltOutlined />,
+                            label     : t("SteadFast"),
+                            permission: "courier_settings_read"
+                        },
+                        {
+                            key       : "redx",
+                            icon      : <DropboxOutlined />,
+                            label     : t("Redx"),
+                            permission: "courier_settings_read"
+                        },
+                        {
+                            key       : "paperfly",
+                            icon      : <SendOutlined />,
+                            label     : t("PaperFly"),
+                            permission: "courier_settings_read"
+                        }
+                    ]
                 }
             ]
         },

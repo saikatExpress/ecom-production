@@ -42,6 +42,10 @@ import CourierIntegrate from "../pages/courier/CourierIntegrate";
 import CourierSetting from "../pages/courier/CourierSetting";
 import CourierTrash from "../pages/courier/CourierTrash";
 import EditCourier from "../pages/courier/EditCourier";
+import PaperFly from "../pages/courier/paper-fly/PaperFly";
+import Pathao from "../pages/courier/pathao/Pathao";
+import Redx from "../pages/courier/redx/Redx";
+import SteadFast from "../pages/courier/steadfast/SteadFast";
 import NotFound from "../pages/error/NotFound";
 import AddOrder from "../pages/order/AddOrder";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
@@ -557,6 +561,30 @@ export default function AppRoutes() {
                         <Route path="/courier/integration" element={
                             <PermissionRoute permission="courier_settings_read">
                                 <CourierIntegrate/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/steadfast" element={
+                            <PermissionRoute permission="courier_settings_update">
+                                <SteadFast/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/pathao" element={
+                            <PermissionRoute permission="courier_settings_update">
+                                <Pathao/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/redx" element={
+                            <PermissionRoute permission="courier_settings_update">
+                                <Redx/>
+                            </PermissionRoute>
+                        }/>
+
+                        <Route path="/paperfly" element={
+                            <PermissionRoute permission="courier_settings_update">
+                                <PaperFly/>
                             </PermissionRoute>
                         }/>
                         {/* Courier Menu */}
