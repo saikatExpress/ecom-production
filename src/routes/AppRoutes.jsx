@@ -55,6 +55,7 @@ import DeliveryGateway from "../pages/order/delivery-gateway/DeliveryGateway";
 import EditDeliveryGateway from "../pages/order/delivery-gateway/EditDeliveryGateway";
 import District from "../pages/order/district/District";
 import EditOrder from "../pages/order/EditOrder";
+import FraudChecker from "../pages/order/fraud-check/FraudChecker";
 import Order from "../pages/order/Order";
 import OrderGuard from "../pages/order/order-guard/OrderGuard";
 import AddOrderSource from "../pages/order/order-source/AddOrderSource";
@@ -462,6 +463,12 @@ export default function AppRoutes() {
                         <Route path="/order-guard" element={
                             <PermissionRoute permission="order_guard_settings_read">
                                 <OrderGuard/>
+                            </PermissionRoute>
+                        }/>
+                        
+                        <Route path="/fraud-checker" element={
+                            <PermissionRoute permission="fraud_check_read">
+                                <FraudChecker/>
                             </PermissionRoute>
                         }/>
                         {/* Fake Order Menu */}

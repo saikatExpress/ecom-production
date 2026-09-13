@@ -187,9 +187,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     permission: "order_guard_settings_read"
                 },
                 {
-                    key  : "fake-order-solutions/fraud-checker",
-                    icon : <WarningOutlined />,
-                    label: t("Fraud Checker"),
+                    key       : "fraud-checker",
+                    icon      : <WarningOutlined />,
+                    label     : t("Fraud Checker"),
+                    permission: "fraud_check_read"
                 }
             ]
         },
