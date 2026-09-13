@@ -2,13 +2,13 @@ import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOu
 import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import OrderHistory from "../../components/order/OrderHistory";
+import OrderPreview from "../../components/order/OrderPreview";
 import usePermissions from "../../hooks/usePermissions";
 import useTitle from "../../hooks/useTitle";
 import { deleteData, getDatas, postData, putData } from "../../services/request";
-import OrderPreview from "../../components/order/OrderPreview";
-import OrderHistory from "../../components/order/OrderHistory";
-import NormalInvoice from "./invoice/NormalInvoice";
 import A5Invoice from "./invoice/A5Invoice";
+import NormalInvoice from "./invoice/NormalInvoice";
 import PosInvoice from "./invoice/PosInvoice";
 
 const { Title, Text } = Typography;
@@ -520,13 +520,8 @@ const Order = () => {
                                     trigger={['click']}
                                     disabled={record.status_id === 1}
                                 >
-                                    <Button 
-                                        type="text" 
-                                        size="small" 
-                                        icon={<PrinterOutlined />} 
-                                        style={{ color: record.status_id === 1 ? '#bfbfbf' : '#52c41a', padding: 0, height: 'auto' }} 
-                                        disabled={record.status_id === 1}
-                                    />
+                                    <Button type="text" size="small" icon={<PrinterOutlined />}  style={{ color: record.status_id === 1 ? '#bfbfbf' : '#52c41a', padding: 0, height: 'auto' }} 
+                                        disabled={record.status_id === 1}/>
                                 </Dropdown>
                                 <Tooltip title="View Order History">
                                     <Button 

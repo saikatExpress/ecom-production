@@ -1,4 +1,4 @@
-import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, EnvironmentOutlined, InfoCircleOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
+import { ApiOutlined, AppstoreOutlined, BranchesOutlined, ControlOutlined, CreditCardOutlined, DashboardOutlined, EnvironmentOutlined, InfoCircleOutlined, LayoutOutlined, PictureOutlined, PlusCircleOutlined, ProductOutlined, ProfileOutlined, RobotOutlined, SafetyOutlined, SendOutlined, SettingOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, TruckOutlined, UnorderedListOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
 
 import { Drawer, Menu } from "antd";
 import { useEffect, useState } from "react";
@@ -345,6 +345,23 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     icon      : <UnorderedListOutlined />,
                     label     : t("Courier Report"),
                     permission: "report_read"
+                }
+            ]
+        },
+        {
+            key: "ai-tools",
+            icon: <RobotOutlined />,
+            label: t("AI Tools"),
+            children: [
+                {
+                    key       : "ai-tools/all",
+                    icon      : <AppstoreOutlined />,
+                    label     : t("All Tools")
+                },
+                {
+                    key       : "ai-tools/api-integration",
+                    icon      : <ApiOutlined />,
+                    label     : t("API Integration")
                 }
             ]
         }

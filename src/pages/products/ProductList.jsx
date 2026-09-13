@@ -1,9 +1,9 @@
-import { AppstoreOutlined, ClearOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, ClearOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined, CopyOutlined } from "@ant-design/icons";
 import { Avatar, Badge, Breadcrumb, Button, Card, Flex, Input, InputNumber, message, Modal, Popconfirm, Radio, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductPreviewModal from "../../components/product/ProductPreviewModal";
-import { deleteData, getData, getDatas } from "../../services/request";
+import { deleteData, getData, getDatas, postData } from "../../services/request";
 import usePermissions from './../../hooks/usePermissions';
 import useTitle from './../../hooks/useTitle';
 
@@ -164,6 +164,22 @@ export default function ProductList() {
 
     const handleRefresh = () => {
         fetchProducts(pagination.current, pagination.pageSize);
+    };
+
+    const handleCopy = async (id) => {
+        try {
+            const res = await postData(`/admin/product/copy/${id}`);
+            if (res?.success && res?.data) {
+                message.success(res?.message || "Product Copied Successfully");
+                setProducts(prevProducts => [res.data, ...prevProducts]);
+                setPagination(prev => ({ ...prev, total: prev.total + 1 }));
+            } else {
+                message.error(res?.message || "Failed to copy product");
+            }
+        } catch (error) {
+            console.error("Copy product error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during copying");
+        }
     };
 
     const handleDelete = async (id) => {
@@ -395,6 +411,20 @@ export default function ProductList() {
                                 state: {fromPage: 'Product List Page', fromAction: 'Click "Edit" Button'}
                             })}/>
                         </Tooltip>
+                    )}
+
+                    {hasPermission('order_create') && (
+                        <Popconfirm
+                            title="Copy Product"
+                            description={`Are you sure you want to copy "${record.name}"?`}
+                            okText="Yes"
+                            cancelText="No"
+                            onConfirm={() => handleCopy(record.id)}
+                        >
+                            <Tooltip title="Copy Product">
+                                <Button type="text" size="small" icon={<CopyOutlined style={{ color: "#52c41a" }} />} />
+                            </Tooltip>
+                        </Popconfirm>
                     )}
 
                     {hasPermission('product_delete') && (
