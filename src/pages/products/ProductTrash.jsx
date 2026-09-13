@@ -1,9 +1,8 @@
-import { AppstoreOutlined, ClearOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
-import { Avatar, Badge, Breadcrumb, Button, Card, Flex, Input, InputNumber, message, Modal, Popconfirm, Radio, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
+import { AppstoreOutlined, ClearOutlined, DeleteOutlined, DownloadOutlined, FilterOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { Avatar, Badge, Breadcrumb, Button, Card, Flex, Input, message, Modal, Popconfirm, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ProductPreviewModal from "../../components/product/ProductPreviewModal";
-import { deleteData, getData, getDatas } from "../../services/request";
+import { deleteData, getDatas, patchData } from "../../services/request";
 import usePermissions from './../../hooks/usePermissions';
 import useTitle from './../../hooks/useTitle';
 
@@ -13,37 +12,29 @@ export default function ProductTrash() {
     // Hook
     useTitle('Product Trash List');
 
+    // Variable
+    const navigate        = useNavigate();
     const {hasPermission} = usePermissions();
 
-    const navigate                    = useNavigate();
-    const [products, setProducts]     = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [subCategories, setSubCategories] = useState([]);
-    const [brands, setBrands]         = useState([]);
-    const [loading, setLoading]       = useState(false);
-
-    // Filter states
-    const [searchKey, setSearchKey]           = useState("");
-    const [categoryIds, setCategoryIds]       = useState([]);
-    const [subCategoryIds, setSubCategoryIds] = useState([]);
-    const [brandIds, setBrandIds]             = useState([]);
-    const [status, setStatus]                 = useState(undefined);
+    // States
+    const [products, setProducts]                     = useState([]);
+    const [categories, setCategories]                 = useState([]);
+    const [subCategories, setSubCategories]           = useState([]);
+    const [brands, setBrands]                         = useState([]);
+    const [loading, setLoading]                       = useState(false);
+    const [searchKey, setSearchKey]                   = useState("");
+    const [categoryIds, setCategoryIds]               = useState([]);
+    const [subCategoryIds, setSubCategoryIds]         = useState([]);
+    const [brandIds, setBrandIds]                     = useState([]);
+    const [status, setStatus]                         = useState(undefined);
+    const [selectedRowKeys, setSelectedRowKeys]       = useState([]);
+    const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
 
     const [pagination, setPagination] = useState({
         current: 1,
         pageSize: 25,
         total: 0,
     });
-
-    // Bulk action states
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
-    const [bulkStatus, setBulkStatus] = useState("active");
-
-    // Preview Modal states
-    const [previewModalVisible, setPreviewModalVisible] = useState(false);
-    const [previewProduct, setPreviewProduct] = useState(null);
-    const [previewLoading, setPreviewLoading] = useState(false);
 
     const fetchProducts = useCallback(async (page = 1, pageSize = 25) => {
         setLoading(true);
@@ -162,8 +153,7 @@ export default function ProductTrash() {
 
     const handleRestore = async (id) => {
         try {
-            // Assuming restore uses a POST or GET endpoint. Update as needed.
-            const res = await getDatas(`/admin/product/restore/${id}`);
+            const res = await patchData(`/admin/product/${id}/restore`);
             if (res?.success) {
                 message.success(res?.message || "Product restored successfully");
                 setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
@@ -179,7 +169,7 @@ export default function ProductTrash() {
 
     const handleForceDelete = async (id) => {
         try {
-            const res = await deleteData(`/admin/product/force-delete/${id}`);
+            const res = await deleteData(`/admin/product/permanent-delete/${id}`);
             if (res?.success) {
                 message.success(res?.message || "Product permanently deleted");
                 setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
@@ -193,19 +183,42 @@ export default function ProductTrash() {
         }
     };
 
-    const handleBulkDelete = async () => {
-        // You can integrate real API for bulk delete here
-        message.info(`Ready to Bulk Delete IDs: ${selectedRowKeys.join(", ")}`);
-        setIsBulkModalVisible(false);
-        // setSelectedRowKeys([]);
-        // fetchProducts(pagination.current, pagination.pageSize);
+    const handleBulkRestore = async () => {
+        if (!selectedRowKeys || selectedRowKeys.length === 0) return;
+        try {
+            const res = await patchData("/admin/product/bulk-restore", { ids: selectedRowKeys });
+            if (res?.success) {
+                message.success(res?.message || "Products restored successfully.");
+                setIsBulkModalVisible(false);
+                setProducts(prevProducts => prevProducts.filter(p => !selectedRowKeys.includes(p.id)));
+                setPagination(prev => ({ ...prev, total: prev.total - selectedRowKeys.length }));
+                setSelectedRowKeys([]);
+            } else {
+                message.error(res?.message || "Failed to restore products.");
+            }
+        } catch (error) {
+            console.error("Bulk restore error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during bulk restore.");
+        }
     };
 
-    const handleBulkStatusChange = async () => {
-        // You can integrate real API for bulk status update here
-        message.info(`Ready to change status to ${bulkStatus} for IDs: ${selectedRowKeys.join(", ")}`);
-        setIsBulkModalVisible(false);
-        // setSelectedRowKeys([]);
+    const handleBulkForceDelete = async () => {
+        if (!selectedRowKeys || selectedRowKeys.length === 0) return;
+        try {
+            const res = await deleteData("/admin/product/bulk-permanent-delete", { data: { ids: selectedRowKeys } });
+            if (res?.success) {
+                message.success(res?.message || "Products permanently deleted.");
+                setIsBulkModalVisible(false);
+                setProducts(prevProducts => prevProducts.filter(p => !selectedRowKeys.includes(p.id)));
+                setPagination(prev => ({ ...prev, total: prev.total - selectedRowKeys.length }));
+                setSelectedRowKeys([]);
+            } else {
+                message.error(res?.message || "Failed to permanently delete products.");
+            }
+        } catch (error) {
+            console.error("Bulk force delete error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during bulk force delete.");
+        }
     };
 
     const handleDownloadCSV = () => {
@@ -233,26 +246,6 @@ export default function ProductTrash() {
         onChange: (newSelectedRowKeys) => {
             setSelectedRowKeys(newSelectedRowKeys);
         },
-    };
-
-    const handlePreviewProduct = async (id) => {
-        setPreviewModalVisible(true);
-        setPreviewLoading(true);
-        try {
-            const res = await getData(`/admin/product/${id}`);
-            if (res?.success) {
-                setPreviewProduct(res.data);
-            } else {
-                message.error(res?.message || "Failed to fetch product details");
-                setPreviewModalVisible(false);
-            }
-        } catch (error) {
-            console.error("Preview error:", error);
-            message.error("Failed to load product preview");
-            setPreviewModalVisible(false);
-        } finally {
-            setPreviewLoading(false);
-        }
     };
 
     const columns = 
@@ -427,8 +420,6 @@ export default function ProductTrash() {
         },
     ];
 
-
-
     return (
         <div className="product-list-page">
             <Breadcrumb
@@ -464,7 +455,6 @@ export default function ProductTrash() {
                     </Flex>
                 }
             >
-                {/* Search & Filters Toolbar */}
                 <Card
                     type="inner"
                     title={
@@ -478,7 +468,6 @@ export default function ProductTrash() {
                 >
                     <Flex wrap="wrap" gap="medium" align="center" justify="space-between">
                         <Space wrap gap="small">
-                            {/* Search by Name or SKU */}
                             <Input.Search
                                 placeholder="Search Name or SKU..."
                                 allowClear
@@ -489,7 +478,6 @@ export default function ProductTrash() {
                                 onSearch={handleSearchSubmit}
                             />
 
-                            {/* Category Filter */}
                             <Select
                                 placeholder="Categories"
                                 allowClear
@@ -505,7 +493,6 @@ export default function ProductTrash() {
                                 options={categories.map((c) => ({ label: c.name, value: c.id }))}
                             />
 
-                            {/* Sub Category Filter */}
                             <Select
                                 placeholder="Sub Categories"
                                 allowClear
@@ -520,7 +507,6 @@ export default function ProductTrash() {
                                 options={subCategories.map((c) => ({ label: c.name, value: c.id }))}
                             />
 
-                            {/* Brand Filter */}
                             <Select
                                 placeholder="Brands"
                                 allowClear
@@ -535,9 +521,6 @@ export default function ProductTrash() {
                                 options={brands.map((b) => ({ label: b.name, value: b.id }))}
                             />
 
-
-
-                            {/* Status Filter */}
                             <Select
                                 placeholder="Status"
                                 allowClear
@@ -553,7 +536,6 @@ export default function ProductTrash() {
                                 ]}
                             />
 
-                            {/* Clear Filters */}
                             {(searchKey || categoryIds?.length > 0 || subCategoryIds?.length > 0 || brandIds?.length > 0 || status) && (
                                 <Button icon={<ClearOutlined />} onClick={handleResetFilters}>
                                     Reset
@@ -567,7 +549,6 @@ export default function ProductTrash() {
                     </Flex>
                 </Card>
 
-                {/* Product Data Table */}
                 <Table
                     bordered
                     columns={columns}
@@ -596,40 +577,35 @@ export default function ProductTrash() {
                 width={500}
             >
                 <Space direction="vertical" style={{ width: '100%' }} size="large">
-                    <Card size="small" type="inner" title="1. Update Status">
-                        <Space>
-                            <Radio.Group value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value)}>
-                                <Radio.Button value="active">Active</Radio.Button>
-                                <Radio.Button value="inactive">Inactive</Radio.Button>
-                            </Radio.Group>
-                            <Button type="primary" onClick={handleBulkStatusChange}>
-                                Apply Status
-                            </Button>
-                        </Space>
-                    </Card>
+                    {hasPermission('product_update') && (
+                        <Card size="small" type="inner" title="1. Bulk Restore">
+                            <Popconfirm title="Are you sure you want to restore the selected products?" onConfirm={handleBulkRestore} okText="Yes, Restore All" okType="primary">
+                                <Button type="primary" block icon={<ReloadOutlined />}>
+                                    Bulk Restore Products
+                                </Button>
+                            </Popconfirm>
+                        </Card>
+                    )}
 
-                    <Card size="small" type="inner" title="2. Export Data">
-                        <Button icon={<DownloadOutlined />} onClick={handleDownloadCSV} block>
-                            Download Selected as CSV
-                        </Button>
-                    </Card>
-
-                    <Card size="small" type="inner" title="3. Danger Zone" style={{ borderColor: '#ffccc7' }} headStyle={{ color: '#cf1322' }}>
-                        <Popconfirm title="Are you sure you want to delete the selected products?" onConfirm={handleBulkDelete} okText="Yes, Delete All" okType="danger">
-                            <Button danger block icon={<DeleteOutlined />}>
-                                Bulk Delete Products
+                    {hasPermission('product_export') && (
+                        <Card size="small" type="inner" title="2. Export Data">
+                            <Button icon={<DownloadOutlined />} onClick={handleDownloadCSV} disabled={!hasPermission('product_export')} block>
+                                Download Selected as CSV
                             </Button>
-                        </Popconfirm>
-                    </Card>
+                        </Card>
+                    )}
+
+                    {hasPermission('product_delete') && (
+                        <Card size="small" type="inner" title="3. Danger Zone" style={{ borderColor: '#ffccc7' }} headStyle={{ color: '#cf1322' }}>
+                            <Popconfirm title="Are you sure you want to permanently delete the selected products?" onConfirm={handleBulkForceDelete} okText="Yes, Delete Permanently" okType="danger">
+                                <Button danger block icon={<DeleteOutlined />}>
+                                    Bulk Permanent Delete
+                                </Button>
+                            </Popconfirm>
+                        </Card>
+                    )}
                 </Space>
             </Modal>
-
-            <ProductPreviewModal 
-                visible={previewModalVisible} 
-                onClose={() => setPreviewModalVisible(false)} 
-                product={previewProduct} 
-                loading={previewLoading}
-            />
         </div>
     );
 }
