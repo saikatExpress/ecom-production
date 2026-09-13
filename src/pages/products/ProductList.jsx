@@ -1,9 +1,9 @@
-import { AppstoreOutlined, ClearOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined, CopyOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, ClearOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
 import { Avatar, Badge, Breadcrumb, Button, Card, Flex, Input, InputNumber, message, Modal, Popconfirm, Radio, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductPreviewModal from "../../components/product/ProductPreviewModal";
-import { deleteData, getData, getDatas, postData } from "../../services/request";
+import { deleteData, getData, getDatas, postData, patchData } from "../../services/request";
 import usePermissions from './../../hooks/usePermissions';
 import useTitle from './../../hooks/useTitle';
 
@@ -199,18 +199,60 @@ export default function ProductList() {
     };
 
     const handleBulkDelete = async () => {
-        // You can integrate real API for bulk delete here
-        message.info(`Ready to Bulk Delete IDs: ${selectedRowKeys.join(", ")}`);
-        setIsBulkModalVisible(false);
-        // setSelectedRowKeys([]);
-        // fetchProducts(pagination.current, pagination.pageSize);
+        if (!selectedRowKeys || selectedRowKeys.length === 0) {
+            message.warning("Please select at least one product.");
+            return;
+        }
+
+        try {
+            const res = await deleteData("/admin/product/bulk-delete", { data: { ids: selectedRowKeys } });
+            
+            if (res?.success) {
+                message.success(res?.data || res?.message || "Products deleted successfully.");
+                setIsBulkModalVisible(false);
+                setProducts(prevProducts => prevProducts.filter(p => !selectedRowKeys.includes(p.id)));
+                setPagination(prev => ({ ...prev, total: prev.total - selectedRowKeys.length }));
+                setSelectedRowKeys([]);
+            } else {
+                message.error(res?.message || "Failed to delete products.");
+            }
+        } catch (error) {
+            console.error("Bulk delete error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during bulk deletion.");
+        }
     };
 
     const handleBulkStatusChange = async () => {
-        // You can integrate real API for bulk status update here
-        message.info(`Ready to change status to ${bulkStatus} for IDs: ${selectedRowKeys.join(", ")}`);
-        setIsBulkModalVisible(false);
-        // setSelectedRowKeys([]);
+        if (!selectedRowKeys || selectedRowKeys.length === 0) {
+            message.warning("Please select at least one product.");
+            return;
+        }
+
+        try {
+            const payload = {
+                ids: selectedRowKeys,
+                status: bulkStatus
+            };
+            const res = await patchData("/admin/product/bulk-status-update", payload);
+            
+            if (res?.success) {
+                message.success(res?.message || "Status updated successfully.");
+                setIsBulkModalVisible(false);
+                setSelectedRowKeys([]);
+                setProducts(prevProducts => 
+                    prevProducts.map(product => 
+                        selectedRowKeys.includes(product.id) 
+                            ? { ...product, status: bulkStatus } 
+                            : product
+                    )
+                );
+            } else {
+                message.error(res?.message || "Failed to update status.");
+            }
+        } catch (error) {
+            console.error("Bulk status update error:", error);
+            message.error(error?.response?.data?.message || "An error occurred during bulk status update.");
+        }
     };
 
     const handleDownloadCSV = () => {
@@ -654,25 +696,27 @@ export default function ProductList() {
                                 <Radio.Button value="active">Active</Radio.Button>
                                 <Radio.Button value="inactive">Inactive</Radio.Button>
                             </Radio.Group>
-                            <Button type="primary" onClick={handleBulkStatusChange}>
+                            <Button type="primary" onClick={handleBulkStatusChange} disabled={!hasPermission('product_update')}>
                                 Apply Status
                             </Button>
                         </Space>
                     </Card>
 
                     <Card size="small" type="inner" title="2. Export Data">
-                        <Button icon={<DownloadOutlined />} onClick={handleDownloadCSV} block>
+                        <Button icon={<DownloadOutlined />} onClick={handleDownloadCSV} disabled={!hasPermission('product_export')} block>
                             Download Selected as CSV
                         </Button>
                     </Card>
 
-                    <Card size="small" type="inner" title="3. Danger Zone" style={{ borderColor: '#ffccc7' }} headStyle={{ color: '#cf1322' }}>
-                        <Popconfirm title="Are you sure you want to delete the selected products?" onConfirm={handleBulkDelete} okText="Yes, Delete All" okType="danger">
-                            <Button danger block icon={<DeleteOutlined />}>
-                                Bulk Delete Products
-                            </Button>
-                        </Popconfirm>
-                    </Card>
+                    {hasPermission('product_delete') && (
+                        <Card size="small" type="inner" title="3. Danger Zone" style={{ borderColor: '#ffccc7' }} headStyle={{ color: '#cf1322' }}>
+                            <Popconfirm title="Are you sure you want to delete the selected products?" onConfirm={handleBulkDelete} okText="Yes, Delete All" okType="danger">
+                                <Button danger block icon={<DeleteOutlined />}>
+                                    Bulk Delete Products
+                                </Button>
+                            </Popconfirm>
+                        </Card>
+                    )}
                 </Space>
             </Modal>
 
