@@ -48,6 +48,7 @@ import Redx from "../pages/courier/redx/Redx";
 import SteadFast from "../pages/courier/steadfast/SteadFast";
 import NotFound from "../pages/error/NotFound";
 import AddOrder from "../pages/order/AddOrder";
+import BlockCustomer from "../pages/order/block/BlockCustomer";
 import CancelReason from "../pages/order/cancel-reason/CancelReason";
 import AddCoupon from "../pages/order/coupon/AddCoupon";
 import Coupon from "../pages/order/coupon/Coupon";
@@ -464,6 +465,12 @@ export default function AppRoutes() {
                         {/* Order Menu */}
 
                         {/* Fake Order Menu */}
+                        <Route path="/block-customers" element={
+                            <PermissionRoute permission="block_customer_read">
+                                <BlockCustomer/>
+                            </PermissionRoute>
+                        }/>
+
                         <Route path="/order-guard" element={
                             <PermissionRoute permission="order_guard_settings_read">
                                 <OrderGuard/>

@@ -176,9 +176,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: t("Fake Order Solutions"),
             children: [
                 {
-                    key  : "fake-order-solutions/block-customers",
-                    icon : <StopOutlined />,
-                    label: t("Block Customers"),
+                    key       : "block-customers",
+                    icon      : <StopOutlined />,
+                    label     : t("Block Customers"),
+                    permission: "block_customer_read"
                 },
                 {
                     key       : "order-guard",
