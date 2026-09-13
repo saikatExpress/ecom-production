@@ -1,9 +1,10 @@
-import { AppstoreOutlined, ClearOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, ClearOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, FormOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
 import { Avatar, Badge, Breadcrumb, Button, Card, Flex, Input, InputNumber, message, Modal, Popconfirm, Radio, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductPreviewModal from "../../components/product/ProductPreviewModal";
-import { deleteData, getData, getDatas, postData, patchData } from "../../services/request";
+import ProductQuickEditModal from "../../components/product/ProductQuickEditModal";
+import { deleteData, getData, getDatas, patchData, postData } from "../../services/request";
 import usePermissions from './../../hooks/usePermissions';
 import useTitle from './../../hooks/useTitle';
 
@@ -13,39 +14,37 @@ export default function ProductList() {
     // Hook
     useTitle('Product List');
 
+    // Variable
+    const navigate        = useNavigate();
     const {hasPermission} = usePermissions();
 
-    const navigate                    = useNavigate();
-    const [products, setProducts]     = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [subCategories, setSubCategories] = useState([]);
-    const [brands, setBrands]         = useState([]);
-    const [loading, setLoading]       = useState(false);
-
-    // Filter states
-    const [searchKey, setSearchKey]           = useState("");
-    const [categoryIds, setCategoryIds]       = useState([]);
-    const [subCategoryIds, setSubCategoryIds] = useState([]);
-    const [brandIds, setBrandIds]             = useState([]);
-    const [minPrice, setMinPrice]             = useState(undefined);
-    const [maxPrice, setMaxPrice]             = useState(undefined);
-    const [status, setStatus]                 = useState(undefined);
+    // States
+    const [products, setProducts]                           = useState([]);
+    const [categories, setCategories]                       = useState([]);
+    const [subCategories, setSubCategories]                 = useState([]);
+    const [brands, setBrands]                               = useState([]);
+    const [loading, setLoading]                             = useState(false);
+    const [searchKey, setSearchKey]                         = useState("");
+    const [categoryIds, setCategoryIds]                     = useState([]);
+    const [subCategoryIds, setSubCategoryIds]               = useState([]);
+    const [brandIds, setBrandIds]                           = useState([]);
+    const [minPrice, setMinPrice]                           = useState(undefined);
+    const [maxPrice, setMaxPrice]                           = useState(undefined);
+    const [status, setStatus]                               = useState(undefined);
+    const [selectedRowKeys, setSelectedRowKeys]             = useState([]);
+    const [isBulkModalVisible, setIsBulkModalVisible]       = useState(false);
+    const [bulkStatus, setBulkStatus]                       = useState("active");
+    const [previewModalVisible, setPreviewModalVisible]     = useState(false);
+    const [previewProduct, setPreviewProduct]               = useState(null);
+    const [previewLoading, setPreviewLoading]               = useState(false);
+    const [quickEditModalVisible, setQuickEditModalVisible] = useState(false);
+    const [quickEditProduct, setQuickEditProduct]           = useState(null);
 
     const [pagination, setPagination] = useState({
         current: 1,
         pageSize: 25,
         total: 0,
     });
-
-    // Bulk action states
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
-    const [bulkStatus, setBulkStatus] = useState("active");
-
-    // Preview Modal states
-    const [previewModalVisible, setPreviewModalVisible] = useState(false);
-    const [previewProduct, setPreviewProduct] = useState(null);
-    const [previewLoading, setPreviewLoading] = useState(false);
 
     const fetchProducts = useCallback(async (page = 1, pageSize = 25) => {
         setLoading(true);
@@ -455,6 +454,20 @@ export default function ProductList() {
                         </Tooltip>
                     )}
 
+                    {hasPermission('product_update') && (!record.variants || record.variants.length === 0) && (
+                        <Tooltip title="Quick Edit">
+                            <Button 
+                                type="text" 
+                                size="small" 
+                                icon={<FormOutlined style={{ color: "#fa8c16" }} />} 
+                                onClick={() => {
+                                    setQuickEditProduct(record);
+                                    setQuickEditModalVisible(true);
+                                }} 
+                            />
+                        </Tooltip>
+                    )}
+
                     {hasPermission('order_create') && (
                         <Popconfirm
                             title="Copy Product"
@@ -725,6 +738,15 @@ export default function ProductList() {
                 onClose={() => setPreviewModalVisible(false)} 
                 product={previewProduct} 
                 loading={previewLoading}
+            />
+
+            <ProductQuickEditModal
+                visible={quickEditModalVisible}
+                onClose={() => setQuickEditModalVisible(false)}
+                product={quickEditProduct}
+                onSuccess={(updatedProduct) => {
+                    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p));
+                }}
             />
         </div>
     );
