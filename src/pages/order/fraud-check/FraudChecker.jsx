@@ -1,4 +1,4 @@
-import { InboxOutlined, PhoneOutlined, SafetyCertificateOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, InboxOutlined, PhoneOutlined, SafetyCertificateOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, message, Progress, Row, Space, Spin, Statistic, Tag, Typography } from 'antd';
 import { useState } from 'react';
 import useTitle from './../../../hooks/useTitle';
@@ -11,8 +11,8 @@ const FraudChecker = () => {
     useTitle("Fraud Checker");
     
     // State
-    const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState(null);
+    const [loading, setLoading]             = useState(false);
+    const [result, setResult]               = useState(null);
     const [searchedPhone, setSearchedPhone] = useState("");
 
     const onFinish = async (values) => {
@@ -23,7 +23,6 @@ const FraudChecker = () => {
 
         setLoading(true);
         try {
-            // Using the endpoint spelling exactly as provided
             const res = await postData("/admin/fraud-cheker", { phone: values.phone });
             
             if (res?.success) {
@@ -139,7 +138,6 @@ const FraudChecker = () => {
         
         const couriers = Object.entries(result.data).filter(([key, val]) => key !== 'summary' && typeof val === 'object');
         
-        // Sort by total parcels descending
         couriers.sort((a, b) => b[1].total_parcel - a[1].total_parcel);
 
         return (
@@ -150,11 +148,7 @@ const FraudChecker = () => {
                 <Row gutter={[16, 16]}>
                     {couriers.map(([key, data]) => (
                         <Col xs={24} sm={12} lg={8} key={key}>
-                            <Card 
-                                hoverable 
-                                size="small" 
-                                style={{ borderRadius: 8, height: '100%', opacity: data.total_parcel === 0 ? 0.6 : 1 }}
-                            >
+                            <Card hoverable size="small" style={{ borderRadius: 8, height: '100%', opacity: data.total_parcel === 0 ? 0.6 : 1 }}>
                                 <Flex align="center" gap="middle" style={{ marginBottom: 16 }}>
                                     <Avatar src={data.logo} shape="square" size={48} style={{ backgroundColor: '#fff', border: '1px solid #f0f0f0', padding: 4 }} />
                                     <div>
@@ -204,52 +198,76 @@ const FraudChecker = () => {
 
     return (
         <div style={{ padding: '0 0 24px 0' }}>
-            <Card style={{ marginBottom: 24, borderRadius: 12, border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                <Title level={2} style={{ textAlign: 'center', marginBottom: 8, color: '#1677ff' }}>
-                    <SafetyCertificateOutlined /> ফ্রড চেকার (Fraud Checker)
-                </Title>
-                <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginBottom: 24, fontSize: 16 }}>
-                    গ্রাহকের ফোন নম্বর দিয়ে তার পূর্ববর্তী কুরিয়ার রেকর্ড যাচাই করুন
-                </Text>
-                
-                <Form onFinish={onFinish} style={{ maxWidth: 500, margin: '0 auto' }}>
-                    <Form.Item name="phone" rules={[{ required: true, message: 'ফোন নম্বর প্রদান করুন' }]}>
-                        <Input 
-                            size="large" 
-                            prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} 
-                            placeholder="ফোন নম্বর লিখুন (যেমন: 017XXXXXXX)" 
-                            allowClear
-                            style={{ borderRadius: 8 }}
-                        />
-                    </Form.Item>
-                    <Form.Item>
-                        <Button 
-                            type="primary" 
-                            htmlType="submit" 
-                            size="large" 
-                            icon={<SearchOutlined />} 
-                            block 
-                            loading={loading}
-                            style={{ borderRadius: 8, fontWeight: 'bold' }}
-                        >
-                            যাচাই করুন
-                        </Button>
-                    </Form.Item>
-                </Form>
+            <Flex align="center" gap="small" style={{ marginBottom: 16 }}>
+                <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => window.history.back()} style={{ fontSize: 16, fontWeight: 500 }}>
+                    Back
+                </Button>
+            </Flex>
+
+            <Card 
+                style={{ 
+                    marginBottom: 24, 
+                    borderRadius: 16, 
+                    border: 'none', 
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
+                    background: 'linear-gradient(145deg, #ffffff 0%, #f0f5ff 100%)'
+                }}
+            >
+                <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                    <Title level={2} style={{ margin: 0, color: '#1677ff', fontWeight: 800 }}>
+                        <SafetyCertificateOutlined style={{ marginRight: 8 }} /> ফ্রড চেকার (Fraud Checker)
+                    </Title>
+                    <Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 16 }}>
+                        গ্রাহকের ফোন নম্বর দিয়ে তার পূর্ববর্তী কুরিয়ার রেকর্ড যাচাই করুন
+                    </Text>
+                    
+                    <Form onFinish={onFinish} style={{ maxWidth: 600, margin: '32px auto 0' }}>
+                        <Flex gap="small">
+                            <Form.Item name="phone" rules={[{ required: true, message: 'ফোন নম্বর প্রদান করুন' }]} style={{ flex: 1, margin: 0 }}>
+                                <Input 
+                                    size="large" 
+                                    prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} 
+                                    placeholder="ফোন নম্বর লিখুন (যেমন: 017XXXXXXX)" 
+                                    allowClear
+                                    style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                />
+                            </Form.Item>
+                            <Form.Item style={{ margin: 0 }}>
+                                <Button 
+                                    type="primary" 
+                                    htmlType="submit" 
+                                    size="large" 
+                                    icon={<SearchOutlined />} 
+                                    loading={loading}
+                                    style={{ borderRadius: 8, fontWeight: 'bold', padding: '0 32px', boxShadow: '0 4px 12px rgba(22, 119, 255, 0.3)' }}
+                                >
+                                    যাচাই করুন
+                                </Button>
+                            </Form.Item>
+                        </Flex>
+                    </Form>
+                </div>
             </Card>
 
             {loading && (
-                <div style={{ textAlign: 'center', padding: '50px 0' }}>
-                    <Spin size="large" tip="যাচাই করা হচ্ছে..." />
+                <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                    <Spin size="large" tip={<div style={{ marginTop: 12, fontWeight: 500, color: '#1677ff' }}>তথ্য যাচাই করা হচ্ছে...</div>} />
                 </div>
             )}
 
             {!loading && result && (
-                <div>
+                <div style={{ animation: 'fadeIn 0.5s ease-in-out' }}>
                     {renderSummary()}
                     {renderCouriers()}
                 </div>
             )}
+            
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
         </div>
     );
 };
