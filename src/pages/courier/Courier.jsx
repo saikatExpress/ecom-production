@@ -120,6 +120,14 @@ const Courier = () => {
             )
         },
         {
+            title: 'Orders Count',
+            dataIndex: 'orders_count',
+            key: 'orders_count',
+            align: 'center',
+            width: 120,
+            render: (count) => <Tag color="purple">{count ?? 0}</Tag>,
+        },
+        {
             title: "Status",
             dataIndex: "status",
             key: "status",
