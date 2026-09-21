@@ -54,7 +54,6 @@ const AddOrder = () => {
     const [statuses, setStatuses]                 = useState([]);
     const [coupons, setCoupons]                   = useState([]);
     const [couriers, setCouriers]                 = useState([]);
-    const [productOptions, setProductOptions]     = useState([]);
     const [fetchedProducts, setFetchedProducts]   = useState({});
     const [searchTimeout, setSearchTimeout]       = useState(null);
     const [isSearching, setIsSearching]           = useState(false);
@@ -148,8 +147,6 @@ const AddOrder = () => {
                         products = res.data.items;
                     }
 
-                    setProductOptions(products);
-
                     setFetchedProducts(prev => {
                         const newDict = { ...prev };
                         products.forEach(p => {
@@ -164,8 +161,6 @@ const AddOrder = () => {
                 }
             }, 500);
             setSearchTimeout(timeout);
-        } else {
-            setProductOptions([]);
         }
     };
 
