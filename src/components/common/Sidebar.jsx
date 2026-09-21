@@ -379,12 +379,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         {
             key: "ai-tools",
             icon: <RobotOutlined />,
-            label: t("AI Tools"),
+            label: t("AI Management"),
             children: [
                 {
                     key       : "ai-tools/all",
                     icon      : <AppstoreOutlined />,
-                    label     : t("All Tools")
+                    label     : t("All Provider")
                 },
                 {
                     key       : "ai-tools/api-integration",
