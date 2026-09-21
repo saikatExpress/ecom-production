@@ -1,7 +1,8 @@
 import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, HistoryOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
+import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Popover, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CourierHistory from "../../components/order/CourierHistory";
 import OrderHistory from "../../components/order/OrderHistory";
 import OrderPreview from "../../components/order/OrderPreview";
 import usePermissions from "../../hooks/usePermissions";
@@ -599,7 +600,7 @@ const Order = () => {
                             )}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
-                            <Text type="secondary" style={{ fontSize: 12 }}>
+                            <Text type="secondary" style={{ fontSize: 12 }} copyable={{ text: record.phone_number }}>
                                 <PhoneOutlined style={{ marginRight: 4 }} />{record.phone_number}
                             </Text>
                             <Tooltip title="WhatsApp">
@@ -615,9 +616,14 @@ const Order = () => {
                                     }}
                                 />
                             </Tooltip>
-                            <Tooltip title="More Info">
+                            <Popover 
+                                content={<CourierHistory phone={record.phone_number} />} 
+                                trigger="hover" 
+                                placement="right"
+                                destroyTooltipOnHide
+                            >
                                 <Button type="text" size="small" icon={<InfoCircleOutlined />} style={{ color: '#1677ff', padding: 0, height: 'auto' }} />
-                            </Tooltip>
+                            </Popover>
                         </div>
                         {record.shipping_address && (
                             <div>
@@ -638,9 +644,9 @@ const Order = () => {
             align: 'right',
             width: 160,
             render: (amount, record) => {
-                const discount = parseFloat(record.special_discount || 0) + parseFloat(record.coupon_discount || 0);
-                const advance = parseFloat(record.advanced_payment || 0);
-                const delivery = parseFloat(record.delivery_charge || 0);
+                const discount   = parseFloat(record.special_discount || 0) + parseFloat(record.coupon_discount || 0);
+                const advance    = parseFloat(record.advanced_payment || 0);
+                const delivery   = parseFloat(record.delivery_charge || 0);
                 const additional = parseFloat(record.additional_cost || 0);
 
                 return (
@@ -653,14 +659,14 @@ const Order = () => {
                             {advance > 0 && <div style={{ color: '#52c41a' }}>- Adv: ৳{advance.toLocaleString()}</div>}
                         </div>
                         <div style={{ 
-                            fontWeight: 700, 
-                            fontSize: 14, 
-                            color: '#1a1a1a', 
-                            marginTop: 4, 
-                            paddingTop: 4, 
-                            borderTop: '1px dashed #d9d9d9',
-                            width: '100%',
-                            textAlign: 'right'
+                            fontWeight: 700,
+                            fontSize  : 14,
+                            color     : '#1a1a1a',
+                            marginTop : 4,
+                            paddingTop: 4,
+                            borderTop : '1px dashed #d9d9d9',
+                            width     : '100%',
+                            textAlign : 'right'
                         }}>
                             ৳{parseFloat(amount || 0).toLocaleString()}
                         </div>
@@ -1206,6 +1212,7 @@ const Order = () => {
                     onChange={handleTableChange}
                     scroll={{ x: 1000 }}
                     size="middle"
+                    bordered
                     rowClassName={(_, index) => index % 2 === 0 ? '' : 'ant-table-row-alt'}
                     pagination={{
                         current: pagination.current_page,
