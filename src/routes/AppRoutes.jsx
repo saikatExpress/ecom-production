@@ -9,6 +9,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 
+import Provider from "../pages/ai/provider/Provider";
 import AddBlog from "../pages/blog/AddBlog";
 import Blog from "../pages/blog/Blog";
 import AddBlogCategory from "../pages/blog/blog-category/AddBlogCategory";
@@ -739,6 +740,14 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* Report Menu */}
+
+                        {/* AI Menu */}
+                        <Route path="/ai-provider" element={
+                            <PermissionRoute permission="ai_read">
+                                <Provider/>
+                            </PermissionRoute>
+                        }/>
+                        {/* AI Menu */}
                     </Route>
 
                 </Route>

@@ -1,6 +1,7 @@
 import { DeleteOutlined, EditOutlined, HolderOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Flex, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
@@ -37,6 +38,7 @@ const Status = () => {
     // Variable
     const navigate          = useNavigate();
     const { hasPermission } = usePermissions();
+    const { user } = useSelector((state) => state.auth);
 
       // States
     const [statuses, setStatuses]       = useState([]);
@@ -162,7 +164,7 @@ const Status = () => {
             key: 'badge',
             render: (_, record) => (
                 <Tag style={{ backgroundColor: record.bg_color, color: record.text_color, borderColor: record.bg_color, fontSize: '13px', padding: '4px 8px', borderRadius: '4px' }}>
-                    {record.icon && <i className={record.icon} style={{ marginRight: 6 }}></i>}
+                    {record.icon && <i className={`ti ${record.icon}`} style={{ marginRight: 6 }}></i>}
                     {record.name}
                 </Tag>
             )
@@ -199,7 +201,7 @@ const Status = () => {
                             Edit
                         </Button>
                     )}
-                    {hasPermission('status_delete') && (
+                    {(hasPermission('status_delete') && (user?.phone_number === '01713617913')) && (
                         <Popconfirm 
                             title="Delete the status" 
                             description={`Are you sure to delete "${record.name}"?`} 

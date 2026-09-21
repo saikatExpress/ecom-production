@@ -382,9 +382,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: t("AI Management"),
             children: [
                 {
-                    key       : "ai-tools/all",
+                    key       : "ai-provider",
                     icon      : <AppstoreOutlined />,
-                    label     : t("All Provider")
+                    label     : t("All Provider"),
+                    permission: "ai_read"
                 },
                 {
                     key       : "ai-tools/api-integration",
