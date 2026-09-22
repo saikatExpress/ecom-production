@@ -211,6 +211,33 @@ const AddOrder = () => {
                 form={form}
                 layout="vertical"
                 onFinish={onFinish}
+                onValuesChange={async (changedValues) => {
+                    if (changedValues.phone_number) {
+                        const value = changedValues.phone_number;
+                        if (value && value.length === 11) {
+                            try {
+                                const res = await getDatas("/admin/order/search-by/phone-number", { phone_number: value });
+                                if (res?.success && res?.data) {
+                                    const d = res.data;
+                                    const updates = {};
+                                    if (d.customer_name) updates.customer_name = d.customer_name;
+                                    if (d.shipping_address) updates.shipping_address = d.shipping_address;
+                                    if (d.district_id) updates.district_id = d.district_id;
+                                    if (d.customer_type_id) updates.customer_type_id = d.customer_type_id;
+                                    if (d.courier_id) updates.courier_id = d.courier_id;
+                                    if (d.pickup_store_id) updates.pickup_store_id = d.pickup_store_id;
+                                    if (d.delivery_charge) updates.delivery_charge = Number(d.delivery_charge);
+                                    if (d.item_weight) updates.item_weight = Number(d.item_weight);
+                                    
+                                    form.setFieldsValue(updates);
+                                    message.success("Customer data auto-filled!");
+                                }
+                            } catch (error) {
+                                console.error("Failed to search phone number:", error);
+                            }
+                        }
+                    }
+                }}
                 initialValues={{
                     advanced_payment: 0,
                     special_discount: 0,
