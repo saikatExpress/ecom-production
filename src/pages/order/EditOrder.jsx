@@ -56,6 +56,7 @@ const EditOrder = () => {
     const [statuses, setStatuses]                 = useState([]);
     const [coupons, setCoupons]                   = useState([]);
     const [couriers, setCouriers]                 = useState([]);
+    const [pathaoStores, setPathaoStores]         = useState([]);
     const [productOptions, setProductOptions]     = useState([]);
     const [fetchedProducts, setFetchedProducts]   = useState({});
     const [searchTimeout, setSearchTimeout]       = useState(null);
@@ -103,6 +104,13 @@ const EditOrder = () => {
                     }
                 }
             } catch (error) { console.error("Failed to fetch couriers:", error); }
+
+            try {
+                const res = await getDatas("/admin/pathao/stores");
+                if (res?.success && res?.data?.data?.data) {
+                    setPathaoStores(res.data.data.data);
+                }
+            } catch (error) { console.error("Failed to fetch pathao stores:", error); }
         };
         fetchDropdowns();
     }, [form]);
@@ -152,6 +160,7 @@ const EditOrder = () => {
                         delivery_gateway_id: order.delivery_gateway_id,
                         payment_gateway_id: order.payment_gateway_id,
                         courier_id: order.courier_id,
+                        pickup_store_id: order.pickup_store_id,
                         coupon_id: order.coupon_id,
                         note: order.note || '',
                         delivery_charge: Number(order.delivery_charge) || 0,
@@ -159,6 +168,7 @@ const EditOrder = () => {
                         special_discount: Number(order.special_discount) || 0,
                         coupon_discount: Number(order.coupon_discount) || 0,
                         additional_cost: Number(order.additional_cost) || 0,
+                        item_weight: Number(order.item_weight) || 0.5,
                         paid_status: order.paid_status || 'unpaid',
                         items: items.length > 0 ? items : [{}]
                     });
@@ -255,6 +265,7 @@ const EditOrder = () => {
                         coupon_discount : 0,
                         delivery_charge : 0,
                         additional_cost : 0,
+                        item_weight     : 0.5,
                         paid_status     : 'unpaid',
                         items           : [{}]
                     }}
@@ -405,6 +416,25 @@ const EditOrder = () => {
                                             <Select size="large" placeholder="Choose Courier" showSearch optionFilterProp="label" options={couriers.map(c => ({ value: c.id, label: c.name }))} allowClear />
                                         </Form.Item>
                                     </Col>
+
+                                    <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.courier_id !== currentValues.courier_id}>
+                                        {({ getFieldValue }) => {
+                                            return getFieldValue('courier_id') === 1 ? (
+                                                <>
+                                                    <Col xs={24} sm={12}>
+                                                        <Form.Item name="pickup_store_id" label="Pickup Store" rules={[{ required: true, message: 'Please select a pickup store' }]}>
+                                                            <Select size="large" placeholder="Select Pickup Store" showSearch optionFilterProp="label" options={pathaoStores.map(s => ({ value: s.store_id, label: s.store_name }))} allowClear />
+                                                        </Form.Item>
+                                                    </Col>
+                                                    <Col xs={24} sm={12}>
+                                                        <Form.Item name="item_weight" label="Item Weight (kg)" rules={[{ required: true, message: 'Please enter item weight' }]}>
+                                                            <InputNumber size="large" step={0.1} min={0.1} style={{ width: '100%' }} />
+                                                        </Form.Item>
+                                                    </Col>
+                                                </>
+                                            ) : null;
+                                        }}
+                                    </Form.Item>
                                     <Col xs={24} sm={12}>
                                         <Form.Item name="coupon_id" label="Coupon">
                                             <Select size="large" placeholder="Select Coupon" showSearch optionFilterProp="label" options={coupons.map(c => ({ value: c.id, label: c.code }))} allowClear />

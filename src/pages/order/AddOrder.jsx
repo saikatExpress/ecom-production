@@ -54,6 +54,7 @@ const AddOrder = () => {
     const [statuses, setStatuses]                 = useState([]);
     const [coupons, setCoupons]                   = useState([]);
     const [couriers, setCouriers]                 = useState([]);
+    const [pathaoStores, setPathaoStores]         = useState([]);
     const [fetchedProducts, setFetchedProducts]   = useState({});
     const [searchTimeout, setSearchTimeout]       = useState(null);
     const [isSearching, setIsSearching]           = useState(false);
@@ -125,6 +126,15 @@ const AddOrder = () => {
                 }
             } catch (error) {
                 console.error("Failed to fetch couriers:", error);
+            }
+
+            try {
+                const res = await getDatas("/admin/pathao/stores");
+                if (res?.success && res?.data?.data?.data) {
+                    setPathaoStores(res.data.data.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch pathao stores:", error);
             }
         };
         fetchDropdowns();
@@ -207,6 +217,7 @@ const AddOrder = () => {
                     coupon_discount: 0,
                     delivery_charge: 0,
                     additional_cost: 0,
+                    item_weight: 0.5,
                     paid_status: 'unpaid',
                     items: [{}]
                 }}
@@ -352,11 +363,32 @@ const AddOrder = () => {
                                         </Select>
                                     </Form.Item>
                                 </Col>
+                                
                                 <Col xs={24} sm={12}>
                                     <Form.Item name="courier_id" label="Select Courier">
                                         <Select size="large" placeholder="Choose Courier" showSearch optionFilterProp="label" options={couriers.map(c => ({ value: c.id, label: c.name }))} allowClear />
                                     </Form.Item>
                                 </Col>
+
+                                <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.courier_id !== currentValues.courier_id}>
+                                    {({ getFieldValue }) => {
+                                        return getFieldValue('courier_id') === 1 ? (
+                                            <>
+                                                <Col xs={24} sm={12}>
+                                                    <Form.Item name="pickup_store_id" label="Pickup Store" rules={[{ required: true, message: 'Please select a pickup store' }]}>
+                                                        <Select size="large" placeholder="Select Pickup Store" showSearch optionFilterProp="label" options={pathaoStores.map(s => ({ value: s.store_id, label: s.store_name }))} allowClear />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col xs={24} sm={12}>
+                                                    <Form.Item name="item_weight" label="Item Weight (kg)" rules={[{ required: true, message: 'Please enter item weight' }]}>
+                                                        <InputNumber size="large" step={0.1} min={0.1} style={{ width: '100%' }} />
+                                                    </Form.Item>
+                                                </Col>
+                                            </>
+                                        ) : null;
+                                    }}
+                                </Form.Item>
+
                                 <Col xs={24} sm={12}>
                                     <Form.Item name="coupon_id" label="Coupon">
                                         <Select size="large" placeholder="Select Coupon" showSearch optionFilterProp="label" options={coupons.map(c => ({ value: c.id, label: c.code }))} allowClear />
