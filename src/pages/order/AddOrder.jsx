@@ -219,6 +219,8 @@ const AddOrder = () => {
                     additional_cost: 0,
                     item_weight: 0.5,
                     paid_status: 'unpaid',
+                    customer_type_id: 1,
+                    status_id: 1,
                     items: [{}]
                 }}
             >
@@ -336,8 +338,9 @@ const AddOrder = () => {
                                         <Select size="large" placeholder="Select Status" showSearch optionFilterProp="label" options={statuses.map(s => ({ value: s.id, label: s.name }))} allowClear />
                                     </Form.Item>
                                 </Col>
+
                                 <Col xs={24} sm={12}>
-                                    <Form.Item name="delivery_gateway_id" label="Delivery Gateway">
+                                    <Form.Item name="delivery_gateway_id" label="Delivery Gateway" rules={[{ required: true, message: 'Please select a gateway' }]}>
                                         <Select size="large" placeholder="Select Gateway" allowClear onChange={(val) => {
                                             if (val) {
                                                 const selected = deliveryGateways.find(g => g.id === val);

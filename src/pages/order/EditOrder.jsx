@@ -346,11 +346,13 @@ const EditOrder = () => {
                                             <Input size="large" placeholder="e.g. 01700000000" prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} />
                                         </Form.Item>
                                     </Col>
+
                                     <Col xs={24} sm={12}>
                                         <Form.Item name="customer_type_id" label="Customer Type">
                                             <Select size="large" placeholder="Select type" showSearch optionFilterProp="label" options={customerTypes.map(c => ({ value: c.id, label: c.name }))} allowClear />
                                         </Form.Item>
                                     </Col>
+
                                     <Col xs={24}>
                                         <Form.Item name="shipping_address" label="Shipping Address" rules={[{ required: true, message: 'Please enter shipping address' }]}>
                                             <Input.TextArea size="large" rows={2} placeholder="Full shipping address..." />
@@ -384,6 +386,7 @@ const EditOrder = () => {
                                             <Select size="large" placeholder="Select Status" showSearch optionFilterProp="label" options={statuses.map(s => ({ value: s.id, label: s.name }))} allowClear />
                                         </Form.Item>
                                     </Col>
+                                    
                                     <Col xs={24} sm={12}>
                                         <Form.Item name="delivery_gateway_id" label="Delivery Gateway">
                                             <Select size="large" placeholder="Select Gateway" allowClear onChange={(val) => {
