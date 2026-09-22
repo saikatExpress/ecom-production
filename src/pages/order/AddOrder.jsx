@@ -221,6 +221,7 @@ const AddOrder = () => {
                     paid_status: 'unpaid',
                     customer_type_id: 1,
                     status_id: 1,
+                    payment_gateway_id: 1,
                     items: [{}]
                 }}
             >
@@ -357,8 +358,9 @@ const AddOrder = () => {
                                         </Select>
                                     </Form.Item>
                                 </Col>
+
                                 <Col xs={24} sm={12}>
-                                    <Form.Item name="payment_gateway_id" label="Payment Gateway">
+                                    <Form.Item name="payment_gateway_id" label="Payment Gateway" rules={[{ required: true, message: 'Please select a payment' }]}>
                                         <Select size="large" placeholder="Select Payment Gateway" allowClear>
                                             {paymentGateways.map(g => (
                                                 <Select.Option key={g.id} value={g.id}>{g.name}</Select.Option>
