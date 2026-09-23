@@ -549,11 +549,26 @@ const Order = () => {
                                     {extraCount > 0 && <Text type="secondary" style={{ fontSize: 11, marginLeft: 4 }}>+{extraCount}</Text>}
                                 </div>
                             )}
-                            <div style={{ marginTop: 2 }}>
+                            <div style={{ marginTop: 2, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                                 <Text type="secondary" style={{ fontSize: 11 }}>
                                     <CalendarOutlined style={{ marginRight: 4 }} />
                                     {new Date(record.order_date).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
                                 </Text>
+                                {record.order_source && (
+                                    <span style={{
+                                        fontSize: 10,
+                                        fontWeight: 600,
+                                        color: record.order_source.color_code || '#1677ff',
+                                        background: `${record.order_source.color_code || '#1677ff'}15`,
+                                        border: `1px solid ${record.order_source.color_code || '#1677ff'}`,
+                                        padding: '1px 6px',
+                                        borderRadius: 4,
+                                        display: 'inline-flex',
+                                        alignItems: 'center'
+                                    }}>
+                                        {record.order_source.name}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </Flex>
