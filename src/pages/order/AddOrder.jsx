@@ -55,6 +55,7 @@ const AddOrder = () => {
     const [coupons, setCoupons]                   = useState([]);
     const [couriers, setCouriers]                 = useState([]);
     const [pathaoStores, setPathaoStores]         = useState([]);
+    const [orderSources, setOrderSources]         = useState([]);
     const [fetchedProducts, setFetchedProducts]   = useState({});
     const [searchTimeout, setSearchTimeout]       = useState(null);
     const [isSearching, setIsSearching]           = useState(false);
@@ -135,6 +136,15 @@ const AddOrder = () => {
                 }
             } catch (error) {
                 console.error("Failed to fetch pathao stores:", error);
+            }
+
+            try {
+                const res = await getDatas("/admin/order-source/list");
+                if (res?.success && res?.data) {
+                    setOrderSources(res.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch order sources:", error);
             }
         };
         fetchDropdowns();
@@ -249,6 +259,7 @@ const AddOrder = () => {
                     customer_type_id: 1,
                     status_id: 1,
                     payment_gateway_id: 1,
+                    order_source_id: 2,
                     items: [{}]
                 }}
             >
@@ -424,6 +435,11 @@ const AddOrder = () => {
                                 <Col xs={24} sm={12}>
                                     <Form.Item name="coupon_id" label="Coupon">
                                         <Select size="large" placeholder="Select Coupon" showSearch optionFilterProp="label" options={coupons.map(c => ({ value: c.id, label: c.code }))} allowClear />
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name="order_source_id" label="Order Source">
+                                        <Select size="large" placeholder="Select Source" showSearch optionFilterProp="label" options={orderSources.map(s => ({ value: s.id, label: s.name }))} allowClear />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24}>
