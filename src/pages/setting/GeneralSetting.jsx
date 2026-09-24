@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import useTitle from "../../hooks/useTitle";
-import { getDatas, postData } from "../../services/request";
+import { getDatas, putData } from "../../services/request";
+import { useDispatch } from "react-redux";
+import { fetchAllSettings } from "../../features/setting/settingThunk";
 
 const { Title, Text } = Typography;
 
@@ -35,6 +37,7 @@ const GeneralSetting = () => {
     useTitle("General Setting");
 
     const [form] = Form.useForm();
+    const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
     const [updatingKey, setUpdatingKey] = useState(null);
     const [settings, setSettings] = useState([]);
@@ -68,13 +71,17 @@ const GeneralSetting = () => {
             const value = await form.validateFields([setting.setting_key]);
             setUpdatingKey(setting.setting_key);
             const payload = {
-                group_name: "general",
-                settings: { [setting.setting_key]: value[setting.setting_key] }
+                group_name: setting.group_name,
+                setting_key: setting.setting_key,
+                label: setting.label,
+                type: setting.type,
+                value: value[setting.setting_key]
             };
 
-            const res = await postData("/admin/setting", payload); 
+            const res = await putData(`/admin/setting/${setting.id}`, payload); 
             if (res?.success) {
                 message.success(`${setting.label} updated successfully!`);
+                dispatch(fetchAllSettings());
             } else {
                 message.error(res?.message || "Failed to update setting");
             }

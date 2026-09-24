@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PageLoader from "./components/common/PageLoader";
 import { authInitialized } from "./features/auth/authSlice";
 import { getMe } from "./features/auth/meThunk";
+import { fetchAllSettings } from "./features/setting/settingThunk";
 import AppRoutes from "./routes/AppRoutes";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import { ApiErrorProvider } from "./context/ApiErrorContext";
@@ -25,6 +26,9 @@ function App() {
         } else {
             dispatch(authInitialized());
         }
+
+        // Fetch application settings globally
+        dispatch(fetchAllSettings());
 
     }, [dispatch]);
 

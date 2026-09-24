@@ -1,8 +1,10 @@
 import { PictureOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Col, Flex, Image, Input, List, Row, Skeleton, Typography, Upload, message } from "antd";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { fetchAllSettings } from "../../features/setting/settingThunk";
 import useTitle from "../../hooks/useTitle";
-import { getDatas, postData } from "../../services/request";
+import { getDatas, putData, postData } from "../../services/request";
 
 const { Title, Text } = Typography;
 
@@ -32,7 +34,6 @@ const LogoSettingItem = ({ setting, onUpdate, isUpdating }) => {
     const [fileOrValue, setFileOrValue] = useState(null);
     const [preview, setPreview] = useState(setting.value);
 
-    // Update local state if setting value changes from the server
     useEffect(() => {
         setPreview(setting.value);
         setFileOrValue(null);
@@ -65,7 +66,7 @@ const LogoSettingItem = ({ setting, onUpdate, isUpdating }) => {
             return;
         }
         
-        onUpdate(setting.setting_key, finalValue);
+        onUpdate(setting, finalValue);
     };
 
     return (
@@ -135,8 +136,8 @@ const LogoSettingItem = ({ setting, onUpdate, isUpdating }) => {
 };
 
 const LogoSetting = () => {
-    // Hook
     useTitle("Logo Setting");
+    const dispatch = useDispatch();
 
     const [loading, setLoading]         = useState(true);
     const [updatingKey, setUpdatingKey] = useState(null);
@@ -161,22 +162,31 @@ const LogoSetting = () => {
         fetchSettings();
     }, []);
 
-    const updateSingleSetting = async (setting_key, fileOrValue) => {
-        setUpdatingKey(setting_key);
+    const updateSingleSetting = async (setting, fileOrValue) => {
+        setUpdatingKey(setting.setting_key);
         try {
             let payload;
-            if (fileOrValue instanceof File) {
+            if (setting.type === 'image' && fileOrValue instanceof File) {
                 payload = new FormData();
-                payload.append("group_name", "logo");
-                payload.append(`settings[${setting_key}]`, fileOrValue);
+                payload.append("group_name", setting.group_name);
+                payload.append("setting_key", setting.setting_key);
+                payload.append("label", setting.label);
+                payload.append("type", setting.type);
+                payload.append("value", fileOrValue);
+                payload.append("_method", "PUT");
             } else {
                 payload = {
-                    group_name: "logo",
-                    settings: { [setting_key]: fileOrValue }
+                    group_name: setting.group_name,
+                    setting_key: setting.setting_key,
+                    label: setting.label,
+                    type: setting.type,
+                    value: fileOrValue,
+                    _method: "PUT"
                 };
             }
 
-            const res = await postData("/admin/setting", payload); 
+            const res = await postData(`/admin/setting/${setting.id}`, payload);
+            
             if (res?.success) {
                 message.success(`Updated successfully!`);
                 
@@ -185,6 +195,8 @@ const LogoSetting = () => {
                 if (updatedRes?.success && updatedRes?.data?.logo) {
                     setSettings(updatedRes.data.logo);
                 }
+                // Update global state so sidebar logo updates immediately
+                dispatch(fetchAllSettings());
             } else {
                 message.error(res?.message || "Failed to update setting");
             }

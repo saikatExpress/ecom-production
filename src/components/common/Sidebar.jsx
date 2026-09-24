@@ -505,9 +505,24 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         if (isMobile) setSidebarOpen(false);
     };
 
+    const settings = useSelector((state) => state.setting?.data) || {};
+    const siteName = settings.site_name || "ECOM ADMIN";
+    const headerLogo = settings.header_logo;
+    const fallbackLogo = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1HE51g1QFrOdlhF0eLqVjsYNknuh_bIdCYqjAj1sg3g&s=10";
+
     const menuContent = (
         <>
-            <div className="sidebar-logo">ECOM ADMIN</div>
+            <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', padding: '16px', gap: '10px' }}>
+                <img 
+                    src={headerLogo || fallbackLogo} 
+                    alt="Site Logo" 
+                    style={{ maxHeight: '36px', maxWidth: '100%', objectFit: 'contain' }}
+                    onError={(e) => { e.target.onerror = null; e.target.src = fallbackLogo; }}
+                />
+                <span style={{ fontSize: '16px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {siteName}
+                </span>
+            </div>
             <Menu
                 mode="inline"
                 selectedKeys={[currentKey]}

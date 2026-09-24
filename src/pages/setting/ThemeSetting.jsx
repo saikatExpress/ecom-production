@@ -1,8 +1,6 @@
-import { SaveOutlined, ShoppingOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, Flex, Input, InputNumber, List, Row, Skeleton, Switch, Typography, message } from "antd";
+import { ControlOutlined, SaveOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Card, Col, ColorPicker, Flex, Input, List, Row, Select, Skeleton, Typography, message } from "antd";
 import { useEffect, useState } from "react";
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
 import useTitle from "../../hooks/useTitle";
 import { getDatas, putData } from "../../services/request";
 import { useDispatch } from "react-redux";
@@ -32,55 +30,62 @@ const SectionHeader = ({ icon, title, subtitle }) => (
     </Flex>
 );
 
-const ProductSettingItem = ({ setting, onUpdate, isUpdating }) => {
-    // Normalize boolean values
-    const getInitialValue = () => {
-        if (setting.type === 'boolean') {
-            return setting.value === 'true' || setting.value === '1' || setting.value === 1 || setting.value === true;
-        }
-        return setting.value;
-    };
+const ThemeSettingItem = ({ setting, onUpdate, isUpdating }) => {
+    const [value, setValue] = useState(setting.value);
 
-    const [value, setValue] = useState(getInitialValue());
-
-    // Update local state if the setting value changes from server fetch
     useEffect(() => {
-        setValue(getInitialValue());
+        setValue(setting.value);
     }, [setting.value]);
 
     const handleUpdate = () => {
         onUpdate(setting, value);
     };
 
+    const handleColorChange = (color, hexString) => {
+        if (typeof color === 'string') {
+            setValue(color);
+        } else if (hexString) {
+            setValue(hexString);
+        } else if (color && color.toHexString) {
+            setValue(color.toHexString());
+        }
+    };
+
     const renderInput = () => {
         switch (setting.type) {
-            case 'boolean':
+            case 'color':
                 return (
-                    <Switch 
-                        checked={!!value} 
-                        onChange={(checked) => setValue(checked)} 
-                    />
+                    <Flex align="center" gap={12} style={{ width: '100%' }}>
+                        <ColorPicker 
+                            value={value} 
+                            onChange={handleColorChange} 
+                            size="large"
+                            showText
+                        />
+                        <Input 
+                            style={{ width: 120, borderRadius: 8 }} 
+                            size="large" 
+                            value={value} 
+                            onChange={(e) => setValue(e.target.value)} 
+                        />
+                    </Flex>
                 );
-            case 'number':
+            case 'select':
+                // Provide some basic layout style options since none are strictly given in the payload
+                const options = [
+                    { label: 'Style 1', value: 'style_1' },
+                    { label: 'Style 2', value: 'style_2' },
+                    { label: 'Style 3', value: 'style_3' },
+                    { label: 'Style 4', value: 'style_4' },
+                ];
                 return (
-                    <InputNumber 
+                    <Select 
                         size="large" 
-                        style={{ width: '100%', borderRadius: 8 }} 
                         value={value} 
                         onChange={(val) => setValue(val)} 
-                        placeholder={`Enter ${setting.label}`}
+                        style={{ width: '100%', borderRadius: 8 }}
+                        options={options}
                     />
-                );
-            case 'textarea':
-                return (
-                    <div style={{ width: '100%', background: '#fff' }}>
-                        <ReactQuill 
-                            theme="snow" 
-                            value={value || ''} 
-                            onChange={setValue} 
-                            placeholder={`Enter ${setting.label}`} 
-                        />
-                    </div>
                 );
             default:
                 return (
@@ -97,7 +102,7 @@ const ProductSettingItem = ({ setting, onUpdate, isUpdating }) => {
 
     return (
         <List.Item style={{ padding: '24px 0' }}>
-            <Row style={{ width: '100%', alignItems: setting.type === 'textarea' ? 'flex-start' : 'center' }} gutter={24}>
+            <Row style={{ width: '100%', alignItems: 'center' }} gutter={24}>
                 <Col xs={24} md={8}>
                     <div style={{ marginBottom: 8 }}>
                         <Text strong style={{ fontSize: 15, color: '#333' }}>{setting.label}</Text>
@@ -111,7 +116,7 @@ const ProductSettingItem = ({ setting, onUpdate, isUpdating }) => {
                         {renderInput()}
                     </div>
                 </Col>
-                <Col xs={24} md={4} style={{ textAlign: 'right', marginTop: setting.type === 'textarea' ? 0 : 0 }}>
+                <Col xs={24} md={4} style={{ textAlign: 'right' }}>
                     <Button
                         type="primary"
                         icon={<SaveOutlined />}
@@ -127,11 +132,11 @@ const ProductSettingItem = ({ setting, onUpdate, isUpdating }) => {
     );
 };
 
-const ProductSetting = () => {
+const ThemeSetting = () => {
     // Hook
-    useTitle("Product Setting");
-
+    useTitle("Theme Setting");
     const dispatch = useDispatch();
+
     const [loading, setLoading] = useState(true);
     const [updatingKey, setUpdatingKey] = useState(null);
     const [settings, setSettings] = useState([]);
@@ -140,9 +145,9 @@ const ProductSetting = () => {
         const fetchSettings = async () => {
             setLoading(true);
             try {
-                const res = await getDatas("/admin/setting", { group_name: "product" });
-                if (res?.success && res?.data?.product) {
-                    setSettings(res.data.product);
+                const res = await getDatas("/admin/setting", { group_name: "theme" });
+                if (res?.success && res?.data?.theme) {
+                    setSettings(res.data.theme);
                 }
             } catch (error) {
                 console.error("Failed to fetch settings:", error);
@@ -169,6 +174,7 @@ const ProductSetting = () => {
             const res = await putData(`/admin/setting/${setting.id}`, payload); 
             if (res?.success) {
                 message.success(`Updated successfully!`);
+                // Dispatch global fetch so sidebar/theme changes apply everywhere
                 dispatch(fetchAllSettings());
             } else {
                 message.error(res?.message || "Failed to update setting");
@@ -194,13 +200,13 @@ const ProductSetting = () => {
                     items={[
                         { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Dashboard</span> },
                         { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Settings</span> },
-                        { title: <span style={{ color: '#fff' }}>Product</span> },
+                        { title: <span style={{ color: '#fff' }}>Theme</span> },
                     ]}
                     separator={<span style={{ color: 'rgba(255,255,255,0.5)' }}>/</span>}
                 />
                 <Title level={4} style={{ margin: '8px 0 0', color: '#fff' }}>
-                    <ShoppingOutlined style={{ marginRight: 8 }} />
-                    Product Settings
+                    <ControlOutlined style={{ marginRight: 8 }} />
+                    Theme Settings
                 </Title>
             </div>
 
@@ -208,7 +214,7 @@ const ProductSetting = () => {
                 <Card bordered={false} style={{ borderRadius: 12 }}><Skeleton active paragraph={{ rows: 10 }} /></Card>
             ) : (
                 <Card
-                    title={<SectionHeader icon={<ShoppingOutlined />} title="Product Configuration" subtitle="Manage product-related settings and preferences" />}
+                    title={<SectionHeader icon={<ControlOutlined />} title="Theme Configuration" subtitle="Customize the colors, fonts, and layouts of your storefront" />}
                     bordered={false}
                     style={{ borderRadius: 12, border: '1px solid #f0f0f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
                     styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: '0 20px' } }}
@@ -218,7 +224,7 @@ const ProductSetting = () => {
                         itemLayout="horizontal"
                         dataSource={settings}
                         renderItem={(setting) => (
-                            <ProductSettingItem
+                            <ThemeSettingItem
                                 key={setting.id}
                                 setting={setting}
                                 isUpdating={updatingKey === setting.setting_key}
@@ -239,13 +245,9 @@ const ProductSetting = () => {
                 .ant-list-item:last-child {
                     border-bottom: none !important;
                 }
-                .ql-editor {
-                    min-height: 150px;
-                    font-size: 14px;
-                }
             `}</style>
         </div>
     );
 };
 
-export default ProductSetting;
+export default ThemeSetting;

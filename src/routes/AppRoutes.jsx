@@ -100,6 +100,7 @@ import ProductReport from "../pages/report/ProductReport";
 import GeneralSetting from "../pages/setting/GeneralSetting";
 import LogoSetting from "../pages/setting/LogoSetting";
 import ProductSetting from "../pages/setting/ProductSetting";
+import ThemeSetting from "../pages/setting/ThemeSetting";
 import AddEmployee from "../pages/user/employee/AddEmployee";
 import EditEmployee from "../pages/user/employee/EditEmployee";
 import Employee from "../pages/user/employee/Employee";
@@ -768,6 +769,11 @@ export default function AppRoutes() {
                         <Route path="/settings/product" element={
                             <PermissionRoute permission="setting_read">
                                 <ProductSetting/>
+                            </PermissionRoute>
+                        }/>
+                        <Route path="/settings/theme" element={
+                            <PermissionRoute permission="setting_read">
+                                <ThemeSetting/>
                             </PermissionRoute>
                         }/>
                         {/* Setting Menu */}
