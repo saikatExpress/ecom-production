@@ -393,6 +393,55 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     label     : t("API Integration")
                 }
             ]
+        },
+        {
+            key: "settings-menu",
+            icon: <SettingOutlined />,
+            label: t("Settings"),
+            children: [
+                {
+                    key       : "settings/general",
+                    icon      : <SettingOutlined />,
+                    label     : t("General Setting"),
+                    permission: "setting_read"
+                },
+                {
+                    key       : "settings/logo",
+                    icon      : <PictureOutlined />,
+                    label     : t("Logo Setting"),
+                    permission: "setting_read"
+                },
+                {
+                    key       : "settings/product",
+                    icon      : <ProductOutlined />,
+                    label     : t("Product Setting"),
+                    permission: "setting_read"
+                },
+                {
+                    key       : "settings/top-header",
+                    icon      : <LayoutOutlined />,
+                    label     : t("Top Header Setting"),
+                    permission: "setting_read"
+                },
+                {
+                    key       : "settings/header-footer",
+                    icon      : <LayoutOutlined />,
+                    label     : t("Header & Footer Setting"),
+                    permission: "setting_read"
+                },
+                {
+                    key       : "settings/theme",
+                    icon      : <ControlOutlined />,
+                    label     : t("Theme Setting"),
+                    permission: "setting_read"
+                },
+                {
+                    key       : "settings/checkout",
+                    icon      : <ShoppingCartOutlined />,
+                    label     : t("CheckOut Setting"),
+                    permission: "setting_read"
+                }
+            ]
         }
     ];
 

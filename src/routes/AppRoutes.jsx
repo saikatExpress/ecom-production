@@ -97,6 +97,7 @@ import CourierReport from "../pages/report/CourierReport";
 import CustomerReport from "../pages/report/CustomerReport";
 import OrderReport from "../pages/report/OrderReport";
 import ProductReport from "../pages/report/ProductReport";
+import GeneralSetting from "../pages/setting/GeneralSetting";
 import AddEmployee from "../pages/user/employee/AddEmployee";
 import EditEmployee from "../pages/user/employee/EditEmployee";
 import Employee from "../pages/user/employee/Employee";
@@ -748,6 +749,14 @@ export default function AppRoutes() {
                             </PermissionRoute>
                         }/>
                         {/* AI Menu */}
+
+                        {/* Setting Menu */}
+                        <Route path="/settings/general" element={
+                            <PermissionRoute permission="setting_read">
+                                <GeneralSetting/>
+                            </PermissionRoute>
+                        }/>
+                        {/* Setting Menu */}
                     </Route>
 
                 </Route>
