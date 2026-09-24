@@ -1,6 +1,8 @@
 import { SaveOutlined, SettingOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Col, Flex, Form, Input, InputNumber, List, Row, Skeleton, Typography, message } from "antd";
 import { useEffect, useState } from "react";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
 
@@ -90,7 +92,7 @@ const GeneralSetting = () => {
     const renderField = (setting) => {
         switch (setting.type) {
             case "textarea":
-                return <Input.TextArea size="large" rows={3} placeholder={`Enter ${setting.label}`} />;
+                return <ReactQuill theme="snow" placeholder={`Enter ${setting.label}`} style={{ backgroundColor: '#fff', borderRadius: 8 }} />;
             case "number":
                 return <InputNumber size="large" style={{ width: '100%' }} placeholder={`Enter ${setting.label}`} />;
             case "email":
@@ -189,6 +191,10 @@ const GeneralSetting = () => {
                 }
                 .ant-input-lg, .ant-select-lg .ant-select-selector, .ant-input-number-lg {
                     border-radius: 8px !important;
+                }
+                .ql-editor {
+                    min-height: 150px;
+                    font-size: 14px;
                 }
             `}</style>
         </div>

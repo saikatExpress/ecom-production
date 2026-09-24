@@ -1,6 +1,8 @@
-import { PictureOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Card, Col, Flex, Image, Input, List, Row, Skeleton, Typography, Upload, message } from "antd";
+import { SaveOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Card, Col, Flex, Input, InputNumber, List, Row, Skeleton, Switch, Typography, message } from "antd";
 import { useEffect, useState } from "react";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import useTitle from "../../hooks/useTitle";
 import { getDatas, postData } from "../../services/request";
 
@@ -28,49 +30,72 @@ const SectionHeader = ({ icon, title, subtitle }) => (
     </Flex>
 );
 
-const LogoSettingItem = ({ setting, onUpdate, isUpdating }) => {
-    const [fileOrValue, setFileOrValue] = useState(null);
-    const [preview, setPreview] = useState(setting.value);
+const ProductSettingItem = ({ setting, onUpdate, isUpdating }) => {
+    // Normalize boolean values
+    const getInitialValue = () => {
+        if (setting.type === 'boolean') {
+            return setting.value === 'true' || setting.value === '1' || setting.value === 1 || setting.value === true;
+        }
+        return setting.value;
+    };
 
-    // Update local state if setting value changes from the server
+    const [value, setValue] = useState(getInitialValue());
+
+    // Update local state if the setting value changes from server fetch
     useEffect(() => {
-        setPreview(setting.value);
-        setFileOrValue(null);
+        setValue(getInitialValue());
     }, [setting.value]);
 
-    const handleFileChange = (info) => {
-        const fileList = info.fileList;
-        if (fileList.length > 0) {
-            const newFile = fileList[0].originFileObj;
-            setFileOrValue(newFile);
-            setPreview(URL.createObjectURL(newFile));
-        } else {
-            setFileOrValue(null);
-            setPreview(setting.value);
-        }
-    };
-
-    const handleTextChange = (e) => {
-        setFileOrValue(e.target.value);
-    };
-
     const handleUpdate = () => {
-        let finalValue = fileOrValue;
-        if (setting.type !== 'image' && finalValue === null) {
-            finalValue = setting.value;
+        onUpdate(setting.setting_key, value);
+    };
+
+    const renderInput = () => {
+        switch (setting.type) {
+            case 'boolean':
+                return (
+                    <Switch 
+                        checked={!!value} 
+                        onChange={(checked) => setValue(checked)} 
+                    />
+                );
+            case 'number':
+                return (
+                    <InputNumber 
+                        size="large" 
+                        style={{ width: '100%', borderRadius: 8 }} 
+                        value={value} 
+                        onChange={(val) => setValue(val)} 
+                        placeholder={`Enter ${setting.label}`}
+                    />
+                );
+            case 'textarea':
+                return (
+                    <div style={{ width: '100%', background: '#fff' }}>
+                        <ReactQuill 
+                            theme="snow" 
+                            value={value || ''} 
+                            onChange={setValue} 
+                            placeholder={`Enter ${setting.label}`} 
+                        />
+                    </div>
+                );
+            default:
+                return (
+                    <Input 
+                        size="large" 
+                        value={value} 
+                        onChange={(e) => setValue(e.target.value)} 
+                        placeholder={`Enter ${setting.label}`} 
+                        style={{ borderRadius: 8 }}
+                    />
+                );
         }
-        
-        if (setting.type === 'image' && finalValue === null) {
-            message.warning(`Please select a new image for ${setting.label} to update.`);
-            return;
-        }
-        
-        onUpdate(setting.setting_key, finalValue);
     };
 
     return (
         <List.Item style={{ padding: '24px 0' }}>
-            <Row style={{ width: '100%', alignItems: 'center' }} gutter={24}>
+            <Row style={{ width: '100%', alignItems: setting.type === 'textarea' ? 'flex-start' : 'center' }} gutter={24}>
                 <Col xs={24} md={8}>
                     <div style={{ marginBottom: 8 }}>
                         <Text strong style={{ fontSize: 15, color: '#333' }}>{setting.label}</Text>
@@ -80,45 +105,11 @@ const LogoSettingItem = ({ setting, onUpdate, isUpdating }) => {
                     </div>
                 </Col>
                 <Col xs={24} md={12}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        {setting.type === 'image' ? (
-                            <>
-                                {preview ? (
-                                    <div style={{
-                                        width: 100, height: 100, borderRadius: 8, border: '1px dashed #d9d9d9',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                                        backgroundColor: '#fafafa'
-                                    }}>
-                                        <Image src={preview} alt={setting.label} style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'contain' }} />
-                                    </div>
-                                ) : (
-                                    <div style={{
-                                        width: 100, height: 100, borderRadius: 8, border: '1px dashed #d9d9d9',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa'
-                                    }}>
-                                        <PictureOutlined style={{ fontSize: 24, color: '#999' }} />
-                                    </div>
-                                )}
-                                <Upload
-                                    beforeUpload={() => false}
-                                    showUploadList={false}
-                                    onChange={handleFileChange}
-                                >
-                                    <Button icon={<UploadOutlined />}>Select Image</Button>
-                                </Upload>
-                            </>
-                        ) : (
-                            <Input 
-                                size="large" 
-                                placeholder={`Enter ${setting.label}`} 
-                                defaultValue={setting.value} 
-                                onChange={handleTextChange} 
-                                style={{ borderRadius: 8 }}
-                            />
-                        )}
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        {renderInput()}
                     </div>
                 </Col>
-                <Col xs={24} md={4} style={{ textAlign: 'right' }}>
+                <Col xs={24} md={4} style={{ textAlign: 'right', marginTop: setting.type === 'textarea' ? 0 : 0 }}>
                     <Button
                         type="primary"
                         icon={<SaveOutlined />}
@@ -134,21 +125,21 @@ const LogoSettingItem = ({ setting, onUpdate, isUpdating }) => {
     );
 };
 
-const LogoSetting = () => {
+const ProductSetting = () => {
     // Hook
-    useTitle("Logo Setting");
+    useTitle("Product Setting");
 
-    const [loading, setLoading]         = useState(true);
+    const [loading, setLoading] = useState(true);
     const [updatingKey, setUpdatingKey] = useState(null);
-    const [settings, setSettings]       = useState([]);
+    const [settings, setSettings] = useState([]);
 
     useEffect(() => {
         const fetchSettings = async () => {
             setLoading(true);
             try {
-                const res = await getDatas("/admin/setting", { group_name: "logo" });
-                if (res?.success && res?.data?.logo) {
-                    setSettings(res.data.logo);
+                const res = await getDatas("/admin/setting", { group_name: "product" });
+                if (res?.success && res?.data?.product) {
+                    setSettings(res.data.product);
                 }
             } catch (error) {
                 console.error("Failed to fetch settings:", error);
@@ -161,30 +152,18 @@ const LogoSetting = () => {
         fetchSettings();
     }, []);
 
-    const updateSingleSetting = async (setting_key, fileOrValue) => {
+    const updateSingleSetting = async (setting_key, value) => {
         setUpdatingKey(setting_key);
         try {
-            let payload;
-            if (fileOrValue instanceof File) {
-                payload = new FormData();
-                payload.append("group_name", "logo");
-                payload.append(`settings[${setting_key}]`, fileOrValue);
-            } else {
-                payload = {
-                    group_name: "logo",
-                    settings: { [setting_key]: fileOrValue }
-                };
-            }
+            const payload = {
+                group_name: "product",
+                settings: { [setting_key]: value }
+            };
 
             const res = await postData("/admin/setting", payload); 
             if (res?.success) {
                 message.success(`Updated successfully!`);
-                
-                // Refresh to get updated data (e.g. image URLs)
-                const updatedRes = await getDatas("/admin/setting", { group_name: "logo" });
-                if (updatedRes?.success && updatedRes?.data?.logo) {
-                    setSettings(updatedRes.data.logo);
-                }
+                // Optionally refresh all settings here if needed
             } else {
                 message.error(res?.message || "Failed to update setting");
             }
@@ -209,13 +188,13 @@ const LogoSetting = () => {
                     items={[
                         { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Dashboard</span> },
                         { title: <span style={{ color: 'rgba(255,255,255,0.7)' }}>Settings</span> },
-                        { title: <span style={{ color: '#fff' }}>Logo</span> },
+                        { title: <span style={{ color: '#fff' }}>Product</span> },
                     ]}
                     separator={<span style={{ color: 'rgba(255,255,255,0.5)' }}>/</span>}
                 />
                 <Title level={4} style={{ margin: '8px 0 0', color: '#fff' }}>
-                    <PictureOutlined style={{ marginRight: 8 }} />
-                    Logo Settings
+                    <ShoppingOutlined style={{ marginRight: 8 }} />
+                    Product Settings
                 </Title>
             </div>
 
@@ -223,7 +202,7 @@ const LogoSetting = () => {
                 <Card bordered={false} style={{ borderRadius: 12 }}><Skeleton active paragraph={{ rows: 10 }} /></Card>
             ) : (
                 <Card
-                    title={<SectionHeader icon={<PictureOutlined />} title="Logo & Images" subtitle="Update logos and favicons for your site individually" />}
+                    title={<SectionHeader icon={<ShoppingOutlined />} title="Product Configuration" subtitle="Manage product-related settings and preferences" />}
                     bordered={false}
                     style={{ borderRadius: 12, border: '1px solid #f0f0f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
                     styles={{ header: { borderBottom: '2px solid #f0f0f0', padding: '16px 20px' }, body: { padding: '0 20px' } }}
@@ -233,7 +212,7 @@ const LogoSetting = () => {
                         itemLayout="horizontal"
                         dataSource={settings}
                         renderItem={(setting) => (
-                            <LogoSettingItem
+                            <ProductSettingItem
                                 key={setting.id}
                                 setting={setting}
                                 isUpdating={updatingKey === setting.setting_key}
@@ -254,9 +233,13 @@ const LogoSetting = () => {
                 .ant-list-item:last-child {
                     border-bottom: none !important;
                 }
+                .ql-editor {
+                    min-height: 150px;
+                    font-size: 14px;
+                }
             `}</style>
         </div>
     );
 };
 
-export default LogoSetting;
+export default ProductSetting;
