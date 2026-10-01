@@ -7,7 +7,7 @@ import OrderHistory from "../../components/order/OrderHistory";
 import OrderPreview from "../../components/order/OrderPreview";
 import usePermissions from "../../hooks/usePermissions";
 import useTitle from "../../hooks/useTitle";
-import { deleteData, getDatas, postData, putData } from "../../services/request";
+import { deleteData, getDatas, patchData, postData, putData } from "../../services/request";
 import A5Invoice from "./invoice/A5Invoice";
 import NormalInvoice from "./invoice/NormalInvoice";
 import PosInvoice from "./invoice/PosInvoice";
@@ -25,39 +25,31 @@ const Order = () => {
     const [noteForm]        = Form.useForm();
 
     // States
-    const [orders, setOrders]                 = useState([]);
-    const [statuses, setStatuses]             = useState([]);
-    const [loading, setLoading]               = useState(false);
-    const [totalAllOrders, setTotalAllOrders] = useState(0);
-    const [showAdvanced, setShowAdvanced]         = useState(false);
-    const [customerTypes, setCustomerTypes]       = useState([]);
-    const [districts, setDistricts]               = useState([]);
-    const [deliveryGateways, setDeliveryGateways] = useState([]);
-    const [paymentGateways, setPaymentGateways]   = useState([]);
-    const [couriers, setCouriers]                 = useState([]);
-    const [users, setUsers]                       = useState([]);
-    const [previewOpen, setPreviewOpen]           = useState(false);
-    const [previewId, setPreviewId]               = useState(null);
-
-    // Note states
+    const [orders, setOrders]                       = useState([]);
+    const [statuses, setStatuses]                   = useState([]);
+    const [loading, setLoading]                     = useState(false);
+    const [totalAllOrders, setTotalAllOrders]       = useState(0);
+    const [showAdvanced, setShowAdvanced]           = useState(false);
+    const [customerTypes, setCustomerTypes]         = useState([]);
+    const [districts, setDistricts]                 = useState([]);
+    const [deliveryGateways, setDeliveryGateways]   = useState([]);
+    const [paymentGateways, setPaymentGateways]     = useState([]);
+    const [couriers, setCouriers]                   = useState([]);
+    const [users, setUsers]                         = useState([]);
+    const [previewOpen, setPreviewOpen]             = useState(false);
+    const [previewId, setPreviewId]                 = useState(null);
     const [noteModalOpen, setNoteModalOpen]         = useState(false);
     const [noteOrderId, setNoteOrderId]             = useState(null);
     const [addingNote, setAddingNote]               = useState(false);
     const [viewNoteModalOpen, setViewNoteModalOpen] = useState(false);
     const [viewNotes, setViewNotes]                 = useState([]);
     const [notesLoading, setNotesLoading]           = useState(false);
-    
-    // History states
-    const [historyModalOpen, setHistoryModalOpen] = useState(false);
-    const [historyOrderId, setHistoryOrderId]     = useState(null);
-
-    // Print states
-    const [printModalOpen, setPrintModalOpen] = useState(false);
-    const [printType, setPrintType]           = useState(null);
-    const [printOrderData, setPrintOrderData] = useState(null);
-
-    // Selection state
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [historyModalOpen, setHistoryModalOpen]   = useState(false);
+    const [historyOrderId, setHistoryOrderId]       = useState(null);
+    const [printModalOpen, setPrintModalOpen]       = useState(false);
+    const [printType, setPrintType]                 = useState(null);
+    const [printOrderData, setPrintOrderData]       = useState(null);
+    const [selectedRowKeys, setSelectedRowKeys]     = useState([]);
 
     const [filters, setFilters] = useState({
         search_key         : '',
@@ -128,7 +120,7 @@ const Order = () => {
                     getDatas("/admin/delivery-gateway/list"),
                     getDatas("/admin/payment-gateway/list"),
                     getDatas("/admin/courier/list"),
-                    getDatas("/admin/user/list")
+                    getDatas("/admin/user/list", {user_category_id: 3})
                 ]);
 
                 if (customerTypesRes?.success && customerTypesRes?.data) {
@@ -252,6 +244,126 @@ const Order = () => {
         } catch (error) {
             console.error("Failed to delete order:", error);
             message.error("An error occurred while deleting the order.");
+        }
+    };
+
+    const handleUpdatePaymentStatus = async (status) => {
+        if (!selectedRowKeys.length) return;
+        setLoading(true);
+        try {
+            const res = await patchData("/admin/order/payment-status-update", {
+                order_ids: selectedRowKeys,
+                paid_status: status
+            });
+            if (res?.success) {
+                message.success(res.message || "Payment status updated successfully!");
+                fetchOrders(filters, pagination.current_page, pagination.per_page);
+                setSelectedRowKeys([]);
+            } else {
+                message.error(res?.message || "Failed to update payment status");
+            }
+        } catch (error) {
+            console.error("Failed to update payment status:", error);
+            message.error(error?.response?.data?.message || "An error occurred while updating payment status");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAssignOrders = async (userId) => {
+        if (!selectedRowKeys.length) return;
+        setLoading(true);
+        try {
+            const res = await patchData("/admin/order/assign", {
+                order_ids: selectedRowKeys,
+                user_id: userId
+            });
+            if (res?.success) {
+                message.success(res.message || "Orders assigned successfully!");
+                fetchOrders(filters, pagination.current_page, pagination.per_page);
+                setSelectedRowKeys([]);
+            } else {
+                message.error(res?.message || "Failed to assign orders");
+            }
+        } catch (error) {
+            console.error("Failed to assign orders:", error);
+            message.error(error?.response?.data?.message || "An error occurred while assigning orders");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleExportCSV = () => {
+        const selectedOrders = orders.filter(o => selectedRowKeys.includes(o.id));
+        if (selectedOrders.length === 0) return;
+
+        const headers = [
+            'Invoice Number',
+            'Order Date',
+            'Customer Name',
+            'Phone Number',
+            'Shipping Address',
+            'IP Address',
+            'Items',
+            'Total Amount',
+            'Payment Status',
+            'Order Status',
+            'Courier'
+        ];
+
+        const csvRows = [headers.join(',')];
+
+        selectedOrders.forEach(order => {
+            const itemsStr = order.details ? order.details.map(d => `${d.product_name} (x${d.quantity})`).join(' | ') : '';
+            
+            const row = [
+                order.invoice_number || '',
+                order.order_date || '',
+                `"${(order.customer_name || '').replace(/"/g, '""')}"`,
+                order.phone_number || '',
+                `"${(order.shipping_address || '').replace(/"/g, '""')}"`,
+                order.ip_address || '',
+                `"${itemsStr.replace(/"/g, '""')}"`,
+                order.total_payable_amount || '',
+                order.paid_status || '',
+                order.current_status?.name || '',
+                order.courier?.name || ''
+            ];
+            
+            csvRows.push(row.join(','));
+        });
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `orders_export_${new Date().getTime()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleBulkDelete = async () => {
+        if (!selectedRowKeys.length) return;
+        setLoading(true);
+        try {
+            const res = await deleteData("/admin/order/bulk-delete", {
+                data: { order_ids: selectedRowKeys }
+            });
+            if (res?.success) {
+                message.success(res.message || "Orders deleted successfully!");
+                setSelectedRowKeys([]);
+                fetchOrders(filters, pagination.current_page, pagination.per_page);
+            } else {
+                message.error(res?.message || "Failed to delete orders");
+            }
+        } catch (error) {
+            console.error("Failed to delete orders:", error);
+            message.error(error?.response?.data?.message || "An error occurred while deleting orders");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -1194,15 +1306,25 @@ const Order = () => {
                             <Tag color="blue" style={{ margin: 0, padding: '4px 10px', fontSize: 13 }}>
                                 {selectedRowKeys.length} Selected
                             </Tag>
-                            <Dropdown menu={{ items: [{ key: 'paid', label: 'Paid' }, { key: 'unpaid', label: 'Unpaid' }] }}>
+
+                            <Dropdown menu={{ 
+                                items: [{ key: 'paid', label: 'Paid' }, { key: 'unpaid', label: 'Unpaid' }],
+                                onClick: ({ key }) => handleUpdatePaymentStatus(key)
+                            }}>
                                 <Button size="small">Payment Status</Button>
                             </Dropdown>
+
                             <Dropdown menu={{ items: statuses.map(s => ({ key: s.id, label: s.name })) }}>
                                 <Button size="small">Order Status</Button>
                             </Dropdown>
-                            <Dropdown menu={{ items: users.map(u => ({ key: u.id, label: u.username })) }}>
+
+                            <Dropdown menu={{ 
+                                items: users.map(u => ({ key: u.id, label: u.username })),
+                                onClick: ({ key }) => handleAssignOrders(key)
+                            }}>
                                 <Button size="small">Order Assign</Button>
                             </Dropdown>
+                            
                             <Dropdown menu={{ 
                                 items: [{ key: 'normal', label: 'Normal Invoice' }, { key: 'a5', label: 'A5 Invoice' }, { key: 'pos', label: 'Pos Invoice' }],
                                 onClick: ({ key }) => {
@@ -1214,8 +1336,8 @@ const Order = () => {
                             }}>
                                 <Button size="small" icon={<PrinterOutlined />}>Print Invoice</Button>
                             </Dropdown>
-                            <Button size="small">Export CSV</Button>
-                            <Popconfirm title="Delete selected orders?" okText="Yes" cancelText="No">
+                            <Button size="small" onClick={handleExportCSV}>Export CSV</Button>
+                            <Popconfirm title="Delete selected orders?" onConfirm={handleBulkDelete} okText="Yes" cancelText="No">
                                 <Button size="small" danger icon={<DeleteOutlined />}>Bulk Delete</Button>
                             </Popconfirm>
                         </Flex>
