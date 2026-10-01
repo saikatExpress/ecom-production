@@ -11,7 +11,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { permissions } = useSelector((state) => state.auth);
+    const { permissions, user } = useSelector((state) => state.auth);
 
     const currentKey = location.pathname.replace(/^\//, "") || "dashboard";
 
@@ -400,6 +400,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             label: t("Settings"),
             children: [
                 {
+                    key          : "settings/all",
+                    icon         : <UnorderedListOutlined />,
+                    label        : t("All Settings"),
+                    requiredPhone: "01713617913"
+                },
+                {
                     key       : "settings/general",
                     icon      : <SettingOutlined />,
                     label     : t("General Setting"),
@@ -448,6 +454,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     const filterMenuItems = (items) => {
         return items
             .map((item) => {
+                if (item.requiredPhone && user?.phone !== item.requiredPhone && user?.phone_number !== item.requiredPhone) {
+                    return null;
+                }
+
                 if (item.children) {
                     const filteredChildren = filterMenuItems(item.children);
                     if (filteredChildren.length > 0) {

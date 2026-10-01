@@ -1,4 +1,4 @@
-import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, HistoryOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined } from "@ant-design/icons";
+import { CalendarOutlined, ClearOutlined, DeleteOutlined, DollarOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FilterOutlined, GlobalOutlined, HistoryOutlined, InfoCircleOutlined, PhoneOutlined, PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import { Breadcrumb, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Popover, Row, Select, Space, Table, Tabs, Tag, Tooltip, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -647,6 +647,13 @@ const Order = () => {
                                 </Text>
                             </div>
                         )}
+                        {record.ip_address && (
+                            <div style={{ marginTop: 2 }}>
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                    <GlobalOutlined style={{ marginRight: 4 }} />{record.ip_address}
+                                </Text>
+                            </div>
+                        )}
                     </div>
                 </Flex>
             )
@@ -1187,7 +1194,7 @@ const Order = () => {
                             <Tag color="blue" style={{ margin: 0, padding: '4px 10px', fontSize: 13 }}>
                                 {selectedRowKeys.length} Selected
                             </Tag>
-                            <Dropdown menu={{ items: [{ key: 'paid', label: 'Paid' }, { key: 'unpaid', label: 'Unpaid' }, { key: 'partial', label: 'Partial' }] }}>
+                            <Dropdown menu={{ items: [{ key: 'paid', label: 'Paid' }, { key: 'unpaid', label: 'Unpaid' }] }}>
                                 <Button size="small">Payment Status</Button>
                             </Dropdown>
                             <Dropdown menu={{ items: statuses.map(s => ({ key: s.id, label: s.name })) }}>
