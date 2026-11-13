@@ -29,10 +29,14 @@ function App() {
             dispatch(authInitialized());
         }
 
-        // Fetch application settings globally
-        dispatch(fetchAllSettings());
-
     }, [dispatch]);
+
+    useEffect(() => {
+        if (auth.isAuthenticated) {
+            dispatch(fetchAllSettings());
+        }
+        
+    }, [auth.isAuthenticated, dispatch]);
 
     useEffect(() => {
         if (settings.site_favicon) {

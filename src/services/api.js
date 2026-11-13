@@ -41,7 +41,15 @@ api.interceptors.response.use(
 
         if (status === 401) {
             localStorage.removeItem("access_token");
-            window.location.href = "/login";
+
+            const isAuthRoute = config.url?.includes("/auth/login") || config.url?.includes("/auth/me") || config.url?.includes("/auth/verify-otp") ||config.url?.includes("/auth/resend-otp");
+
+            const isGuestPage = window.location.pathname === "/login" || window.location.pathname === "/forgot-password";
+
+            if (!isAuthRoute && !isGuestPage) {
+                window.location.href = "/login";
+            }
+
             return Promise.reject(error);
         }
 
@@ -57,18 +65,9 @@ api.interceptors.response.use(
                 endpoint += (endpoint.includes("?") ? "&" : "?") + qs;
             }
 
-            const serverMessage =
-                error.response?.data?.message ||
-                error.response?.data?.error   ||
-                error.message                  ||
-                "No additional details.";
+            const serverMessage = error.response?.data?.message || error.response?.data?.error || error.message ||"No additional details.";
 
-            _reportApiError({
-                status,
-                method,
-                endpoint,
-                message : serverMessage,
-            });
+            _reportApiError({status,method,endpoint,message : serverMessage});
         }
 
         return Promise.reject(error);
