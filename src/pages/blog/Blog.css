@@ -1,0 +1,41 @@
+/* Blog.css */
+@keyframes blogHighlightPulse {
+    0% {
+        background-color: #bae0ff;
+    }
+    50% {
+        background-color: #e6f4ff;
+    }
+    100% {
+        background-color: #f4f9ff;
+    }
+}
+
+.blog-highlighted-row > td {
+    background-color: #e6f4ff !important;
+    animation: blogHighlightPulse 1.8s ease-in-out infinite alternate;
+    box-shadow: inset 0 2px 0 #1677ff, inset 0 -2px 0 #1677ff;
+    transition: background-color 0.5s ease;
+}
+
+.blog-highlighted-row > td:first-child {
+    box-shadow: inset 4px 0 0 #1677ff, inset 0 2px 0 #1677ff, inset 0 -2px 0 #1677ff;
+}
+
+.blog-highlighted-row > td:last-child {
+    box-shadow: inset -2px 0 0 #1677ff, inset 0 2px 0 #1677ff, inset 0 -2px 0 #1677ff;
+}
+
+.dark-mode .blog-highlighted-row > td {
+    background-color: #112a45 !important;
+    box-shadow: inset 0 2px 0 #177ddc, inset 0 -2px 0 #177ddc;
+}
+
+.dark-mode .blog-highlighted-row > td:first-child {
+    box-shadow: inset 4px 0 0 #177ddc, inset 0 2px 0 #177ddc, inset 0 -2px 0 #177ddc;
+}
+
+.dark-mode .blog-highlighted-row > td:last-child {
+    box-shadow: inset -2px 0 0 #177ddc, inset 0 2px 0 #177ddc, inset 0 -2px 0 #177ddc;
+}
+

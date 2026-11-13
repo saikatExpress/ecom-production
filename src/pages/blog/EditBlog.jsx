@@ -3,7 +3,7 @@ import { Breadcrumb, Button, Card, Col, Form, Input, message, Row, Select, Spin,
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { getData, getDatas, postData } from "../../services/request";
 import { handleFormErrors } from "../../utils/formUtils";
@@ -15,6 +15,7 @@ export default function EditBlog() {
 
     // Variable
     const navigate = useNavigate();
+    const location = useLocation();
     const { id }   = useParams();
     const [form]   = Form.useForm();
 
@@ -105,7 +106,16 @@ export default function EditBlog() {
             const response = await postData(`/admin/blog/${id}`, formData);
             if (response?.success !== false) {
                 message.success(response?.message || "Blog updated successfully");
-                navigate("/blog");
+                navigate("/blog", {
+                    state: {
+                        blogId: id,
+                        page: location.state?.page,
+                        pageSize: location.state?.pageSize,
+                        searchKey: location.state?.searchKey,
+                        selectedCategories: location.state?.selectedCategories,
+                        selectedTags: location.state?.selectedTags,
+                    }
+                });
             } else {
                 message.error(response?.message || "Failed to update blog");
             }
@@ -116,6 +126,21 @@ export default function EditBlog() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleBack = () => {
+        navigate("/blog", {
+            state: {
+                fromPage: 'Edit Blog Page',
+                fromAction: 'Click "Back to Blogs" Button',
+                blogId: id,
+                page: location.state?.page,
+                pageSize: location.state?.pageSize,
+                searchKey: location.state?.searchKey,
+                selectedCategories: location.state?.selectedCategories,
+                selectedTags: location.state?.selectedTags,
+            }
+        });
     };
 
     const handleFileChange = ({ fileList: newFileList }) => {
@@ -135,7 +160,9 @@ export default function EditBlog() {
             <Breadcrumb
                 items={[
                     { title: "Dashboard" },
-                    { title: "Blog", href: "/blog" },
+                    { 
+                        title: <span style={{ cursor: 'pointer' }} onClick={handleBack}>Blog</span> 
+                    },
                     { title: "Edit Blog" },
                 ]}
                 style={{ marginBottom: 16 }}
@@ -145,9 +172,7 @@ export default function EditBlog() {
                 title={
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>Edit Blog</span>
-                        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/blog", {
-                            state: {fromPage: 'Edit Blog Page', fromAction: 'Click "Back to Logs" Button'}
-                        })}>
+                        <Button icon={<ArrowLeftOutlined />} onClick={handleBack}>
                             Back to Blogs
                         </Button>
                     </div>

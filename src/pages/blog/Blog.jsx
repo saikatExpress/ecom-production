@@ -1,10 +1,11 @@
 import { DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import usePermissions from "../../hooks/usePermissions";
 import useTitle from "../../hooks/useTitle";
 import { deleteData, getDatas } from "../../services/request";
+import "./Blog.css";
 
 const { Title, Text } = Typography;
 
@@ -14,29 +15,72 @@ export default function Blog() {
 
     // Variable
     const navigate        = useNavigate();
+    const location        = useLocation();
     const {hasPermission} = usePermissions();
+
+    // Check if returning from edit
+    const returningFromEdit = Boolean(
+        location.state?.blogId || sessionStorage.getItem("blog_last_id")
+    );
+
+    const initialPage = returningFromEdit ? (location.state?.page || Number(sessionStorage.getItem("blog_page")) || 1) : 1;
+
+    const initialPageSize = returningFromEdit ? (location.state?.pageSize || Number(sessionStorage.getItem("blog_pageSize")) || 25) : 25;
+
+    const initialSearch = returningFromEdit ? (location.state?.searchKey ?? sessionStorage.getItem("blog_search") ?? "") : "";
+
+    const initialCategories = returningFromEdit
+    ? (location.state?.selectedCategories || (() => {
+        try {
+            const s = sessionStorage.getItem("blog_categories");
+            return s ? JSON.parse(s) : [];
+        } catch { return []; }
+    })())
+    : [];
+
+    const initialTags = returningFromEdit
+    ? (location.state?.selectedTags || (() => {
+        try {
+            const s = sessionStorage.getItem("blog_tags");
+            return s ? JSON.parse(s) : [];
+        } catch { return []; }
+    })())
+    : [];
+
+    const initialTargetId = returningFromEdit ? (location.state?.blogId || sessionStorage.getItem("blog_last_id") || null) : null;
 
     // States
     const [blogs, setBlogs]           = useState([]);
     const [loading, setLoading]       = useState(false);
-    const [searchKey, setSearchKey]   = useState("");
-    const [pagination, setPagination] = useState({ current: 1, pageSize: 25, total: 0 });
+    const [searchKey, setSearchKey]   = useState(initialSearch);
+    const [searchInput, setSearchInput] = useState(initialSearch);
+    const [pagination, setPagination] = useState({ current: initialPage, pageSize: initialPageSize, total: 0 });
 
     // Filter States
     const [categoriesList, setCategoriesList]         = useState([]);
     const [tagsList, setTagsList]                     = useState([]);
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedTags, setSelectedTags]             = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState(initialCategories);
+    const [selectedTags, setSelectedTags]             = useState(initialTags);
+
+    // Target row to scroll & highlight
+    const [targetBlogId]                              = useState(initialTargetId);
+    const [highlightedRowId, setHighlightedRowId]     = useState(null);
 
     // Fetch filters on mount
     useEffect(() => {
         const fetchFilters = async () => {
             try {
                 const catRes = await getDatas("/admin/blog-category/list");
-                if (catRes?.success) setCategoriesList(catRes.data);
+
+                if (catRes?.success) {
+                    setCategoriesList(catRes.data);
+                }
                 
                 const tagRes = await getDatas("/admin/tag/list");
-                if (tagRes?.success) setTagsList(tagRes.data);
+
+                if (tagRes?.success) {
+                    setTagsList(tagRes.data);
+                }
             } catch (error) {
                 console.error("Failed to load filters", error);
             }
@@ -94,22 +138,80 @@ export default function Blog() {
             current: newPagination.current,
             pageSize: newPagination.pageSize,
         }));
+        sessionStorage.setItem("blog_page", String(newPagination.current));
+        sessionStorage.setItem("blog_pageSize", String(newPagination.pageSize));
     };
 
     const handleSearch = (value) => {
         setSearchKey(value);
+        setSearchInput(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.setItem("blog_page", "1");
+        sessionStorage.setItem("blog_search", value || "");
     };
 
     const handleCategoryChange = (value) => {
         setSelectedCategories(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.setItem("blog_page", "1");
+        sessionStorage.setItem("blog_categories", JSON.stringify(value || []));
     };
 
     const handleTagChange = (value) => {
         setSelectedTags(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.setItem("blog_page", "1");
+        sessionStorage.setItem("blog_tags", JSON.stringify(value || []));
     };
+
+    const handleEdit = (record) => {
+        sessionStorage.setItem("blog_last_id", String(record.id));
+        sessionStorage.setItem("blog_page", String(pagination.current));
+        sessionStorage.setItem("blog_pageSize", String(pagination.pageSize));
+        sessionStorage.setItem("blog_search", searchKey || "");
+        sessionStorage.setItem("blog_categories", JSON.stringify(selectedCategories || []));
+        sessionStorage.setItem("blog_tags", JSON.stringify(selectedTags || []));
+
+        navigate(`/edit/blog/${record.id}`, {
+            state: {
+                fromPage: 'Blog List Page',
+                fromAction: 'Click "Edit" Button',
+                blogId: record.id,
+                page: pagination.current,
+                pageSize: pagination.pageSize,
+                searchKey,
+                selectedCategories,
+                selectedTags,
+            }
+        });
+    };
+
+    useEffect(() => {
+        if (!loading && targetBlogId && blogs.length > 0) {
+            const itemExists = blogs.some(b => String(b.id) === String(targetBlogId));
+            if (itemExists) {
+                setHighlightedRowId(targetBlogId);
+
+                const scrollTimer = setTimeout(() => {
+                    const rowEl = document.getElementById(`blog-row-${targetBlogId}`);
+                    if (rowEl) {
+                        rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }, 200);
+
+                sessionStorage.removeItem("blog_last_id");
+
+                const highlightTimer = setTimeout(() => {
+                    setHighlightedRowId(null);
+                }, 4000);
+
+                return () => {
+                    clearTimeout(scrollTimer);
+                    clearTimeout(highlightTimer);
+                };
+            }
+        }
+    }, [loading, blogs, targetBlogId]);
 
     const handleRefresh = () => {
         fetchBlogs(pagination.current, pagination.pageSize, searchKey, selectedCategories, selectedTags);
@@ -215,9 +317,7 @@ export default function Blog() {
             render: (_, record) => (
                 <Space size="small">
                     {hasPermission('blog_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/blog/${record.id}`, {
-                            state: {fromPage: 'Blog List Page', fromAction: 'Click "Edit" Button'}
-                        })}>
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
                             Edit
                         </Button>
                     )}
@@ -277,6 +377,13 @@ export default function Blog() {
                             allowClear
                             enterButton={<SearchOutlined />}
                             style={{ width: 250 }}
+                            value={searchInput}
+                            onChange={(e) => {
+                                setSearchInput(e.target.value);
+                                if (!e.target.value) {
+                                    handleSearch("");
+                                }
+                            }}
                             onSearch={handleSearch}
                         />
                         <Select
@@ -284,6 +391,7 @@ export default function Blog() {
                             allowClear
                             placeholder="Filter by Category"
                             style={{ minWidth: 200 }}
+                            value={selectedCategories}
                             onChange={handleCategoryChange}
                             options={categoriesList.map(cat => ({ label: cat.name, value: cat.id }))}
                             maxTagCount="responsive"
@@ -293,6 +401,7 @@ export default function Blog() {
                             allowClear
                             placeholder="Filter by Tag"
                             style={{ minWidth: 200 }}
+                            value={selectedTags}
                             onChange={handleTagChange}
                             options={tagsList.map(tag => ({ label: tag.name, value: tag.id }))}
                             maxTagCount="responsive"
@@ -308,6 +417,10 @@ export default function Blog() {
                     dataSource={blogs}
                     rowKey="id"
                     loading={loading}
+                    rowClassName={(record) => String(record.id) === String(highlightedRowId) ? "blog-highlighted-row" : ""}
+                    onRow={(record) => ({
+                        id: `blog-row-${record.id}`,
+                    })}
                     pagination={{
                         current: pagination.current,
                         pageSize: pagination.pageSize,
