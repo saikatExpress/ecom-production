@@ -3,7 +3,7 @@ import { Breadcrumb, Button, Card, Col, Flex, Form, Input, InputNumber, message,
 import { useEffect, useRef, useState } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ProductAiChat from "../../components/product/ProductAiChat";
 import useTitle from "../../hooks/useTitle";
 import { getData, getDatas, postData } from "../../services/request";
@@ -31,7 +31,27 @@ export default function EditProduct() {
     // Variable
     const { id }   = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [form]   = Form.useForm();
+
+    const handleBack = () => {
+        navigate("/products", {
+            state: {
+                fromPage: 'Edit Product Page',
+                fromAction: 'Click "Back to Product List" Button',
+                productId: id,
+                page: location.state?.page,
+                pageSize: location.state?.pageSize,
+                searchKey: location.state?.searchKey,
+                categoryIds: location.state?.categoryIds,
+                subCategoryIds: location.state?.subCategoryIds,
+                brandIds: location.state?.brandIds,
+                minPrice: location.state?.minPrice,
+                maxPrice: location.state?.maxPrice,
+                status: location.state?.status,
+            }
+        });
+    };
 
     // States
     const [loading, setLoading]                     = useState(true);
@@ -283,10 +303,36 @@ export default function EditProduct() {
 
             if (response?.success || response?.id) {
                 message.success("Product updated successfully!");
-                navigate("/products");
+                navigate("/products", {
+                    state: {
+                        productId: id,
+                        page: location.state?.page,
+                        pageSize: location.state?.pageSize,
+                        searchKey: location.state?.searchKey,
+                        categoryIds: location.state?.categoryIds,
+                        subCategoryIds: location.state?.subCategoryIds,
+                        brandIds: location.state?.brandIds,
+                        minPrice: location.state?.minPrice,
+                        maxPrice: location.state?.maxPrice,
+                        status: location.state?.status,
+                    }
+                });
             } else {
                 message.success("Product updated!");
-                navigate("/products");
+                navigate("/products", {
+                    state: {
+                        productId: id,
+                        page: location.state?.page,
+                        pageSize: location.state?.pageSize,
+                        searchKey: location.state?.searchKey,
+                        categoryIds: location.state?.categoryIds,
+                        subCategoryIds: location.state?.subCategoryIds,
+                        brandIds: location.state?.brandIds,
+                        minPrice: location.state?.minPrice,
+                        maxPrice: location.state?.maxPrice,
+                        status: location.state?.status,
+                    }
+                });
             }
         } catch (error) {
             console.error("Failed to update product:", error);
@@ -311,7 +357,9 @@ export default function EditProduct() {
                     className="ap-breadcrumb"
                     items={[
                         { title: "Dashboard" },
-                        { title: "Product", href: "/products" },
+                        { 
+                            title: <span style={{ cursor: 'pointer' }} onClick={handleBack}>Product</span> 
+                        },
                         { title: "Edit Product" },
                     ]}
                 />
@@ -329,7 +377,9 @@ export default function EditProduct() {
                 className="ap-breadcrumb"
                 items={[
                     { title: "Dashboard" },
-                    { title: "Product", href: "/products" },
+                    { 
+                        title: <span style={{ cursor: 'pointer' }} onClick={handleBack}>Product</span> 
+                    },
                     { title: "Edit Product" },
                 ]}
             />
@@ -338,7 +388,7 @@ export default function EditProduct() {
                 <div className="ap-toolbar">
                     <Flex className="ap-toolbar-inner" align="center" justify="space-between" wrap="wrap" gap={12}>
                         <Space align="center" size={12}>
-                            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/products")} title="Back to product list"/>
+                            <Button icon={<ArrowLeftOutlined />} onClick={handleBack} title="Back to product list"/>
                             <span className="ap-toolbar-badge">
                                 <EditOutlined />
                             </span>
@@ -353,7 +403,7 @@ export default function EditProduct() {
                         </Space>
 
                         <Flex className="ap-toolbar-actions" align="center" gap={8} wrap="wrap">
-                            <Button onClick={() => navigate("/products")}>Cancel</Button>
+                            <Button onClick={handleBack}>Cancel</Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>
                                 Update Product
                             </Button>
@@ -855,7 +905,7 @@ export default function EditProduct() {
                                     >
                                         Update Product
                                     </Button>
-                                    <Button className="ap-lesser-btn" block onClick={() => navigate("/products")}>
+                                    <Button className="ap-lesser-btn" block onClick={handleBack}>
                                         Back to Product List
                                     </Button>
                                 </Card>
@@ -936,7 +986,7 @@ export default function EditProduct() {
 
                 {/* ── Mobile bottom bar ── */}
                 <div className="ap-mobile-bottombar">
-                    <Button onClick={() => navigate("/products")}>Cancel</Button>
+                    <Button onClick={handleBack}>Cancel</Button>
                     <Button type="primary" htmlType="submit" loading={submitting} icon={<SaveOutlined />}>
                         Update Product
                     </Button>

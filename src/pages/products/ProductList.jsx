@@ -1,12 +1,13 @@
 import { AppstoreOutlined, ClearOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FilterOutlined, FormOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
 import { Avatar, Badge, Breadcrumb, Button, Card, Flex, Input, InputNumber, message, Modal, Popconfirm, Radio, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ProductPreviewModal from "../../components/product/ProductPreviewModal";
 import ProductQuickEditModal from "../../components/product/ProductQuickEditModal";
 import { deleteData, getData, getDatas, patchData, postData } from "../../services/request";
 import usePermissions from './../../hooks/usePermissions';
 import useTitle from './../../hooks/useTitle';
+import "./ProductList.css";
 
 const { Title, Text } = Typography;
 
@@ -16,7 +17,52 @@ export default function ProductList() {
 
     // Variable
     const navigate        = useNavigate();
+    const location        = useLocation();
     const {hasPermission} = usePermissions();
+
+    // Check if returning from edit
+    const returningFromEdit = Boolean(location.state?.productId || sessionStorage.getItem("product_last_id"));
+
+    const initialPage = returningFromEdit ? (location.state?.page || Number(sessionStorage.getItem("product_page")) || 1) : 1;
+
+    const initialPageSize = returningFromEdit ? (location.state?.pageSize || Number(sessionStorage.getItem("product_pageSize")) || 25) : 25;
+
+    const initialSearch = returningFromEdit ? (location.state?.searchKey ?? sessionStorage.getItem("product_search") ?? "") : "";
+
+    const initialCategories = returningFromEdit
+    ? (location.state?.categoryIds || (() => {
+        try {
+            const s = sessionStorage.getItem("product_categories");
+            return s ? JSON.parse(s) : [];
+        } catch { return []; }
+    })())
+    : [];
+
+    const initialSubCategories = returningFromEdit
+    ? (location.state?.subCategoryIds || (() => {
+        try {
+            const s = sessionStorage.getItem("product_subcategories");
+            return s ? JSON.parse(s) : [];
+        } catch { return []; }
+    })())
+    : [];
+
+    const initialBrands = returningFromEdit
+    ? (location.state?.brandIds || (() => {
+        try {
+            const s = sessionStorage.getItem("product_brands");
+            return s ? JSON.parse(s) : [];
+        } catch { return []; }
+    })())
+    : [];
+
+    const initialMinPrice = returningFromEdit ? (location.state?.minPrice ?? (sessionStorage.getItem("product_min_price") ? Number(sessionStorage.getItem("product_min_price")) : undefined)) : undefined;
+
+    const initialMaxPrice = returningFromEdit ? (location.state?.maxPrice ?? (sessionStorage.getItem("product_max_price") ? Number(sessionStorage.getItem("product_max_price")) : undefined)) : undefined;
+
+    const initialStatus = returningFromEdit ? (location.state?.status ?? sessionStorage.getItem("product_status") ?? undefined) : undefined;
+
+    const initialTargetId = returningFromEdit ? (location.state?.productId || sessionStorage.getItem("product_last_id") || null) : null;
 
     // States
     const [products, setProducts]                           = useState([]);
@@ -24,13 +70,13 @@ export default function ProductList() {
     const [subCategories, setSubCategories]                 = useState([]);
     const [brands, setBrands]                               = useState([]);
     const [loading, setLoading]                             = useState(false);
-    const [searchKey, setSearchKey]                         = useState("");
-    const [categoryIds, setCategoryIds]                     = useState([]);
-    const [subCategoryIds, setSubCategoryIds]               = useState([]);
-    const [brandIds, setBrandIds]                           = useState([]);
-    const [minPrice, setMinPrice]                           = useState(undefined);
-    const [maxPrice, setMaxPrice]                           = useState(undefined);
-    const [status, setStatus]                               = useState(undefined);
+    const [searchKey, setSearchKey]                         = useState(initialSearch);
+    const [categoryIds, setCategoryIds]                     = useState(initialCategories);
+    const [subCategoryIds, setSubCategoryIds]               = useState(initialSubCategories);
+    const [brandIds, setBrandIds]                           = useState(initialBrands);
+    const [minPrice, setMinPrice]                           = useState(initialMinPrice);
+    const [maxPrice, setMaxPrice]                           = useState(initialMaxPrice);
+    const [status, setStatus]                               = useState(initialStatus);
     const [selectedRowKeys, setSelectedRowKeys]             = useState([]);
     const [isBulkModalVisible, setIsBulkModalVisible]       = useState(false);
     const [bulkStatus, setBulkStatus]                       = useState("active");
@@ -41,10 +87,13 @@ export default function ProductList() {
     const [quickEditProduct, setQuickEditProduct]           = useState(null);
 
     const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 25,
+        current: initialPage,
+        pageSize: initialPageSize,
         total: 0,
     });
+
+    const [targetProductId]                                 = useState(initialTargetId);
+    const [highlightedRowId, setHighlightedRowId]           = useState(null);
 
     const fetchProducts = useCallback(async (page = 1, pageSize = 25) => {
         setLoading(true);
@@ -143,11 +192,15 @@ export default function ProductList() {
             current: newPagination.current,
             pageSize: newPagination.pageSize,
         }));
+        sessionStorage.setItem("product_page", String(newPagination.current));
+        sessionStorage.setItem("product_pageSize", String(newPagination.pageSize));
     };
 
     const handleSearchSubmit = (value) => {
         setSearchKey(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.setItem("product_page", "1");
+        sessionStorage.setItem("product_search", value || "");
     };
 
     const handleResetFilters = () => {
@@ -159,7 +212,87 @@ export default function ProductList() {
         setMaxPrice(undefined);
         setStatus(undefined);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.removeItem("product_page");
+        sessionStorage.removeItem("product_search");
+        sessionStorage.removeItem("product_categories");
+        sessionStorage.removeItem("product_subcategories");
+        sessionStorage.removeItem("product_brands");
+        sessionStorage.removeItem("product_min_price");
+        sessionStorage.removeItem("product_max_price");
+        sessionStorage.removeItem("product_status");
+        sessionStorage.removeItem("product_last_id");
     };
+
+    const handleEdit = (record) => {
+        sessionStorage.setItem("product_last_id", String(record.id));
+        sessionStorage.setItem("product_page", String(pagination.current));
+        sessionStorage.setItem("product_pageSize", String(pagination.pageSize));
+        sessionStorage.setItem("product_search", searchKey || "");
+        sessionStorage.setItem("product_categories", JSON.stringify(categoryIds || []));
+        sessionStorage.setItem("product_subcategories", JSON.stringify(subCategoryIds || []));
+        sessionStorage.setItem("product_brands", JSON.stringify(brandIds || []));
+        if (minPrice !== undefined && minPrice !== null) {
+            sessionStorage.setItem("product_min_price", String(minPrice));
+        } else {
+            sessionStorage.removeItem("product_min_price");
+        }
+        if (maxPrice !== undefined && maxPrice !== null) {
+            sessionStorage.setItem("product_max_price", String(maxPrice));
+        } else {
+            sessionStorage.removeItem("product_max_price");
+        }
+        if (status) {
+            sessionStorage.setItem("product_status", status);
+        } else {
+            sessionStorage.removeItem("product_status");
+        }
+
+        navigate(`/edit/product/${record.id}`, {
+            state: {
+                fromPage: 'Product List Page',
+                fromAction: 'Click "Edit" Button',
+                productId: record.id,
+                page: pagination.current,
+                pageSize: pagination.pageSize,
+                searchKey,
+                categoryIds,
+                subCategoryIds,
+                brandIds,
+                minPrice,
+                maxPrice,
+                status,
+            }
+        });
+    };
+
+    // Scroll and highlight target row when returning from edit
+    useEffect(() => {
+        if (!loading && targetProductId && products.length > 0) {
+            const itemExists = products.some(p => String(p.id) === String(targetProductId));
+            if (itemExists) {
+                setHighlightedRowId(targetProductId);
+
+                const scrollTimer = setTimeout(() => {
+                    const rowEl = document.getElementById(`product-row-${targetProductId}`);
+                    if (rowEl) {
+                        rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }, 200);
+
+                // Clean up session storage flag so future visits start fresh
+                sessionStorage.removeItem("product_last_id");
+
+                const highlightTimer = setTimeout(() => {
+                    setHighlightedRowId(null);
+                }, 4000);
+
+                return () => {
+                    clearTimeout(scrollTimer);
+                    clearTimeout(highlightTimer);
+                };
+            }
+        }
+    }, [loading, products, targetProductId]);
 
     const handleRefresh = () => {
         fetchProducts(pagination.current, pagination.pageSize);
@@ -448,9 +581,7 @@ export default function ProductList() {
 
                     {hasPermission('product_update') && (
                         <Tooltip title="Edit Product">
-                            <Button type="text" size="small" icon={<EditOutlined style={{ color: "#1677ff" }} />} onClick={() => navigate(`/edit/product/${record.id}`, {
-                                state: {fromPage: 'Product List Page', fromAction: 'Click "Edit" Button'}
-                            })}/>
+                            <Button type="text" size="small" icon={<EditOutlined style={{ color: "#1677ff" }} />} onClick={() => handleEdit(record)}/>
                         </Tooltip>
                     )}
 
@@ -682,6 +813,10 @@ export default function ProductList() {
                     rowKey="id"
                     rowSelection={rowSelection}
                     loading={loading}
+                    rowClassName={(record) => String(record.id) === String(highlightedRowId) ? "product-highlighted-row" : ""}
+                    onRow={(record) => ({
+                        id: `product-row-${record.id}`,
+                    })}
                     scroll={{ x: 1100, y: "calc(100vh - 380px)" }}
                     pagination={{
                         current: pagination.current,
