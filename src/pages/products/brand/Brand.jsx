@@ -1,10 +1,11 @@
 import { ClearOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas } from "../../../services/request";
+import "./Brand.css";
 
 const { Title, Text } = Typography;
 
@@ -14,13 +15,43 @@ export default function Brand() {
 
     // Variable
     const navigate        = useNavigate();
+    const location        = useLocation();
     const {hasPermission} = usePermissions();
+
+    // Check if returning from edit
+    const returningFromEdit = Boolean(
+        location.state?.brandId ||
+        sessionStorage.getItem("brand_last_id")
+    );
+
+    const initialPage = returningFromEdit
+        ? (location.state?.page || Number(sessionStorage.getItem("brand_page")) || 1)
+        : 1;
+
+    const initialPageSize = returningFromEdit
+        ? (location.state?.pageSize || Number(sessionStorage.getItem("brand_pageSize")) || 25)
+        : 25;
+
+    const initialSearch = returningFromEdit
+        ? (location.state?.searchKey ?? sessionStorage.getItem("brand_search") ?? "")
+        : "";
+
+    const initialTargetId = returningFromEdit
+        ? (location.state?.brandId || sessionStorage.getItem("brand_last_id") || null)
+        : null;
 
     // States
     const [brands, setBrands]         = useState([]);
     const [loading, setLoading]       = useState(false);
-    const [searchKey, setSearchKey]   = useState("");
-    const [pagination, setPagination] = useState({current: 1,pageSize: 25,total: 0,});
+    const [searchKey, setSearchKey]   = useState(initialSearch);
+    const [pagination, setPagination] = useState({
+        current: initialPage,
+        pageSize: initialPageSize,
+        total: 0,
+    });
+
+    const [targetBrandId]             = useState(initialTargetId);
+    const [highlightedRowId, setHighlightedRowId] = useState(null);
 
     const fetchBrands = async (page = 1, pageSize = 25, search = "") => {
         setLoading(true);
@@ -57,6 +88,8 @@ export default function Brand() {
             current: newPagination.current,
             pageSize: newPagination.pageSize,
         }));
+        sessionStorage.setItem("brand_page", String(newPagination.current));
+        sessionStorage.setItem("brand_pageSize", String(newPagination.pageSize));
     };
 
     const handleDelete = async (id) => {
@@ -77,12 +110,64 @@ export default function Brand() {
     const handleSearch = (value) => {
         setSearchKey(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.setItem("brand_page", "1");
+        sessionStorage.setItem("brand_search", value || "");
     };
 
     const handleReset = () => {
         setSearchKey("");
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.removeItem("brand_page");
+        sessionStorage.removeItem("brand_search");
+        sessionStorage.removeItem("brand_last_id");
     };
+
+    const handleEdit = (record) => {
+        sessionStorage.setItem("brand_last_id", String(record.id));
+        sessionStorage.setItem("brand_page", String(pagination.current));
+        sessionStorage.setItem("brand_pageSize", String(pagination.pageSize));
+        sessionStorage.setItem("brand_search", searchKey || "");
+
+        navigate(`/edit/brand/${record.id}`, {
+            state: {
+                fromPage: 'Brand List Page',
+                fromAction: 'Click "Edit" Button',
+                brandId: record.id,
+                page: pagination.current,
+                pageSize: pagination.pageSize,
+                searchKey,
+            }
+        });
+    };
+
+    // Scroll and highlight target row when returning from edit
+    useEffect(() => {
+        if (!loading && targetBrandId && brands.length > 0) {
+            const itemExists = brands.some((b) => String(b.id) === String(targetBrandId));
+            if (itemExists) {
+                setHighlightedRowId(targetBrandId);
+
+                const scrollTimer = setTimeout(() => {
+                    const rowEl = document.getElementById(`brand-row-${targetBrandId}`);
+                    if (rowEl) {
+                        rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }, 200);
+
+                // Clean up session storage flag so future visits start fresh
+                sessionStorage.removeItem("brand_last_id");
+
+                const highlightTimer = setTimeout(() => {
+                    setHighlightedRowId(null);
+                }, 4000);
+
+                return () => {
+                    clearTimeout(scrollTimer);
+                    clearTimeout(highlightTimer);
+                };
+            }
+        }
+    }, [loading, brands, targetBrandId]);
 
     const handleRefresh = () => {
         fetchBrands(pagination.current, pagination.pageSize, searchKey);
@@ -146,7 +231,7 @@ export default function Brand() {
             render: (_, record) => (
                 <Space size="small">
                     {hasPermission('brand_update') && (
-                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/brand/${record.id}`)}>
+                        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
                             Edit
                         </Button>
                     )}
@@ -213,7 +298,12 @@ export default function Brand() {
                             enterButton={<SearchOutlined />}
                             style={{ width: 300 }}
                             value={searchKey}
-                            onChange={(e) => setSearchKey(e.target.value)}
+                            onChange={(e) => {
+                                setSearchKey(e.target.value);
+                                if (!e.target.value) {
+                                    handleReset();
+                                }
+                            }}
                             onSearch={handleSearch}
                         />
                         {searchKey && (
@@ -233,6 +323,10 @@ export default function Brand() {
                     dataSource={brands}
                     rowKey="id"
                     loading={loading}
+                    rowClassName={(record) => String(record.id) === String(highlightedRowId) ? "brand-highlighted-row" : ""}
+                    onRow={(record) => ({
+                        id: `brand-row-${record.id}`,
+                    })}
                     pagination={{
                         current: pagination.current,
                         pageSize: pagination.pageSize,
