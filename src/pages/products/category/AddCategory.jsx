@@ -16,7 +16,6 @@ const AddCategory = () => {
     // State
     const [submitting, setSubmitting] = useState(false);
 
-    // Normalize file input for Ant Design Upload
     const normFile = (e) => {
         if (Array.isArray(e)) {
             return e;
@@ -27,7 +26,6 @@ const AddCategory = () => {
     const onFinish = async (values) => {
         setSubmitting(true);
         try {
-            // Use FormData for file upload support
             const formData = new FormData();
             formData.append('name', values.name);
             formData.append('position', values.position || 0);
@@ -94,13 +92,7 @@ const AddCategory = () => {
 
                         <Col xs={24}>
                             <Form.Item name="image" label="Category Image" valuePropName="fileList" getValueFromEvent={normFile}>
-                                <Upload 
-                                    name="image"
-                                    listType="picture-card"
-                                    maxCount={1}
-                                    beforeUpload={() => false}
-                                    accept="image/*"
-                                >
+                                <Upload name="image" listType="picture-card" maxCount={1} beforeUpload={() => false} accept="image/*">
                                     <div>
                                         <PlusOutlined />
                                         <div style={{ marginTop: 8 }}>Upload</div>
