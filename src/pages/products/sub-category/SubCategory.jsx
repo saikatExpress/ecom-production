@@ -1,10 +1,11 @@
 import { ClearOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Avatar, Breadcrumb, Button, Card, Flex, Image, Input, Popconfirm, Select, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import usePermissions from "../../../hooks/usePermissions";
 import useTitle from "../../../hooks/useTitle";
 import { deleteData, getDatas } from "../../../services/request";
+import "./SubCategory.css";
 
 const { Title, Text } = Typography;
 
@@ -14,15 +15,49 @@ export default function SubCategory() {
 
     // Variable
     const navigate = useNavigate();
+    const location = useLocation();
     const {hasPermission} = usePermissions();
+
+    // Check if returning from edit
+    const returningFromEdit = Boolean(
+        location.state?.subCategoryId ||
+        sessionStorage.getItem("subcategory_last_id")
+    );
+
+    const initialPage = returningFromEdit
+        ? (location.state?.page || Number(sessionStorage.getItem("subcategory_page")) || 1)
+        : 1;
+
+    const initialPageSize = returningFromEdit
+        ? (location.state?.pageSize || Number(sessionStorage.getItem("subcategory_pageSize")) || 25)
+        : 25;
+
+    const initialSearch = returningFromEdit
+        ? (location.state?.searchKey ?? sessionStorage.getItem("subcategory_search") ?? "")
+        : "";
+
+    const initialCategoryId = returningFromEdit
+        ? (location.state?.categoryId ?? (sessionStorage.getItem("subcategory_category_id") ? Number(sessionStorage.getItem("subcategory_category_id")) : undefined))
+        : undefined;
+
+    const initialTargetId = returningFromEdit
+        ? (location.state?.subCategoryId || sessionStorage.getItem("subcategory_last_id") || null)
+        : null;
 
     // States
     const [subCategories, setSubCategories] = useState([]);
     const [categories, setCategories]       = useState([]);
     const [loading, setLoading]             = useState(false);
-    const [searchKey, setSearchKey]         = useState("");
-    const [categoryId, setCategoryId]       = useState(undefined);
-    const [pagination, setPagination]       = useState({current: 1,pageSize: 25,total: 0});
+    const [searchKey, setSearchKey]         = useState(initialSearch);
+    const [categoryId, setCategoryId]       = useState(initialCategoryId);
+    const [pagination, setPagination]       = useState({
+        current: initialPage,
+        pageSize: initialPageSize,
+        total: 0,
+    });
+
+    const [targetSubCategoryId]             = useState(initialTargetId);
+    const [highlightedRowId, setHighlightedRowId] = useState(null);
 
     // Fetch Sub Categories from backend API
     const fetchSubCategories = async (page = 1, pageSize = 25) => {
@@ -79,6 +114,8 @@ export default function SubCategory() {
             current: newPagination.current,
             pageSize: newPagination.pageSize,
         }));
+        sessionStorage.setItem("subcategory_page", String(newPagination.current));
+        sessionStorage.setItem("subcategory_pageSize", String(newPagination.pageSize));
     };
 
     const handleDelete = async (id) => {
@@ -99,13 +136,72 @@ export default function SubCategory() {
     const handleSearchSubmit = (value) => {
         setSearchKey(value);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.setItem("subcategory_page", "1");
+        sessionStorage.setItem("subcategory_search", value || "");
     };
 
     const handleResetFilters = () => {
         setSearchKey("");
         setCategoryId(undefined);
         setPagination((prev) => ({ ...prev, current: 1 }));
+        sessionStorage.removeItem("subcategory_page");
+        sessionStorage.removeItem("subcategory_search");
+        sessionStorage.removeItem("subcategory_category_id");
+        sessionStorage.removeItem("subcategory_last_id");
     };
+
+    const handleEdit = (record) => {
+        sessionStorage.setItem("subcategory_last_id", String(record.id));
+        sessionStorage.setItem("subcategory_page", String(pagination.current));
+        sessionStorage.setItem("subcategory_pageSize", String(pagination.pageSize));
+        sessionStorage.setItem("subcategory_search", searchKey || "");
+        if (categoryId) {
+            sessionStorage.setItem("subcategory_category_id", String(categoryId));
+        } else {
+            sessionStorage.removeItem("subcategory_category_id");
+        }
+
+        navigate(`/edit/subcategory/${record.id}`, {
+            state: {
+                fromPage: 'Sub Category List Page',
+                fromAction: 'Click "Edit" Button',
+                subCategoryId: record.id,
+                page: pagination.current,
+                pageSize: pagination.pageSize,
+                searchKey,
+                categoryId,
+            }
+        });
+    };
+
+    // Scroll and highlight target row when returning from edit
+    useEffect(() => {
+        if (!loading && targetSubCategoryId && subCategories.length > 0) {
+            const itemExists = subCategories.some((s) => String(s.id) === String(targetSubCategoryId));
+            if (itemExists) {
+                setHighlightedRowId(targetSubCategoryId);
+
+                const scrollTimer = setTimeout(() => {
+                    const rowEl = document.getElementById(`subcategory-row-${targetSubCategoryId}`);
+                    if (rowEl) {
+                        rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }, 200);
+
+                // Clean up session storage flag so future visits start fresh
+                sessionStorage.removeItem("subcategory_last_id");
+
+                const highlightTimer = setTimeout(() => {
+                    setHighlightedRowId(null);
+                }, 4000);
+
+                return () => {
+                    clearTimeout(scrollTimer);
+                    clearTimeout(highlightTimer);
+                };
+            }
+        }
+    }, [loading, subCategories, targetSubCategoryId]);
 
     const handleRefresh = () => {
         fetchSubCategories(pagination.current, pagination.pageSize);
@@ -178,7 +274,7 @@ export default function SubCategory() {
             width: 150,
             render: (_, record) => (
                 <Space size="small">
-                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/edit/subcategory/${record.id}`)}>
+                    <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
                         Edit
                     </Button>
 
@@ -235,8 +331,19 @@ export default function SubCategory() {
             >
                 <Flex justify="space-between" align="center" style={{ marginBottom: 16 }} wrap="wrap" gap="small">
                     <Space wrap gap="small">
-                        <Input.Search placeholder="Search sub category..." allowClear enterButton={<SearchOutlined />} style={{ width: 280 }} value={searchKey}
-                            onChange={(e) => setSearchKey(e.target.value)} onSearch={handleSearchSubmit}
+                        <Input.Search 
+                            placeholder="Search sub category..." 
+                            allowClear 
+                            enterButton={<SearchOutlined />} 
+                            style={{ width: 280 }} 
+                            value={searchKey}
+                            onChange={(e) => {
+                                setSearchKey(e.target.value);
+                                if (!e.target.value) {
+                                    handleResetFilters();
+                                }
+                            }} 
+                            onSearch={handleSearchSubmit}
                         />
 
                         <Select
@@ -247,6 +354,12 @@ export default function SubCategory() {
                             onChange={(val) => {
                                 setCategoryId(val);
                                 setPagination((prev) => ({ ...prev, current: 1 }));
+                                sessionStorage.setItem("subcategory_page", "1");
+                                if (val) {
+                                    sessionStorage.setItem("subcategory_category_id", String(val));
+                                } else {
+                                    sessionStorage.removeItem("subcategory_category_id");
+                                }
                             }}
                             options={categories.map((cat) => ({
                                 label: cat.name,
@@ -271,6 +384,10 @@ export default function SubCategory() {
                     dataSource={subCategories}
                     rowKey="id"
                     loading={loading}
+                    rowClassName={(record) => String(record.id) === String(highlightedRowId) ? "subcategory-highlighted-row" : ""}
+                    onRow={(record) => ({
+                        id: `subcategory-row-${record.id}`,
+                    })}
                     pagination={{
                         current: pagination.current,
                         pageSize: pagination.pageSize,

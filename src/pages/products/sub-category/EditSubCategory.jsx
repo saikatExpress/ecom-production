@@ -1,7 +1,7 @@
 import { CloseOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Form, Input, Row, Select, Space, Spin, Upload, message } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useTitle from "../../../hooks/useTitle";
 import { getData, postData } from "../../../services/request";
 import { handleFormErrors } from '../../../utils/formUtils';
@@ -13,7 +13,22 @@ const EditSubCategory = () => {
     // Variable
     const { id }   = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [form]   = Form.useForm();
+
+    const handleBack = () => {
+        navigate("/sub-categories", {
+            state: {
+                fromPage: 'Edit Sub Category Page',
+                fromAction: 'Click "Cancel" Button',
+                subCategoryId: id,
+                page: location.state?.page,
+                pageSize: location.state?.pageSize,
+                searchKey: location.state?.searchKey,
+                categoryId: location.state?.categoryId,
+            }
+        });
+    };
 
     // State
     const [loading, setLoading]                     = useState(true);
@@ -108,7 +123,15 @@ const EditSubCategory = () => {
             
             if (res?.success) {
                 message.success(res?.message || "Subcategory updated successfully!");
-                navigate(-1);
+                navigate("/sub-categories", {
+                    state: {
+                        subCategoryId: id,
+                        page: location.state?.page,
+                        pageSize: location.state?.pageSize,
+                        searchKey: location.state?.searchKey,
+                        categoryId: location.state?.categoryId,
+                    }
+                });
             } else {
                 message.error(res?.message || "Failed to update subcategory");
             }
@@ -136,7 +159,7 @@ const EditSubCategory = () => {
                     title="Edit Sub Category" 
                     extra={
                         <Space>
-                            <Button icon={<CloseOutlined />} onClick={() => navigate(-1)}>
+                            <Button icon={<CloseOutlined />} onClick={handleBack}>
                                 Cancel
                             </Button>
                             <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={submitting}>
