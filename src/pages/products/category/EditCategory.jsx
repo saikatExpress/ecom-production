@@ -27,7 +27,7 @@ const EditCategory = () => {
                     const category = res.data;
                     
                     let initialFileList = [];
-                    const imageUrl = category.img_url || category.img_path; 
+                    const imageUrl = category.image || category.img_url || category.img_path || category.image_url; 
                     if (imageUrl) {
                         initialFileList = [
                             {
@@ -35,6 +35,7 @@ const EditCategory = () => {
                                 name: 'Existing Image',
                                 status: 'done',
                                 url: imageUrl,
+                                thumbUrl: imageUrl,
                             }
                         ];
                     }
@@ -150,7 +151,7 @@ const EditCategory = () => {
 
                         <Col xs={24}>
                             <Form.Item name="image" label="Category Image" valuePropName="fileList" getValueFromEvent={normFile}
-                                extra="Recommended size: 400x400px. Max size: 2MB. Leave unchanged to keep the existing image."
+                                extra="Recommended size: 400x400px. Max size: 3MB. Leave unchanged to keep the existing image."
                             >
                                 <Upload name="image" listType="picture-card" maxCount={1} beforeUpload={() => false} accept="image/*">
                                     <div>
