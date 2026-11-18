@@ -508,16 +508,49 @@ export default function ProductList() {
                     );
                 }
 
+                const sellPrice = Number(record.sell_price || record.offer_price || 0);
+                const mrp = Number(record.mrp || 0);
+                const discount = mrp > sellPrice && sellPrice > 0 ? Math.round(((mrp - sellPrice) / mrp) * 100) : 0;
+
                 return (
-                    <Space direction="vertical" size={0}>
+                    <Space direction="vertical" size={2}>
                         <Text strong style={{ color: "#1677ff", fontSize: '15px' }}>
-                            ৳{record.offer_price || record.sell_price}
+                            ৳{record.sell_price || record.offer_price}
                         </Text>
-                        {record.mrp && Number(record.mrp) > Number(record.sell_price) && (
-                            <Text delete type="secondary" style={{ fontSize: "12px" }}>
-                                MRP: ৳{record.mrp}
-                            </Text>
+
+                        {mrp > 0 && (
+                            <Flex align="center" gap={6} wrap="wrap">
+                                <Text
+                                    delete
+                                    style={{
+                                        color: "#ff4d4f",
+                                        fontSize: "12px",
+                                        fontWeight: 500,
+                                        textDecorationColor: "#ff4d4f",
+                                        textDecorationThickness: "1.5px",
+                                    }}
+                                >
+                                    MRP: ৳{record.mrp}
+                                </Text>
+                                {discount > 0 && (
+                                    <Tag
+                                        color="error"
+                                        bordered={false}
+                                        style={{
+                                            fontSize: "10px",
+                                            lineHeight: "16px",
+                                            padding: "0 4px",
+                                            margin: 0,
+                                            borderRadius: "3px",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        -{discount}%
+                                    </Tag>
+                                )}
+                            </Flex>
                         )}
+                        
                         <Text type="secondary" style={{ fontSize: "11px" }}>
                             Buy: ৳{record.buy_price}
                         </Text>
@@ -699,7 +732,7 @@ export default function ProductList() {
                                 placeholder="Search Name or SKU..."
                                 allowClear
                                 enterButton={<SearchOutlined />}
-                                style={{ width: 220 }}
+                                style={{ width: 320 }}
                                 value={searchKey}
                                 onChange={(e) => setSearchKey(e.target.value)}
                                 onSearch={handleSearchSubmit}

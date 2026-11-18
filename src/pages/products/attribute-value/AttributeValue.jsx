@@ -193,13 +193,6 @@ export default function AttributeValue() {
             render: (text) => <Text strong>{text}</Text>,
         },
         {
-            title: "Created At",
-            dataIndex: "created_at",
-            key: "created_at",
-            width: 180,
-            render: (date) => (date ? new Date(date).toLocaleString() : "-"),
-        },
-        {
             title: "Action",
             key: "action",
             width: 150,
